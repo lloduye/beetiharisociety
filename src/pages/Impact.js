@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Building, Heart, Target, ArrowRight, TrendingUp, Award } from 'lucide-react';
+import { Users, Building, Heart, Target, TrendingUp, Award } from 'lucide-react';
 
 const Impact = () => {
   const achievements = [

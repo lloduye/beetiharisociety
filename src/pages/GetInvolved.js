@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart } from 'lucide-react';
 
 const GetInvolved = () => {
