@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X, CheckCircle, ExternalLink, Copy, TrendingUp, Users as UsersIcon, Target } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X, CheckCircle, ExternalLink, TrendingUp, Target } from 'lucide-react';
 
 const GetInvolved = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -79,7 +79,7 @@ const GetInvolved = () => {
     }
   ];
 
-  const donationProjects = [
+  const donationProjects = useMemo(() => [
     { 
       id: 'classroom', 
       name: 'Classroom Construction', 
@@ -161,7 +161,7 @@ const GetInvolved = () => {
       donors: 445,
       image: '🤝'
     }
-  ];
+  ], []);
 
   // Simulate recent donations
   useEffect(() => {
@@ -188,7 +188,7 @@ const GetInvolved = () => {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [donationProjects]);
 
   const membershipTypes = [
     { id: 'individual', label: 'Individual Member', price: '$25/year' },
