@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <!-- Background -->
+  <rect width="400" height="120" fill="#f8fafc" rx="8"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="50" cy="60" r="25" fill="#0284c7" opacity="0.1"/>
+  <circle cx="350" cy="60" r="20" fill="#14b8a6" opacity="0.1"/>
+  
+  <!-- Book/Education icon -->
+  <g transform="translate(20, 30)">
+    <rect x="0" y="0" width="40" height="30" fill="#0284c7" rx="2"/>
+    <rect x="5" y="5" width="30" height="3" fill="white"/>
+    <rect x="5" y="12" width="30" height="3" fill="white"/>
+    <rect x="5" y="19" width="20" height="3" fill="white"/>
+  </g>
+  
+  <!-- Organization name -->
+  <text x="80" y="45" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600" fill="#1e293b">Beeti Hari Society</text>
+  <text x="80" y="65" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="400" fill="#64748b">for Education & Economic Development</text>
+  
+  <!-- Tagline -->
+  <text x="80" y="85" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="400" fill="#94a3b8">Empowering children and communities in South Sudan</text>
+</svg>

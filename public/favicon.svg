@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="#0284c7"/>
+  
+  <!-- Book/Education symbol - more prominent -->
+  <rect x="6" y="10" width="20" height="12" fill="white" rx="1"/>
+  <rect x="8" y="12" width="16" height="2" fill="#14b8a6"/>
+  <rect x="8" y="16" width="16" height="2" fill="#14b8a6"/>
+  <rect x="8" y="20" width="12" height="2" fill="#14b8a6"/>
+  
+  <!-- Person/student symbol - more visible -->
+  <circle cx="16" cy="6" r="2.5" fill="white"/>
+  <rect x="13.5" y="8.5" width="5" height="3" fill="white" rx="1"/>
+  
+  <!-- Heart symbol for care/compassion -->
+  <path d="M11 26 Q11 23.5 13.5 23.5 Q16 23.5 16 26 Q16 23.5 18.5 23.5 Q21 23.5 21 26 Q21 28.5 16 30 Q11 28.5 11 26" fill="#14b8a6"/>
+</svg>
