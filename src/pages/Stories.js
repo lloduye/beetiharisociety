@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
+import { MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
 
 const Stories = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');

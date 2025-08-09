@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
+  ArrowRight,
   Calendar, 
   User, 
   MapPin, 
@@ -13,9 +14,7 @@ import {
   Twitter,
   Linkedin,
   Mail,
-  Globe,
-  Send,
-  Clock
+  Send
 } from 'lucide-react';
 
 const StoryDetail = () => {
