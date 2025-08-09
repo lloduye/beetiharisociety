@@ -9,6 +9,8 @@ import About from './pages/About';
 import Mission from './pages/Mission';
 import WhatWeDo from './pages/WhatWeDo';
 import Impact from './pages/Impact';
+import Stories from './pages/Stories';
+import StoryDetail from './pages/StoryDetail';
 import GetInvolved from './pages/GetInvolved';
 import Contact from './pages/Contact';
 
@@ -25,6 +27,8 @@ function App() {
             <Route path="/mission" element={<Mission />} />
             <Route path="/what-we-do" element={<WhatWeDo />} />
             <Route path="/impact" element={<Impact />} />
+            <Route path="/stories" element={<Stories />} />
+            <Route path="/stories/:id" element={<StoryDetail />} />
             <Route path="/get-involved" element={<GetInvolved />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
