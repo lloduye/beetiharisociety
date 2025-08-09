@@ -1,210 +1,187 @@
 # Beeti Hari Society for Education & Economic Development
 
-A stunning, modern React-based nonprofit website for the Beeti Hari Society, showcasing their mission to provide education and community development in South Sudan.
+A modern, responsive React website for the Beeti Hari Society, a nonprofit organization dedicated to providing quality education and community development in South Sudan.
 
 ## 🌟 Features
 
-### Modern React Architecture
-- **React 18** - Latest React features with hooks and modern patterns
-- **Component-Based Design** - Modular, reusable components for maintainability
-- **State Management** - React hooks for local state management
-- **Intersection Observer** - Smooth animations triggered by scroll
-- **Responsive Design** - Mobile-first approach with CSS Grid and Flexbox
-
-### Design & User Experience
-- **Modern, Responsive Design** - Beautiful gradient backgrounds and clean typography
-- **Mobile-First Approach** - Fully responsive across all devices
-- **Smooth Animations** - Intersection Observer animations and hover effects
-- **Accessibility Focused** - Keyboard navigation and screen reader support
-- **Professional Color Scheme** - Purple gradient theme representing hope and education
-
-### Interactive Features
-- **Animated Counters** - Dynamic statistics that animate when scrolled into view
-- **Mobile Navigation** - Hamburger menu with smooth transitions
-- **Form Handling** - Contact and donation forms with validation
-- **Email Integration** - Click-to-copy email addresses
-- **Smooth Scrolling** - Navigation links with smooth scroll behavior
-- **Hover Effects** - Interactive cards and buttons with visual feedback
+- **Modern Design**: Clean, professional design with beautiful gradients and typography
+- **Responsive Layout**: Fully responsive design that works on all devices
+- **Interactive Navigation**: Smooth navigation with active state indicators
+- **Contact Forms**: Functional contact forms with email integration
+- **Donation Options**: Clear donation pathways and information
+- **Accessibility**: Built with accessibility best practices
+- **Performance**: Optimized for fast loading and smooth interactions
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (version 14 or higher)
-- npm or yarn package manager
+- npm or yarn
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd beetiharisociety
-   ```
+1. Clone the repository:
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+git clone <repository-url>
+cd beetihari-society
+```
 
-3. **Start the development server**
-   ```bash
-   npm start
-   ```
+2. Install dependencies:
 
-4. **Open your browser**
-   Navigate to `http://localhost:3000` to view the website
+```bash
+npm install
+```
 
-### Available Scripts
+3. Start the development server:
 
-- `npm start` - Runs the app in development mode
-- `npm build` - Builds the app for production
-- `npm test` - Launches the test runner
-- `npm eject` - Ejects from Create React App (one-way operation)
+```bash
+npm start
+```
+
+4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## 📁 Project Structure
 
 ```
-beetiharisociety/
-├── public/
-│   ├── index.html          # Main HTML template
-│   └── manifest.json       # PWA manifest
-├── src/
-│   ├── components/         # React components
-│   │   ├── Navbar.js       # Navigation component
-│   │   ├── Hero.js         # Hero section with animated stats
-│   │   ├── About.js        # About us section
-│   │   ├── Mission.js      # Mission & vision
-│   │   ├── Services.js     # What we do section
-│   │   ├── Education.js    # Why education matters
-│   │   ├── Impact.js       # Impact statistics
-│   │   ├── WhySupport.js   # Why support us
-│   │   ├── HowToHelp.js    # How to help section
-│   │   ├── PeopleWeServe.js # People we serve
-│   │   ├── Leadership.js   # Team information
-│   │   ├── Donate.js       # Donation form
-│   │   ├── Contact.js      # Contact form
-│   │   └── Footer.js       # Footer component
-│   ├── App.js              # Main App component
-│   ├── App.css             # Main styles
-│   ├── index.js            # React entry point
-│   └── index.css           # Global styles
-├── package.json            # Dependencies and scripts
-└── README.md              # Project documentation
+src/
+├── components/          # Reusable components
+│   ├── Navbar.js       # Navigation component
+│   └── Footer.js       # Footer component
+├── pages/              # Page components
+│   ├── Home.js         # Homepage
+│   ├── About.js        # About page
+│   ├── Mission.js      # Mission & Vision page
+│   ├── WhatWeDo.js     # Programs page
+│   ├── Impact.js       # Impact page
+│   ├── GetInvolved.js  # Get Involved page
+│   └── Contact.js      # Contact page
+├── App.js              # Main app component with routing
+├── index.css           # Global styles and Tailwind CSS
+└── index.js            # App entry point
 ```
 
-## 🎨 Customization
+## 🎨 Design System
 
 ### Colors
-The website uses a purple gradient theme. To customize colors, modify the CSS variables in `src/App.css`:
 
-```css
-/* Primary gradient */
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+- **Primary**: Blue shades (#0ea5e9, #0284c7, #0369a1)
+- **Secondary**: Yellow shades (#eab308, #ca8a04, #a16207)
+- **Neutral**: Gray shades for text and backgrounds
 
-/* Secondary gradient */
-background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+### Typography
+
+- **Font Family**: Inter (Google Fonts)
+- **Weights**: 300, 400, 500, 600, 700
+
+### Components
+
+- **Buttons**: Primary, secondary, and outline variants
+- **Cards**: Consistent card design with shadows and hover effects
+- **Sections**: Standardized section padding and container widths
+
+## 📱 Pages
+
+### Home
+
+- Hero section with call-to-action buttons
+- Quick highlights with statistics
+- Mission preview
+- Call-to-action section
+
+### About
+
+- Organization overview
+- Core values
+- The people we serve (Didinga community)
+- Leadership information
+
+### Mission & Vision
+
+- Mission statement
+- Vision statement
+- Why education matters
+- Impact areas
+
+### What We Do
+
+- Core programs overview
+- Educational access focus
+- Holistic development initiatives
+- Community approach
+
+### Impact
+
+- Key achievements
+- Areas of impact
+- Teacher stories
+- Future goals
+
+### Get Involved
+
+- Ways to help
+- Donation options
+- Why support us
+- Spread the word
+
+### Contact
+
+- Contact information
+- Contact form
+- Service areas
+- Quick contact details
+
+## 🛠️ Technologies Used
+
+- **React**: Frontend framework
+- **React Router**: Client-side routing
+- **Tailwind CSS**: Utility-first CSS framework
+- **Lucide React**: Icon library
+- **Google Fonts**: Typography
+
+## 📧 Contact Information
+
+- **General Inquiries**: contact@beetiharisociety.org
+- **Donations**: donate@beetiharisociety.org
+- **Service Areas**: Budi County & Lotukei sub-county, South Sudan
+
+## 🚀 Deployment
+
+### Build for Production
+
+```bash
+npm run build
 ```
 
-### Content
-- Update component content in the respective `.js` files
-- Modify images by replacing the placeholder divs with actual image components
-- Update contact information in the Contact and Footer components
+This creates a `build` folder with optimized production files.
 
-### Styling
-- All styles are in `src/App.css`
-- Responsive breakpoints: 768px (tablet), 480px (mobile)
-- Uses CSS Grid and Flexbox for layouts
+### Deploy Options
 
-## 📱 Responsive Design
-
-The website is fully responsive with breakpoints at:
-- **Desktop**: 1200px and above
-- **Tablet**: 768px - 1199px
-- **Mobile**: Below 768px
-
-### Mobile Features
-- Collapsible navigation menu
-- Touch-friendly buttons and forms
-- Optimized typography and spacing
-- Simplified layouts for small screens
-
-## 🌐 Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## 🔧 Key Features for Nonprofits
-
-### Donation System
-- Interactive donation form with preset amounts
-- Monthly donation options
-- Email integration for donation inquiries
-- Transparent impact descriptions
-
-### Contact Management
-- Contact form with validation
-- Multiple contact methods
-- Email copy-to-clipboard functionality
-- Professional contact information display
-
-### Content Management
-- Modular component structure for easy updates
-- Clear content organization
-- SEO-friendly structure
-- Accessibility features
-
-## ⚡ Performance Optimizations
-
-- **Code Splitting** - React.lazy for component loading
-- **Optimized Images** - Placeholder system for fast loading
-- **CSS Optimization** - Efficient selectors and minimal reflows
-- **JavaScript Optimization** - Debounced scroll handlers
-- **Font Loading** - Google Fonts with display=swap
-
-## 🔒 Security Considerations
-
-- Form validation on client and server side
-- XSS protection through React's built-in escaping
-- Secure email handling
-- HTTPS enforcement for production
-
-## 📊 Analytics Ready
-
-The website is prepared for analytics integration:
-- Google Analytics 4 ready
-- Facebook Pixel compatible
-- Custom event tracking points
-- Conversion tracking setup
+1. **Netlify**: Drag and drop the `build` folder to Netlify
+2. **Vercel**: Connect your repository to Vercel for automatic deployments
+3. **GitHub Pages**: Use `gh-pages` package for GitHub Pages deployment
+4. **Traditional Hosting**: Upload the `build` folder to any web server
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is created for the Beeti Hari Society for Education & Economic Development. All rights reserved.
 
 ## 🙏 Acknowledgments
 
-- Font Awesome for icons
-- Google Fonts for typography
-- React community for excellent documentation
-- South Sudan communities for inspiration
-
-## 📞 Contact
-
-For questions about this website or the Beeti Hari Society:
-
-- **General Inquiries**: info@beetiharisociety.org
-- **Donation Support**: donations@beetiharisociety.org
-- **Location**: South Sudan
+- The Beeti Hari Society team for their mission and vision
+- The Didinga community in South Sudan
+- All volunteers and supporters of the organization
 
 ---
 
-**Empowering communities through education in South Sudan.**
+**Beeti Hari Society for Education & Economic Development**
+Empowering children and communities through purpose-driven education in South Sudan.

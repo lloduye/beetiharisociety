@@ -1,73 +1,120 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Mail, Globe, MapPin, BookOpen } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>Beeti Hari Society</h3>
-            <p>
-              Empowering young people and strengthening communities in South Sudan through quality education and sustainable development programs.
+    <footer className="bg-gray-900 text-white">
+      <div className="container-custom section-padding">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Organization Info */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center space-x-2 mb-4">
+              <Globe className="h-8 w-8 text-primary-400" />
+              <div>
+                <h3 className="text-xl font-bold">Beeti Hari Society</h3>
+                <p className="text-sm text-gray-400">Education & Economic Development</p>
+              </div>
+            </div>
+            <p className="text-gray-300 mb-6 max-w-md">
+              Empowering children and communities through purpose-driven education in South Sudan.
             </p>
-            <p>
-              We believe education is the most powerful tool for breaking the cycle of poverty and building a brighter, more sustainable future.
-            </p>
+            <div className="flex space-x-4">
+              <Link to="/get-involved" className="btn-primary">
+                Donate Now
+              </Link>
+              <Link to="/get-involved" className="btn-outline text-white border-white hover:bg-white hover:text-gray-900">
+                Volunteer
+              </Link>
+            </div>
           </div>
-          
-          <div className="footer-section">
-            <h3>Quick Links</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/mission">Our Mission</Link></li>
-              <li><Link to="/impact">Our Impact</Link></li>
-              <li><Link to="/how-to-help">How to Help</Link></li>
-              <li><Link to="/donate">Donate</Link></li>
-              <li><Link to="/contact">Contact</Link></li>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/about" className="text-gray-300 hover:text-white transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/mission" className="text-gray-300 hover:text-white transition-colors">
+                  Mission & Vision
+                </Link>
+              </li>
+              <li>
+                <Link to="/what-we-do" className="text-gray-300 hover:text-white transition-colors">
+                  What We Do
+                </Link>
+              </li>
+              <li>
+                <Link to="/impact" className="text-gray-300 hover:text-white transition-colors">
+                  Our Impact
+                </Link>
+              </li>
+              <li>
+                <Link to="/get-involved" className="text-gray-300 hover:text-white transition-colors">
+                  Get Involved
+                </Link>
+              </li>
             </ul>
           </div>
-          
-          <div className="footer-section">
-            <h3>Our Programs</h3>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li>Primary Education</li>
-              <li>Teacher Training</li>
-              <li>Infrastructure Development</li>
-              <li>Community Development</li>
-              <li>Educational Resources</li>
-              <li>Partnership Building</li>
-            </ul>
-          </div>
-          
-          <div className="footer-section">
-            <h3>Contact Information</h3>
-            <p>
-              <strong>General Inquiries:</strong><br />
-              <a href="mailto:info@beetiharisociety.org">info@beetiharisociety.org</a>
-            </p>
-            <p>
-              <strong>Donation Support:</strong><br />
-              <a href="mailto:donations@beetiharisociety.org">donations@beetiharisociety.org</a>
-            </p>
-            <p>
-              <strong>Location:</strong><br />
-              South Sudan
-            </p>
+
+          {/* Contact Info */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Contact Us</h4>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <Mail className="h-5 w-5 text-primary-400 mt-0.5" />
+                <div>
+                  <p className="text-sm text-gray-300">General Inquiries</p>
+                  <a 
+                    href="mailto:contact@beetiharisociety.org" 
+                    className="text-white hover:text-primary-400 transition-colors"
+                  >
+                    contact@beetiharisociety.org
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Mail className="h-5 w-5 text-primary-400 mt-0.5" />
+                <div>
+                  <p className="text-sm text-gray-300">Donations</p>
+                  <a 
+                    href="mailto:donate@beetiharisociety.org" 
+                    className="text-white hover:text-primary-400 transition-colors"
+                  >
+                    donate@beetiharisociety.org
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-5 w-5 text-primary-400 mt-0.5" />
+                <div>
+                  <p className="text-sm text-gray-300">Serving</p>
+                  <p className="text-white">Budi County & Lotukei sub-county</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className="footer-bottom">
-          <p>
-            © {new Date().getFullYear()} Beeti Hari Society for Education & Economic Development. All rights reserved.
-          </p>
-          <p>
-            Empowering communities through education in South Sudan.
-          </p>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © 2024 Beeti Hari Society for Education & Economic Development. All rights reserved.
+            </p>
+            <div className="flex items-center space-x-2 mt-4 md:mt-0">
+              <BookOpen className="h-4 w-4 text-primary-400" />
+              <span className="text-sm text-gray-400">Rooted in education. Powered by hope.</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
   );
 };
 
-export default Footer; 
+export default Footer;
