@@ -30,311 +30,253 @@ const StoryDetail = () => {
   const stories = [
     {
       id: 1,
-      title: "From No School to University Dreams: Sarah's Journey",
-      excerpt: "Sarah, a 15-year-old girl from Budi County, never thought she'd see the inside of a classroom. Today, she's one of our brightest students with dreams of becoming a doctor.",
-      content: `Sarah's family had never sent a child to school before. When we built our first classroom in her village, her parents were hesitant. But Sarah's determination changed everything. She walks 3 kilometers each day to attend classes, and her grades are exceptional.
+      title: "From Cattle Herder to Scholar: Nakang's Educational Journey",
+      excerpt: "Nakang, a 15-year-old Didinga girl from the Didinga Hills, never thought she'd see the inside of a classroom. Today, she's one of our brightest students with dreams of becoming a doctor.",
+      content: `Nakang's family had never sent a child to school before. As traditional cattle herders in the Didinga Hills, education was seen as unnecessary. When we built our first classroom in her village, her parents were hesitant. But Nakang's determination changed everything. She walks 3 kilometers each day through the rugged hills to attend classes, and her grades are exceptional.
 
 "I want to become a doctor to help my community," she says with confidence that inspires everyone around her.
 
-Sarah's journey began in 2020 when our organization constructed the first classroom in her remote village. At the time, only 15% of children in the area had access to education. Her parents, like many others, were skeptical about the value of education, especially for girls.
+Nakang's journey began in 2020 when our organization constructed the first classroom in her remote Didinga village. At the time, only 15% of children in the area had access to education. Her parents, like many other Didinga families, were skeptical about the value of education, especially for girls.
 
-But Sarah's curiosity and determination were undeniable. She would walk past the construction site every day, watching with wide eyes as the classroom took shape. When the school finally opened, she was the first child to arrive, clutching a notebook made from recycled paper.
+But Nakang's curiosity and determination were undeniable. She would walk past the construction site every day, watching with wide eyes as the classroom took shape. When the school finally opened, she was the first child to arrive, clutching a notebook made from recycled paper.
 
-Today, Sarah is not only excelling academically but has become a role model for other girls in her community. She helps younger students with their studies and encourages families to send their daughters to school.
+Today, Nakang is not only excelling academically but has become a role model for other Didinga girls in her community. She helps younger students with their studies and encourages families to send their daughters to school.
 
-"Education has given me a voice," Sarah says. "I want to use that voice to help others and make my community stronger."
+"Education has given me a voice," Nakang says. "I want to use that voice to help others and make my Didinga community stronger."
 
-Her story represents the transformative power of education and the ripple effect it creates in communities.`,
-      author: "Mary Akol",
+Her story represents the transformative power of education and the ripple effect it creates in Didinga communities.`,
+      author: "Mary Loboi",
       date: "2024-01-15",
-      location: "Budi County, South Sudan",
+      location: "Didinga Hills, Budi County, South Sudan",
       category: "students",
-      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=400&fit=crop",
+      image: "/Images/Story000001.jpg",
       views: 1247,
       shares: 89,
       comments: 23,
       likes: 156,
       featured: true,
-      tags: ["Education", "Girls Empowerment", "Community Development", "South Sudan"]
+      tags: ["Education", "Girls Empowerment", "Didinga Community", "South Sudan"]
     },
     {
       id: 2,
-      title: "Teacher John's 20-Year Commitment to Education",
-      excerpt: "Despite delayed salaries and challenging conditions, Teacher John has been educating children in Lotukei sub-county for two decades.",
-      content: `Teacher John started teaching in 2004, when there were no proper classrooms. He taught under trees and in makeshift shelters. Even when government salaries were delayed for 18 months, he continued teaching.
+      title: "Teacher Lokonyen's 20-Year Commitment to Didinga Education",
+      excerpt: "Despite delayed salaries and challenging conditions, Teacher Lokonyen has been educating Didinga children in Lotukei sub-county for two decades.",
+      content: `Teacher Lokonyen started teaching in 2004, when there were no proper classrooms in the Didinga Hills. He taught under the shade of acacia trees and in makeshift shelters made from local materials. Even when government salaries were delayed for 18 months, he continued teaching.
 
 "These children are our future," he says. "I cannot abandon them."
 
-His dedication has inspired 11 other volunteers to join our teaching staff.
+His dedication has inspired 11 other Didinga volunteers to join our teaching staff.
 
-John's story is one of unwavering commitment in the face of immense challenges. When he first began teaching, he had no classroom, no textbooks, and often no salary. But he had a vision of what education could do for his community.
+Lokonyen's story is one of unwavering commitment in the face of immense challenges. When he first began teaching, he had no classroom, no textbooks, and often no salary. But he had a vision of what education could do for his Didinga community.
 
-He started by gathering children under the shade of a large tree, using sticks to write in the dirt. When it rained, they would move to whatever shelter was available. Despite these conditions, his students began to learn and thrive.
+He started by gathering children under the shade of large acacia trees, using sticks to write in the dirt. When it rained, they would move to whatever shelter was available. Despite these conditions, his students began to learn and thrive.
 
-"Education is the only way we can break the cycle of poverty," John explains. "I see it in the eyes of my students - they understand that knowledge is their path to a better life."
+"Education is the only way we can break the cycle of poverty in the Didinga Hills," Lokonyen explains. "I see it in the eyes of my students - they understand that knowledge is their path to a better life."
 
-Over the years, John has taught hundreds of children, many of whom have gone on to become teachers, healthcare workers, and community leaders. His impact extends far beyond the classroom walls.
+Over the years, Lokonyen has taught hundreds of Didinga children, many of whom have gone on to become teachers, healthcare workers, and community leaders. His impact extends far beyond the classroom walls.
 
-Today, John continues to teach with the same passion he had 20 years ago, but now he has proper classrooms, teaching materials, and a supportive community behind him.`,
-      author: "David Luka",
+Today, Lokonyen continues to teach with the same passion he had 20 years ago, but now he has proper classrooms, teaching materials, and a supportive Didinga community behind him.`,
+      author: "David Lokang",
       date: "2024-01-10",
-      location: "Lotukei sub-county",
+      location: "Lotukei sub-county, Didinga Hills",
       category: "teachers",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&h=400&fit=crop",
+      image: "/Images/Story000002.jpg",
       views: 892,
       shares: 45,
       comments: 18,
-      likes: 98,
+      likes: 78,
       featured: false,
-      tags: ["Teaching", "Dedication", "Community Service", "Education"]
+      tags: ["Teacher Dedication", "Didinga Education", "Community Service", "South Sudan"]
     },
     {
       id: 3,
-      title: "How One Classroom Changed an Entire Village",
-      excerpt: "The construction of our first classroom in Piobokoi village sparked a community transformation that continues to grow.",
-      content: `When we built our first classroom in Piobokoi, the entire village came together. Men helped with construction, women prepared meals for workers, and children watched with excitement.
+      title: "Building Dreams: How One Classroom Changed Everything",
+      excerpt: "The construction of our first permanent classroom in the Didinga Hills has transformed education access for over 200 children.",
+      content: `Before we built our first classroom, children in the Didinga Hills were learning under trees and in temporary shelters. When it rained, classes were cancelled. When it was too hot, children couldn't concentrate. The new classroom has changed everything.
 
-Today, that single classroom has grown into a school serving 120 students. The village now has a literacy rate of 85%, up from 15% in 2010.
+"Now we can learn every day, no matter the weather," says 12-year-old student Peter Lokang. "I want to become a teacher so I can help other children like me."
 
-"Education has given us hope," says village elder Peter Lokoro.
-
-The transformation of Piobokoi village began with a simple idea: build one classroom and see what happens. What happened exceeded everyone's expectations.
-
-The construction process itself became a community-building exercise. Villagers who had never worked together before came together with a common purpose. Skills were shared, relationships were formed, and a sense of collective ownership emerged.
-
-As the classroom took shape, so did the community's vision for the future. Parents began to dream bigger dreams for their children. The village elders started planning for additional classrooms. Local businesses began to support the school.
-
-Today, Piobokoi is a model village, known throughout the region for its commitment to education. The school has expanded to include multiple classrooms, a library, and a community center. The literacy rate has increased dramatically, and the village has become a destination for families seeking better educational opportunities.
-
-"The classroom didn't just teach our children to read and write," says elder Peter Lokoro. "It taught our entire village how to work together for a better future."`,
-      author: "Grace Nyibol",
-      date: "2024-01-08",
-      location: "Piobokoi village",
+The construction of this classroom was a community effort. Didinga men used traditional building techniques, women prepared meals for workers, and children watched with excitement as their future took shape. Today, that single classroom serves 120 students and has inspired the construction of four additional classrooms.`,
+      author: "Grace Nadai",
+      date: "2024-01-05",
+      location: "Didinga Hills, Budi County, South Sudan",
       category: "community",
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9d1?w=800&h=400&fit=crop",
-      views: 1567,
-      shares: 134,
-      comments: 31,
-      likes: 234,
-      featured: true,
-      tags: ["Community Development", "Village Transformation", "Education Impact", "South Sudan"]
+      image: "/Images/Story000003.jpg",
+      views: 756,
+      shares: 34,
+      comments: 12,
+      likes: 45,
+      featured: false,
+      tags: ["Infrastructure", "Community Development", "Didinga Hills", "Education Access"]
     },
     {
       id: 4,
-      title: "The Donor Who Changed Everything: Maria's Story",
-      excerpt: "Maria, a retired teacher from Canada, decided to sponsor an entire classroom. Her impact has been transformative.",
-      content: `Maria, 72, had never been to Africa, but she believed in the power of education. She donated $5,000 to sponsor a classroom, which now serves 35 students.
+      title: "Empowering Girls Through Education in the Didinga Hills",
+      excerpt: "Our girls' education program has increased female enrollment by 300% in the Didinga community.",
+      content: `Traditionally, Didinga girls were expected to stay home and help with household chores. Education was seen as unnecessary for them. But our program has changed this mindset.
 
-"I wanted to make a difference," she says. "Seeing photos of the children learning in the classroom I helped build brings me more joy than anything I've ever done."
+"My daughter will be the first woman in our family to read and write," says mother Akuol Loboi. "This changes everything for our family."
 
-Her generosity inspired 12 other donors to sponsor classrooms.
+Today, girls make up 45% of our student body, and many are our top performers. The program includes special support for girls, including mentorship, hygiene education, and family counseling to ensure long-term success.
 
-Maria's journey began when she read an article about the educational challenges in South Sudan. As a retired teacher with 35 years of experience, she understood the transformative power of education.
+The impact extends beyond the classroom. Educated Didinga girls are more likely to marry later, have fewer children, and invest in their own children's education. They become role models and change agents in their communities.
 
-"I spent my life teaching children in Canada," Maria explains. "I know what a difference education makes in a child's life. When I learned about the children in South Sudan who had no access to schools, I knew I had to help."
-
-Maria's donation funded the construction of a complete classroom, including furniture, teaching materials, and books. The classroom was named "Maria's Hope" in her honor.
-
-Today, 35 children attend classes in Maria's classroom, and the impact extends far beyond those students. Their families are more engaged in education, the community has a renewed sense of hope, and other donors have been inspired by Maria's example.
-
-"I receive regular updates about the children in my classroom," Maria says. "Seeing their progress and hearing about their dreams makes me feel like I'm still teaching, even though I'm thousands of miles away."`,
-      author: "Sarah Johnson",
-      date: "2024-01-05",
-      location: "Toronto, Canada",
-      category: "donors",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
-      views: 723,
-      shares: 67,
+"Education has given me confidence," says 16-year-old student Rebecca Nakang. "I know I can achieve anything I set my mind to."`,
+      author: "Rebecca Lodai",
+      date: "2023-12-28",
+      location: "Didinga Hills, Budi County, South Sudan",
+      category: "students",
+      image: "/Images/Story000004.jpg",
+      views: 634,
+      shares: 28,
       comments: 15,
-      likes: 89,
+      likes: 67,
       featured: false,
-      tags: ["Donor Story", "International Support", "Classroom Sponsorship", "Education"]
+      tags: ["Girls Education", "Women Empowerment", "Didinga Community", "Gender Equality"]
     },
     {
       id: 5,
-      title: "Breaking Barriers: Girls' Education Success",
-      excerpt: "Our girls' education program has achieved remarkable results, with 95% of enrolled girls completing primary education.",
-      content: `When we started our girls' education program in 2015, only 20% of girls in our service area attended school. Today, that number has increased to 85%.
+      title: "Volunteer Teachers: The Heart of Didinga Education",
+      excerpt: "Our 11 volunteer teachers work without pay to ensure Didinga children receive quality education.",
+      content: `When government salaries are delayed, our volunteer teachers continue working. They believe in the power of education to transform the Didinga community.
 
-We provide sanitary supplies, mentorship programs, and family education to support girls' education.
+"I teach because I want to see my community prosper," says volunteer teacher Michael Lokang. "These children are our future leaders."
 
-"My daughter will be the first woman in our family to read and write," says mother Akuol Deng. "This changes everything for our family."
+The volunteers work alongside our paid teachers, providing additional support and ensuring no child is left behind. They come from various backgrounds - some are former students, others are community members who want to contribute.
 
-The girls' education program was born out of a recognition that girls face unique barriers to education in South Sudan. Cultural norms, lack of sanitary facilities, and family responsibilities often prevent girls from attending school.
+Volunteer teacher Sarah Nakang explains, "I was one of the first girls to graduate from our program. Now I want to help other girls achieve their dreams."
 
-Our program addresses these barriers through a comprehensive approach. We provide sanitary supplies to ensure girls can attend school during their menstrual cycles. We offer mentorship programs where older girls support younger ones. We work with families to educate them about the importance of girls' education.
-
-The results have been transformative. Girls who once had no hope of education are now excelling in school. They're becoming role models for their communities and breaking down barriers for future generations.
-
-"Education has given me confidence," says 16-year-old student Rebecca. "I know I can achieve anything I set my mind to."
-
-The program's success has inspired similar initiatives in neighboring communities, creating a ripple effect of positive change.`,
-      author: "Rebecca Ajak",
-      date: "2024-01-03",
-      location: "Didinga Hills region",
-      category: "students",
-      image: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&h=400&fit=crop",
-      views: 1345,
-      shares: 156,
-      comments: 42,
-      likes: 187,
-      featured: true,
-      tags: ["Girls Education", "Gender Equality", "Women Empowerment", "Education Access"]
+The volunteer program has created a sustainable model where community members take ownership of education. It's not just about teaching - it's about building a culture of learning and growth in the Didinga Hills.`,
+      author: "Michael Lokang",
+      date: "2023-12-22",
+      location: "Lotukei sub-county, Didinga Hills",
+      category: "teachers",
+      image: "/Images/Story000005.jpg",
+      views: 589,
+      shares: 22,
+      comments: 9,
+      likes: 34,
+      featured: false,
+      tags: ["Volunteerism", "Community Service", "Didinga Education", "Teacher Dedication"]
     },
     {
       id: 6,
-      title: "Volunteer Teacher Program: Community Heroes",
-      excerpt: "Our volunteer teacher program has created a network of community heroes who are transforming education in South Sudan.",
-      content: `Our 11 volunteer teachers range in age from 22 to 70. They teach without pay, driven by love for their community.
+      title: "From Student to Teacher: Peter's Journey",
+      excerpt: "Peter Lokang, once a student in our program, is now inspiring the next generation as a teacher.",
+      content: `Peter Lokang was one of our first students when we started in 2010. Today, he's a teacher in the same classroom where he learned to read and write.
 
-Teacher Rebecca, 45, walks 5 kilometers daily to teach. "I do this because I want my grandchildren to have a better future," she says.
+"I want to give back to my community what was given to me," he says. "Education opened doors I never knew existed."
 
-These volunteers have helped us reach 200 additional students who would otherwise have no access to education.
+His story inspires other students to dream big. "If Peter can do it, so can I," says his student, 12-year-old Nakang.
 
-The volunteer teacher program represents the heart of our community-based approach to education. These dedicated individuals come from the communities they serve, understanding the local context and challenges.
+Peter's journey represents the full circle of education in the Didinga Hills. He started as a student with no hope for education, became a successful learner, and now serves as an inspiration and teacher for the next generation.
 
-Each volunteer brings unique skills and experiences. Some are retired teachers who want to continue serving their communities. Others are young people who received education and want to give back. All share a common commitment to improving lives through education.
-
-The program provides training and support to volunteers, ensuring they have the skills and resources they need to be effective teachers. We also provide small stipends to help cover transportation and other basic costs.
-
-The impact of these volunteers extends far beyond the classroom. They serve as role models, community leaders, and advocates for education. Their dedication inspires others to get involved and support educational initiatives.
-
-"Teaching is not just a job, it's a calling," says volunteer teacher Michael. "When I see my students learning and growing, I know I'm making a difference."`,
-      author: "Michael Ochieng",
-      date: "2023-12-28",
-      location: "Southeastern South Sudan",
+"Teaching here is more than a job," Peter explains. "It's my way of ensuring that what happened to me - getting an education - happens for every Didinga child who wants to learn."`,
+      author: "James Lokang",
+      date: "2023-12-18",
+      location: "Didinga Hills, Budi County, South Sudan",
       category: "teachers",
-      image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&h=400&fit=crop",
-      views: 678,
-      shares: 34,
-      comments: 12,
-      likes: 67,
+      image: "/Images/Story000006.jpg",
+      views: 523,
+      shares: 19,
+      comments: 7,
+      likes: 28,
       featured: false,
-      tags: ["Volunteer Teachers", "Community Service", "Education", "South Sudan"]
+      tags: ["Student Success", "Teacher Development", "Didinga Community", "Role Models"]
     },
     {
       id: 7,
-      title: "From Student to Teacher: Peter's Full Circle Journey",
-      excerpt: "Peter, once a student in our first classroom, is now a teacher inspiring the next generation.",
-      content: `Peter was 8 years old when our first classroom opened. He was among the first 30 students. Today, at 22, he's a teacher in the same school.
+      title: "Community Fundraising: Building Schools One Bottle at a Time",
+      excerpt: "The Didinga community has raised funds for 3 classrooms through bottle and can collection programs.",
+      content: `When we couldn't afford to build classrooms, the Didinga community took action. They started collecting bottles and cans, selling them to recycling companies. The proceeds have funded 3 classrooms.
 
-"I want to give back what was given to me," he says. Peter teaches mathematics and science to 45 students.
+"Every bottle counts," says Didinga community leader Thomas Lokang. "We're building our children's future one bottle at a time."
 
-His story inspires other students to dream big. "If Peter can do it, so can I," says his student, 12-year-old Akol.
+This program has created a sense of ownership and pride in the Didinga community. Children participate in the collection, learning about environmental responsibility while contributing to their own education.
 
-Peter's journey represents the full circle of education - from student to teacher, from recipient to giver. His story demonstrates the transformative power of education and the importance of role models in inspiring future generations.
-
-As a student, Peter showed exceptional promise in mathematics and science. His teachers recognized his potential and provided extra support and encouragement. When he completed his education, he chose to return to his community as a teacher.
-
-"I could have pursued other opportunities," Peter explains. "But I wanted to come back and help other children like me. I know what it's like to grow up without access to education, and I want to make sure other children don't have to face that challenge."
-
-Peter's teaching style is influenced by his own experiences as a student. He understands the challenges his students face and provides the same support and encouragement that he received.
-
-His presence in the classroom serves as a powerful reminder to students that education can change lives and create opportunities.`,
-      author: "James Lual",
-      date: "2023-12-25",
-      location: "Budi County",
-      category: "students",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
-      views: 945,
-      shares: 78,
-      comments: 19,
-      likes: 123,
-      featured: false,
-      tags: ["Student Success", "Teacher Development", "Education Impact", "Role Models"]
-    },
-    {
-      id: 8,
-      title: "Community Fundraising: The Power of Local Action",
-      excerpt: "Local communities have raised over $15,000 through bottle and can collection to build classrooms.",
-      content: `Our community fundraising program has been incredibly successful. Families collect bottles and cans, which we sell to recycling companies.
-
-The proceeds have funded 3 classrooms. "Every bottle counts," says community leader Thomas Luka. "We're building our children's future one bottle at a time."
-
-This program has created a sense of ownership and pride in the community.
-
-The community fundraising program was born out of necessity and creativity. When we needed additional funding for classroom construction, we looked to the community for solutions.
-
-The bottle and can collection program was simple but effective. Families collect recyclable materials, which are then sold to recycling companies. The proceeds are used to fund educational infrastructure.
-
-What started as a small initiative has grown into a major source of funding. The program has raised over $15,000, enough to build three complete classrooms. More importantly, it has created a sense of ownership and pride in the community.
-
-"Every family participates," explains community leader Thomas Luka. "Children help collect bottles, parents organize collection drives, and everyone feels invested in the success of our schools."
-
-The program has also created employment opportunities. Several community members are now employed in the collection and processing of recyclable materials.
-
-The success of this program has inspired similar initiatives in other communities, demonstrating the power of local action and community engagement.`,
-      author: "Anna Nyadeng",
+The community's commitment shows that education is valued here. Despite limited resources, they find creative ways to support their children's learning. This grassroots approach has inspired other communities to start similar programs.`,
+      author: "Anna Nadai",
       date: "2023-12-20",
-      location: "Lotukei sub-county",
+      location: "Lotukei sub-county, Didinga Hills",
       category: "community",
-      image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=800&h=400&fit=crop",
+      image: "/Images/Story000007.jpg",
       views: 567,
       shares: 23,
       comments: 8,
-      likes: 45,
+      likes: 42,
       featured: false,
-      tags: ["Community Fundraising", "Recycling", "Local Action", "Education Funding"]
+      tags: ["Community Fundraising", "Environmental Responsibility", "Didinga Initiative", "Grassroots Development"]
     },
     {
-      id: 9,
-      title: "International Partnership: Building Bridges Through Education",
-      excerpt: "Our partnership with international organizations has brought resources and expertise to our programs.",
-      content: `Through partnerships with international NGOs, we've received educational materials, teacher training, and technical support.
+      id: 8,
+      title: "International Partnership: Building Bridges Through Didinga Education",
+      excerpt: "Our partnership with international organizations has brought resources and expertise to our Didinga programs.",
+      content: `Through partnerships with international NGOs, we've received educational materials, teacher training, and technical support for our Didinga communities. These partnerships have helped us improve our curriculum and teaching methods.
 
-These partnerships have helped us improve our curriculum and teaching methods.
+"The support we receive helps us provide better education for our Didinga children," says program coordinator Mary Loboi. "We're not alone in this mission."
 
-"The support we receive helps us provide better education," says program coordinator Mary Akol. "We're not alone in this mission."
+The partnerships have brought not just resources, but also new perspectives and ideas. International volunteers have shared teaching methods, while our Didinga teachers have shared local knowledge and cultural insights.
 
-Our international partnerships represent a recognition that education is a global challenge that requires global solutions. These partnerships bring together local knowledge and international expertise to create more effective educational programs.
-
-The partnerships provide access to resources that would otherwise be unavailable. This includes textbooks, teaching materials, technology, and training programs. International partners also provide technical support and best practices from around the world.
-
-But the partnerships are not one-way relationships. We share our local knowledge and experiences with our international partners, contributing to global understanding of educational challenges and solutions.
-
-The partnerships have also created opportunities for cultural exchange and mutual learning. Students and teachers from different countries can learn from each other, building bridges of understanding and cooperation.
-
-"These partnerships remind us that we're part of a global community," says program coordinator Mary Akol. "We're working together to solve a common challenge."`,
-      author: "David Ochieng",
+This exchange has created a richer educational experience for our students, combining global best practices with local Didinga wisdom.`,
+      author: "David Lokang",
       date: "2023-12-18",
-      location: "South Sudan",
+      location: "South Sudan, Didinga Hills",
       category: "community",
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=400&fit=crop",
+      image: "/Images/Story000008.jpg",
       views: 432,
       shares: 19,
       comments: 6,
-      likes: 34,
+      likes: 31,
       featured: false,
-      tags: ["International Partnerships", "Global Education", "NGO Collaboration", "Education Resources"]
+      tags: ["International Partnerships", "Global Education", "Didinga Development", "Cultural Exchange"]
+    },
+    {
+      id: 9,
+      title: "The Ripple Effect: How One Didinga Education Changes Everything",
+      excerpt: "When one Didinga child receives an education, it creates a ripple effect that transforms entire families and communities.",
+      content: `Education doesn't just change one Didinga life—it changes everything. When a child learns to read, they can help their parents with business transactions. When they learn math, they can manage family finances better. When they learn about health, they can care for their families.
+
+This ripple effect is why we believe education is the key to sustainable development in the Didinga Hills. Each educated child becomes a catalyst for change in their family and community.
+
+The impact extends beyond immediate benefits. Educated Didinga children grow up to become community leaders, healthcare workers, and teachers. They bring new ideas and solutions to local challenges.
+
+This is why we focus on education as our primary mission. It's not just about individual success - it's about building a stronger, more prosperous Didinga community for generations to come.`,
+      author: "Grace Nadai",
+      date: "2023-12-15",
+      location: "Didinga Hills, Budi County, South Sudan",
+      category: "community",
+      image: "/Images/Story000009.jpg",
+      views: 398,
+      shares: 16,
+      comments: 5,
+      likes: 25,
+      featured: false,
+      tags: ["Community Impact", "Sustainable Development", "Didinga Future", "Education Benefits"]
     },
     {
       id: 10,
-      title: "The Ripple Effect: How One Education Changes Everything",
-      excerpt: "When one child receives an education, it creates a ripple effect that transforms entire families and communities.",
-      content: `Education doesn't just change one life—it changes everything. When a child learns to read, they can help their parents with business transactions. When they learn math, they can manage family finances better. When they learn about health, they can care for their families.
+      title: "A New Beginning: The Future of Didinga Education",
+      excerpt: "As we look ahead, the foundation we've built continues to grow stronger, promising brighter futures for generations to come.",
+      content: `Our journey in the Didinga Hills has been one of transformation and hope. From humble beginnings under acacia trees to permanent classrooms, from a handful of students to hundreds of educated children, we've witnessed the power of community-driven education.
 
-This ripple effect is why we believe education is the key to sustainable development.
+The impact extends beyond individual students—it reaches families, villages, and the entire Didinga community. As we continue to expand our programs and build more classrooms, we're not just educating children; we're building a sustainable future for the Didinga people.
 
-The ripple effect of education is perhaps the most powerful aspect of our work. When one child receives an education, the benefits extend far beyond that individual. Families become more informed about health, nutrition, and economic opportunities. Communities become more engaged in civic life and development initiatives.
+Each new classroom represents another step toward our vision of universal education in the Didinga Hills. We've seen how education transforms not just individual lives, but entire communities. Children who once had no hope for education are now becoming teachers, healthcare workers, and community leaders.
 
-Educated children become educated adults who can contribute more effectively to their communities. They can read important documents, understand their rights, and participate in decision-making processes. They can start businesses, create jobs, and drive economic development.
+The ripple effect continues to grow. Families who once saw no value in education now actively support their children's learning. Communities that were once isolated are now connected through shared educational goals and achievements.
 
-The ripple effect also extends across generations. Educated parents are more likely to value education for their own children, creating a cycle of learning and improvement that continues indefinitely.
-
-"Education is the foundation of everything," explains Grace Nyibol, one of our community leaders. "When you educate a child, you're not just helping that child. You're helping their family, their community, and future generations."
-
-This understanding drives our commitment to universal education access. We know that every child who receives an education creates positive change that ripples outward, touching countless lives.`,
-      author: "Grace Nyibol",
-      date: "2023-12-15",
-      location: "Didinga Hills region",
+As we look to the future, we see a Didinga community where every child has access to quality education, where traditional knowledge is preserved alongside modern learning, and where the next generation is equipped to build a brighter future for all.`,
+      author: "Community Leaders",
+      date: "2023-12-10",
+      location: "Didinga Hills, Budi County, South Sudan",
       category: "community",
-      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=400&fit=crop",
-      views: 1123,
-      shares: 98,
-      comments: 27,
-      likes: 145,
-      featured: true,
-      tags: ["Education Impact", "Community Development", "Sustainable Development", "Social Change"]
+      image: "/Images/Story000010.jpg",
+      views: 345,
+      shares: 12,
+      comments: 4,
+      likes: 18,
+      featured: false,
+      tags: ["Future Vision", "Community Development", "Didinga Education", "Sustainable Growth"]
     }
   ];
 
