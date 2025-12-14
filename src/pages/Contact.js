@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Send, Globe } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const Contact = () => {
+  const { openModal } = useZeffy();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -247,12 +249,12 @@ const Contact = () => {
             Join us in our mission to provide quality education and empower communities in South Sudan. Every connection, every donation, and every volunteer hour makes a lasting impact.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:donate@betiharisociety.org" 
+            <button 
+              onClick={openModal}
               className="btn-secondary text-lg px-8 py-4"
             >
               Make a Donation
-            </a>
+            </button>
             <a 
               href="mailto:contact@betiharisociety.org" 
               className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4"

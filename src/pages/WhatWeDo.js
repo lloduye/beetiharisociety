@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Users, Heart, Target, ArrowRight, Building, GraduationCap } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const WhatWeDo = () => {
+  const { openModal } = useZeffy();
   const programs = [
     {
       icon: <Building className="h-8 w-8" />,
@@ -244,9 +246,9 @@ const WhatWeDo = () => {
             Your support helps us build classrooms, train teachers, and provide comprehensive education and development programs to communities in South Sudan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-involved" className="btn-secondary text-lg px-8 py-4">
+            <button onClick={openModal} className="btn-secondary text-lg px-8 py-4">
               Make a Donation
-            </Link>
+            </button>
             <Link to="/contact" className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4">
               Get Involved
             </Link>

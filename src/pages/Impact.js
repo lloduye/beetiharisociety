@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Building, Heart, Target, TrendingUp, Award } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const Impact = () => {
+  const { openModal } = useZeffy();
   const achievements = [
     {
       icon: <Building className="h-8 w-8" />,
@@ -237,9 +239,9 @@ const Impact = () => {
             Your support helps us continue building classrooms, training teachers, and expanding educational opportunities for children in South Sudan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-involved" className="btn-secondary text-lg px-8 py-4">
+            <button onClick={openModal} className="btn-secondary text-lg px-8 py-4">
               Make a Donation
-            </Link>
+            </button>
             <Link to="/what-we-do" className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4">
               Learn About Our Programs
             </Link>

@@ -1,8 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, BookOpen, Heart, Target, ArrowRight } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const Home = () => {
+  const { openModal } = useZeffy();
+
+  const handleDonateClick = (e) => {
+    e.preventDefault();
+    openModal();
+  };
   const highlights = [
     {
       icon: <Users className="h-8 w-8" />,
@@ -44,10 +51,10 @@ const Home = () => {
             
             {/* Call to Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/get-involved" className="btn-secondary text-lg px-8 py-4">
+              <button onClick={handleDonateClick} className="btn-secondary text-lg px-8 py-4">
                 Donate Now
                 <ArrowRight className="ml-2 h-5 w-5 inline" />
-              </Link>
+              </button>
               <Link to="/about" className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4">
                 Learn More
                 <ArrowRight className="ml-2 h-5 w-5 inline" />
@@ -136,9 +143,9 @@ const Home = () => {
             Your support can make a lasting difference in the lives of children and communities in South Sudan. Every donation, no matter the size, helps us build a brighter future through education.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/get-involved" className="btn-secondary text-lg px-8 py-4">
+            <button onClick={handleDonateClick} className="btn-secondary text-lg px-8 py-4">
               Make a Donation
-            </Link>
+            </button>
             <Link to="/contact" className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4">
               Contact Us
             </Link>

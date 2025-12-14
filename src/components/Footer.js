@@ -1,8 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Globe, MapPin, BookOpen } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const Footer = () => {
+  const { openModal } = useZeffy();
+
+  const handleDonateClick = (e) => {
+    e.preventDefault();
+    openModal();
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container-custom section-padding">
@@ -20,9 +28,9 @@ const Footer = () => {
               Empowering children and communities through purpose-driven education in South Sudan.
             </p>
             <div className="flex space-x-4">
-              <Link to="/get-involved" className="btn-primary">
+              <button onClick={handleDonateClick} className="btn-primary">
                 Donate Now
-              </Link>
+              </button>
               <Link to="/get-involved" className="btn-outline text-white border-white hover:bg-white hover:text-gray-900">
                 Volunteer
               </Link>

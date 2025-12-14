@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ZeffyProvider } from './contexts/ZeffyContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -16,27 +17,29 @@ import Contact from './pages/Contact';
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/mission" element={<Mission />} />
-            <Route path="/what-we-do" element={<WhatWeDo />} />
-            <Route path="/impact" element={<Impact />} />
-            <Route path="/stories" element={<Stories />} />
-            <Route path="/stories/:id" element={<StoryDetail />} />
-            <Route path="/get-involved" element={<GetInvolved />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </main>
-        <Footer />
-        <Chatbot />
-      </div>
-    </Router>
+    <ZeffyProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/mission" element={<Mission />} />
+              <Route path="/what-we-do" element={<WhatWeDo />} />
+              <Route path="/impact" element={<Impact />} />
+              <Route path="/stories" element={<Stories />} />
+              <Route path="/stories/:id" element={<StoryDetail />} />
+              <Route path="/get-involved" element={<GetInvolved />} />
+              <Route path="/contact" element={<Contact />} />
+            </Routes>
+          </main>
+          <Footer />
+          <Chatbot />
+        </div>
+      </Router>
+    </ZeffyProvider>
   );
 }
 

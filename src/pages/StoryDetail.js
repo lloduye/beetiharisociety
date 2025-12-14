@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useZeffy } from '../contexts/ZeffyContext';
 import { 
   ArrowLeft, 
   ArrowRight,
@@ -19,6 +20,7 @@ import {
 
 const StoryDetail = () => {
   const { id } = useParams();
+  const { openModal } = useZeffy();
   const [liked, setLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -590,12 +592,12 @@ As we look to the future, we see a Didinga community where every child has acces
                Help us create more stories like this by supporting our educational programs.
              </p>
              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-               <a 
-                 href="mailto:donate@betiharisociety.org" 
+               <button 
+                 onClick={openModal}
                  className="btn-primary"
                >
                  Make a Donation
-               </a>
+               </button>
                <Link 
                  to="/get-involved" 
                  className="btn-outline"

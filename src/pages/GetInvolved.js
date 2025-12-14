@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X, CheckCircle, ExternalLink, TrendingUp, Target } from 'lucide-react';
+import { useZeffy } from '../contexts/ZeffyContext';
 
 const GetInvolved = () => {
+  const { openModal } = useZeffy();
   const [activeModal, setActiveModal] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -1325,13 +1327,13 @@ const GetInvolved = () => {
               <Mail className="mr-2 h-5 w-5 inline" />
               Contact Us
             </a>
-            <a 
-              href="mailto:donate@betiharisociety.org" 
+            <button 
+              onClick={openModal}
               className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4"
             >
               <DollarSign className="mr-2 h-5 w-5 inline" />
               Make a Donation
-            </a>
+            </button>
           </div>
         </div>
       </section>
