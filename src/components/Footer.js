@@ -12,7 +12,7 @@ const Footer = () => {
             <div className="flex items-center space-x-2 mb-4">
               <Globe className="h-8 w-8 text-primary-400" />
               <div>
-                <h3 className="text-xl font-bold">Beeti Hari Society</h3>
+                <h3 className="text-xl font-bold">BETI-HARI SOCIETY</h3>
                 <p className="text-sm text-gray-400">Education & Economic Development</p>
               </div>
             </div>
@@ -70,10 +70,10 @@ const Footer = () => {
                 <div>
                   <p className="text-sm text-gray-300">General Inquiries</p>
                   <a 
-                    href="mailto:contact@beetiharisociety.org" 
+                    href="mailto:contact@betiharisociety.org" 
                     className="text-white hover:text-primary-400 transition-colors"
                   >
-                    contact@beetiharisociety.org
+                    contact@betiharisociety.org
                   </a>
                 </div>
               </div>
@@ -82,10 +82,10 @@ const Footer = () => {
                 <div>
                   <p className="text-sm text-gray-300">Donations</p>
                   <a 
-                    href="mailto:donate@beetiharisociety.org" 
+                    href="mailto:donate@betiharisociety.org" 
                     className="text-white hover:text-primary-400 transition-colors"
                   >
-                    donate@beetiharisociety.org
+                    donate@betiharisociety.org
                   </a>
                 </div>
               </div>
@@ -104,7 +104,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Beeti Hari Society for Education & Economic Development. All rights reserved.
+              © 2024 Beti-Hari Society for Education & Economic Development. All rights reserved.
             </p>
             <div className="flex items-center space-x-2 mt-4 md:mt-0">
               <BookOpen className="h-4 w-4 text-primary-400" />

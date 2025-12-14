@@ -33,7 +33,7 @@ const Home = () => {
         <div className="container-custom section-padding">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Beeti Hari Society for Education & Economic Development
+              Beti-Hari Society for Education & Economic Development
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-primary-100">
               Empowering Young People. Strengthening Communities. Transforming South Sudan Through Education.

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const donateButtonRef = useRef(null);
+  const mobileDonateButtonRef = useRef(null);
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -19,7 +21,82 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const zeffyFormUrl = 'https://www.zeffy.com/embed/donation-form/donate-to-change-lives-5934?modal=true';
+  const [showZeffyModal, setShowZeffyModal] = useState(false);
+
+  // Handle donate button click
+  const handleDonateClick = (e) => {
+    e.preventDefault();
+    setShowZeffyModal(true);
+  };
+
+  const closeZeffyModal = () => {
+    setShowZeffyModal(false);
+  };
+
+  // Set up Zeffy attributes after component mounts
+  useEffect(() => {
+    // Wait a bit for Zeffy script to load
+    const setupZeffy = () => {
+      // Set attribute on desktop button
+      if (donateButtonRef.current) {
+        donateButtonRef.current.setAttribute('zeffy-form-link', zeffyFormUrl);
+      }
+      
+      // Set attribute on mobile button
+      if (mobileDonateButtonRef.current) {
+        mobileDonateButtonRef.current.setAttribute('zeffy-form-link', zeffyFormUrl);
+      }
+    };
+
+    // Try immediately
+    setupZeffy();
+    
+    // Also try after a short delay in case script loads later
+    const timeout = setTimeout(setupZeffy, 500);
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
+    <>
+    {showZeffyModal && (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-fade-in"
+        onClick={closeZeffyModal}
+      >
+        <div 
+          className="bg-white rounded-xl max-w-3xl w-full max-h-[85vh] overflow-hidden relative shadow-2xl animate-bounce-in"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-primary-600 via-primary-700 to-primary-600 px-5 py-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-white">Make a Donation</h2>
+              <p className="text-xs text-primary-100 mt-0.5">Support BETI-HARI SOCIETY</p>
+            </div>
+            <button
+              onClick={closeZeffyModal}
+              className="text-white hover:text-primary-100 hover:bg-primary-700 rounded-full p-1.5 transition-colors duration-200"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Form Container */}
+          <div className="relative">
+            <iframe
+              src={zeffyFormUrl.replace('?modal=true', '')}
+              className="w-full h-[75vh] border-0"
+              title="Zeffy Donation Form"
+              allow="payment"
+              style={{ minHeight: '500px' }}
+            />
+          </div>
+        </div>
+      </div>
+    )}
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex justify-between items-center py-4">
@@ -27,7 +104,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center space-x-2">
             <Globe className="h-8 w-8 text-primary-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Beeti Hari Society</h1>
+              <h1 className="text-xl font-bold text-gray-900">BETI-HARI SOCIETY</h1>
               <p className="text-xs text-gray-600">Education & Economic Development</p>
             </div>
           </Link>
@@ -47,9 +124,13 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-            <Link to="/get-involved" className="btn-primary">
+            <button 
+              ref={donateButtonRef}
+              onClick={handleDonateClick}
+              className="btn-primary"
+            >
               Donate Now
-            </Link>
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -82,19 +163,23 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                <Link
-                  to="/get-involved"
+                <button
+                  ref={mobileDonateButtonRef}
+                  onClick={(e) => {
+                    setIsOpen(false);
+                    handleDonateClick(e);
+                  }}
                   className="btn-primary w-full text-center"
-                  onClick={() => setIsOpen(false)}
                 >
                   Donate Now
-                </Link>
+                </button>
               </div>
             </div>
           </div>
         )}
       </div>
     </nav>
+    </>
   );
 };
 

@@ -53,7 +53,7 @@ const About = () => {
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Organization</h2>
               <p className="text-lg text-gray-700 mb-6">
-                Beeti Hari Society for Education & Economic Development is a grassroots nonprofit organization dedicated to building access to quality education, life skills, and essential community support services in rural South Sudan.
+                Beti-Hari Society for Education & Economic Development is a grassroots nonprofit organization dedicated to building access to quality education, life skills, and essential community support services in rural South Sudan.
               </p>
               <p className="text-lg text-gray-700 mb-6">
                 Founded on values of purpose, service, and empowerment, we are working to uplift entire communities by starting where it matters most — in the classroom.

@@ -274,12 +274,12 @@ const GetInvolved = () => {
   const handleShare = async (type) => {
     const shareData = {
       'Share Our Mission': {
-        title: 'Beeti Hari Society for Education & Economic Development',
+        title: 'Beti-Hari Society for Education & Economic Development',
         text: 'Supporting education and economic development in South Sudan. Join our mission to empower children and communities.',
         url: window.location.origin
       },
       'Share Our Story': {
-        title: 'Beeti Hari Society - Our Story',
+        title: 'Beti-Hari Society - Our Story',
         text: 'Learn about our mission to empower children and communities through education in South Sudan.',
         url: `${window.location.origin}/about`
       }
@@ -1153,10 +1153,10 @@ const GetInvolved = () => {
                 For donation-related inquiries, please contact us at:
               </p>
               <a 
-                href="mailto:donate@beetiharisociety.org" 
+                href="mailto:donate@betiharisociety.org" 
                 className="text-xl font-semibold hover:text-primary-200 transition-colors"
               >
-                donate@beetiharisociety.org
+                donate@betiharisociety.org
               </a>
               <p className="mt-4 text-primary-100">
                 Donations can be monthly, annual, or one-time pledges.
@@ -1209,7 +1209,7 @@ const GetInvolved = () => {
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Why Support Us</h2>
               <p className="text-lg text-gray-700 mb-6">
-                Supporting the Beeti Hari Society for Education & Economic Development means investing in grassroots, community-led education that understands the unique challenges faced by rural families and students.
+                Supporting the Beti-Hari Society for Education & Economic Development means investing in grassroots, community-led education that understands the unique challenges faced by rural families and students.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
@@ -1319,14 +1319,14 @@ const GetInvolved = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:contact@beetiharisociety.org" 
+              href="mailto:contact@betiharisociety.org" 
               className="btn-secondary text-lg px-8 py-4"
             >
               <Mail className="mr-2 h-5 w-5 inline" />
               Contact Us
             </a>
             <a 
-              href="mailto:donate@beetiharisociety.org" 
+              href="mailto:donate@betiharisociety.org" 
               className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4"
             >
               <DollarSign className="mr-2 h-5 w-5 inline" />

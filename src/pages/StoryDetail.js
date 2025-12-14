@@ -591,7 +591,7 @@ As we look to the future, we see a Didinga community where every child has acces
              </p>
              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                <a 
-                 href="mailto:donate@beetiharisociety.org" 
+                 href="mailto:donate@betiharisociety.org" 
                  className="btn-primary"
                >
                  Make a Donation

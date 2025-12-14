@@ -19,7 +19,7 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // In a real application, you would send this data to your backend
-    const mailtoLink = `mailto:contact@beetiharisociety.org?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`;
+    const mailtoLink = `mailto:contact@betiharisociety.org?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`;
     window.location.href = mailtoLink;
   };
 
@@ -27,13 +27,13 @@ const Contact = () => {
     {
       icon: <Mail className="h-6 w-6" />,
       title: "General Inquiries",
-      email: "contact@beetiharisociety.org",
+      email: "contact@betiharisociety.org",
       description: "For general questions about our work, programs, or organization."
     },
     {
       icon: <Mail className="h-6 w-6" />,
       title: "Donations & Fundraising",
-      email: "donate@beetiharisociety.org",
+      email: "donate@betiharisociety.org",
       description: "For donation-related inquiries, sponsorship opportunities, or fundraising partnerships."
     }
   ];
@@ -198,10 +198,10 @@ const Contact = () => {
                     <div>
                       <p className="text-sm text-gray-600">General Inquiries</p>
                       <a 
-                        href="mailto:contact@beetiharisociety.org"
+                        href="mailto:contact@betiharisociety.org"
                         className="text-primary-600 hover:text-primary-700 font-medium"
                       >
-                        contact@beetiharisociety.org
+                        contact@betiharisociety.org
                       </a>
                     </div>
                   </div>
@@ -210,10 +210,10 @@ const Contact = () => {
                     <div>
                       <p className="text-sm text-gray-600">Donations</p>
                       <a 
-                        href="mailto:donate@beetiharisociety.org"
+                        href="mailto:donate@betiharisociety.org"
                         className="text-primary-600 hover:text-primary-700 font-medium"
                       >
-                        donate@beetiharisociety.org
+                        donate@betiharisociety.org
                       </a>
                     </div>
                   </div>
@@ -248,13 +248,13 @@ const Contact = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:donate@beetiharisociety.org" 
+              href="mailto:donate@betiharisociety.org" 
               className="btn-secondary text-lg px-8 py-4"
             >
               Make a Donation
             </a>
             <a 
-              href="mailto:contact@beetiharisociety.org" 
+              href="mailto:contact@betiharisociety.org" 
               className="btn-outline text-white border-white hover:bg-white hover:text-primary-700 text-lg px-8 py-4"
             >
               Learn More

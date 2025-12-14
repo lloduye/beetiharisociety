@@ -323,7 +323,7 @@ const Stories = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="mailto:contact@beetiharisociety.org" 
+              href="mailto:contact@betiharisociety.org" 
               className="btn-secondary text-lg px-8 py-4"
             >
               Share Your Story

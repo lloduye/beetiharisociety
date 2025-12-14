@@ -1,6 +1,6 @@
-# Beeti Hari Society for Education & Economic Development
+# Beti-Hari Society for Education & Economic Development
 
-A modern, responsive React website for the Beeti Hari Society, a nonprofit organization dedicated to providing quality education and community development in South Sudan.
+A modern, responsive React website for the Beti-Hari Society, a nonprofit organization dedicated to providing quality education and community development in South Sudan.
 
 ## 🌟 Features
 
@@ -25,7 +25,7 @@ A modern, responsive React website for the Beeti Hari Society, a nonprofit organ
 
 ```bash
 git clone <repository-url>
-cd beetihari-society
+cd beti-hari-society
 ```
 
 2. Install dependencies:
@@ -142,8 +142,8 @@ src/
 
 ## 📧 Contact Information
 
-- **General Inquiries**: contact@beetiharisociety.org
-- **Donations**: donate@beetiharisociety.org
+- **General Inquiries**: contact@betiharisociety.org
+- **Donations**: donate@betiharisociety.org
 - **Service Areas**: Budi County & Lotukei sub-county, South Sudan
 
 ## 🚀 Deployment
@@ -173,15 +173,15 @@ This creates a `build` folder with optimized production files.
 
 ## 📄 License
 
-This project is created for the Beeti Hari Society for Education & Economic Development. All rights reserved.
+This project is created for the Beti-Hari Society for Education & Economic Development. All rights reserved.
 
 ## 🙏 Acknowledgments
 
-- The Beeti Hari Society team for their mission and vision
+- The Beti-Hari Society team for their mission and vision
 - The Didinga community in South Sudan
 - All volunteers and supporters of the organization
 
 ---
 
-**Beeti Hari Society for Education & Economic Development**
+**Beti-Hari Society for Education & Economic Development**
 Empowering children and communities through purpose-driven education in South Sudan.

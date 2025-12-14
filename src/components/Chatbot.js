@@ -6,7 +6,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm here to help you learn more about the Beeti Hari Society. How can I assist you today?",
+      text: "Hello! I'm here to help you learn more about the Beti-Hari Society. How can I assist you today?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -26,11 +26,11 @@ const Chatbot = () => {
   // Common questions and responses
   const responses = {
     'donation': {
-      text: "To make a donation, please email us at donate@beetiharisociety.org. We accept various donation levels including classroom sponsorship ($5,000), teacher support ($100/month), and general support (any amount).",
+      text: "To make a donation, please email us at donate@betiharisociety.org. We accept various donation levels including classroom sponsorship ($5,000), teacher support ($100/month), and general support (any amount).",
       quickReplies: ['How do I donate?', 'What are the donation options?', 'Contact us']
     },
     'contact': {
-      text: "You can reach us at contact@beetiharisociety.org for general inquiries or donate@beetiharisociety.org for donation-related questions. We typically respond within 24-48 hours.",
+      text: "You can reach us at contact@betiharisociety.org for general inquiries or donate@betiharisociety.org for donation-related questions. We typically respond within 24-48 hours.",
       quickReplies: ['Email addresses', 'Response time', 'Get involved']
     },
     'location': {
@@ -83,7 +83,7 @@ const Chatbot = () => {
     }
     
     return {
-      text: "I'm not sure about that specific question. You can ask me about donations, our mission, location, volunteering, impact, or how to contact us. Or feel free to email us directly at contact@beetiharisociety.org.",
+      text: "I'm not sure about that specific question. You can ask me about donations, our mission, location, volunteering, impact, or how to contact us. Or feel free to email us directly at contact@betiharisociety.org.",
       quickReplies: ['How can I donate?', 'What is your mission?', 'Contact us']
     };
   };
@@ -144,7 +144,7 @@ const Chatbot = () => {
           <div className="bg-primary-600 text-white p-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Bot className="h-5 w-5" />
-              <span className="font-semibold">Beeti Hari Society Assistant</span>
+              <span className="font-semibold">Beti-Hari Society Assistant</span>
             </div>
             <button
               onClick={() => setIsOpen(false)}

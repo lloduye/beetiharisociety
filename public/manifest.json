@@ -1,6 +1,6 @@
 {
-  "short_name": "Beeti Hari Society",
-  "name": "Beeti Hari Society for Education & Economic Development",
+  "short_name": "Beti-Hari Society",
+  "name": "Beti-Hari Society for Education & Economic Development",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,7 +8,7 @@
       "type": "image/x-icon"
     },
     {
-      "src": "beeti-hari-favicon.svg",
+      "src": "beti-hari-favicon.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     },
