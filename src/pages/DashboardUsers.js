@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usersService } from '../services/usersService';
-import { Plus, Edit, Trash2, Mail, Users as UsersIcon, Shield, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Users as UsersIcon, X } from 'lucide-react';
 
 const DashboardUsers = () => {
   const [users, setUsers] = useState([]);
