@@ -72,11 +72,18 @@ const DashboardLogin = () => {
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setError(result.error || 'Invalid email or password. Please try again.');
+        const errorMsg = result.error || 'Invalid email or password. Please try again.';
+        // Check if Firebase might not be configured
+        if (errorMsg.includes('Firebase') || errorMsg.includes('configuration')) {
+          setError('Firebase is not configured. Please check environment variables in Netlify.');
+        } else {
+          setError(errorMsg);
+        }
         setPassword('');
       }
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      console.error('Login error:', error);
+      setError('An error occurred. Please check browser console for details. If Firebase is not configured, please set environment variables in Netlify.');
       setPassword('');
     } finally {
       setIsLoading(false);

@@ -23,7 +23,8 @@ export const usersService = {
    */
   getAll(callback) {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Returning empty array.');
+      console.warn('Firebase not initialized. Cannot load users. Please check Firebase configuration.');
+      // For login to work, we need Firebase - show helpful error
       if (callback) callback([]);
       return Promise.resolve([]);
     }

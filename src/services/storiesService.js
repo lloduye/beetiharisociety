@@ -1,5 +1,6 @@
 // Stories service - manages stories using Firebase Firestore
 import { db, firebaseInitialized } from '../config/firebase';
+import { storiesData } from '../data/storiesData';
 import { 
   collection, 
   doc, 
@@ -14,6 +15,7 @@ import {
 } from 'firebase/firestore';
 
 const STORIES_COLLECTION = 'stories';
+const STORIES_CACHE_KEY = 'stories_data';
 
 export const storiesService = {
   /**
@@ -23,9 +25,22 @@ export const storiesService = {
    */
   getAll(callback) {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Returning empty array.');
-      if (callback) callback([]);
-      return Promise.resolve([]);
+      console.warn('Firebase not initialized. Loading stories from fallback data.');
+      // Fallback to localStorage or initial data
+      try {
+        const cached = localStorage.getItem(STORIES_CACHE_KEY);
+        if (cached) {
+          const stories = JSON.parse(cached);
+          if (callback) callback(stories);
+          return Promise.resolve(stories);
+        }
+      } catch (e) {
+        console.warn('Failed to load from cache:', e);
+      }
+      // Use initial data as last resort
+      const fallbackStories = storiesData || [];
+      if (callback) callback(fallbackStories);
+      return Promise.resolve(fallbackStories);
     }
     const storiesRef = collection(db, STORIES_COLLECTION);
     
@@ -59,12 +74,31 @@ export const storiesService = {
    * Get a single story by ID
    */
   async getById(id) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Loading story from fallback data.');
+      // Fallback to localStorage or initial data
+      try {
+        const cached = localStorage.getItem(STORIES_CACHE_KEY);
+        if (cached) {
+          const stories = JSON.parse(cached);
+          const story = stories.find(s => s.id === parseInt(id) || s.id === id);
+          return story || null;
+        }
+      } catch (e) {
+        console.warn('Failed to load from cache:', e);
+      }
+      // Use initial data as last resort
+      const fallbackStories = storiesData || [];
+      return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
+    }
     try {
       const storyRef = doc(db, STORIES_COLLECTION, id.toString());
       const storySnap = await getDoc(storyRef);
       
       if (!storySnap.exists()) {
-        return null;
+        // Fallback check
+        const fallbackStories = storiesData || [];
+        return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
       }
       
       return {
@@ -73,7 +107,9 @@ export const storiesService = {
       };
     } catch (error) {
       console.error('Error getting story by ID:', error);
-      return null;
+      // Fallback on error
+      const fallbackStories = storiesData || [];
+      return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
     }
   },
 
@@ -81,6 +117,22 @@ export const storiesService = {
    * Get published stories only (for public website)
    */
   async getPublished() {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Loading published stories from fallback data.');
+      // Fallback to localStorage or initial data
+      try {
+        const cached = localStorage.getItem(STORIES_CACHE_KEY);
+        if (cached) {
+          const stories = JSON.parse(cached);
+          return stories.filter(s => s.published);
+        }
+      } catch (e) {
+        console.warn('Failed to load from cache:', e);
+      }
+      // Use initial data as last resort
+      const fallbackStories = storiesData || [];
+      return fallbackStories.filter(s => s.published);
+    }
     try {
       const storiesRef = collection(db, STORIES_COLLECTION);
       const q = query(storiesRef, where('published', '==', true));
@@ -92,7 +144,9 @@ export const storiesService = {
       }));
     } catch (error) {
       console.error('Error getting published stories:', error);
-      return [];
+      // Fallback on error
+      const fallbackStories = storiesData || [];
+      return fallbackStories.filter(s => s.published);
     }
   },
 
