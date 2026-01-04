@@ -34,13 +34,49 @@ cd beti-hari-society
 npm install
 ```
 
-3. Start the development server:
+3. Set up environment variables (optional):
+
+```bash
+cp .env.example .env
+# Edit .env and set your admin password
+```
+
+4. Start the development server:
 
 ```bash
 npm start
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+5. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+## 🔐 Admin Dashboard
+
+The website includes a fully functional admin dashboard for tracking donations and managing the organization.
+
+### Accessing the Dashboard
+
+1. Navigate to `/dashboard/login` (e.g., `http://localhost:3000/dashboard/login`)
+2. Enter the admin password (default: `betihari2024` or set via `REACT_APP_ADMIN_PASSWORD` environment variable)
+3. Once logged in, you'll have access to the dashboard at `/dashboard`
+
+### Dashboard Features
+
+- **Donation Tracking**: View all donations with details (donor name, amount, date, project, status)
+- **Statistics**: Real-time stats including total raised, total donations, monthly totals, and average donation
+- **Search & Filter**: Search donations by name/email and filter by time period
+- **Export**: Export donation data to CSV for external analysis
+- **Zeffy Integration**: Ready for Zeffy API integration (currently using sample data)
+
+### Setting Up Zeffy Integration
+
+To connect the dashboard with your Zeffy account:
+
+1. Get your Zeffy API key from your Zeffy dashboard
+2. Set up webhooks in Zeffy to send donation notifications
+3. Update `src/pages/Dashboard.js` to replace mock data with actual API calls
+4. Store API credentials securely in environment variables
+
+**Note**: The dashboard currently displays sample data. Connect to the Zeffy API for live donation tracking.
 
 ## 📁 Project Structure
 

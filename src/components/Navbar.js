@@ -30,9 +30,9 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container-custom">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+        <div className="flex justify-between items-center py-4 relative">
+          {/* Logo - centered on mobile, left on desktop */}
+          <Link to="/" className="flex items-center space-x-2 md:static absolute left-1/2 md:left-0 transform md:transform-none -translate-x-1/2 md:translate-x-0">
             <Globe className="h-8 w-8 text-primary-600" />
             <div>
               <h1 className="text-xl font-bold text-gray-900">BETI-HARI SOCIETY</h1>
@@ -63,8 +63,8 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button - on right */}
+          <div className="md:hidden ml-auto">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 hover:text-primary-600 focus:outline-none"

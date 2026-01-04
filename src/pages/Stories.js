@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
+import { storiesService } from '../services/storiesService';
+import { interactionsService } from '../services/interactionsService';
 
 const Stories = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [stories, setStories] = useState([]);
 
   const categories = [
     { id: 'all', name: 'All Stories' },
@@ -13,162 +16,51 @@ const Stories = () => {
     { id: 'donors', name: 'Donor Stories' }
   ];
 
-  const stories = [
-    {
-      id: 1,
-      title: "From Cattle Herder to Scholar: Nakang's Educational Journey",
-      excerpt: "Nakang, a 15-year-old Didinga girl from the Didinga Hills, never thought she'd see the inside of a classroom. Today, she's one of our brightest students with dreams of becoming a doctor.",
-      content: "Nakang's family had never sent a child to school before. As traditional cattle herders in the Didinga Hills, education was seen as unnecessary. When we built our first classroom in her village, her parents were hesitant. But Nakang's determination changed everything. She walks 3 kilometers each day through the rugged hills to attend classes, and her grades are exceptional. 'I want to become a doctor to help my community,' she says with confidence that inspires everyone around her.",
-      author: "Mary Loboi",
-      date: "2024-01-15",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "students",
-      image: "/Images/Story000001.jpg",
-      views: 1247,
-      shares: 89,
-      comments: 23,
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Teacher Lokonyen's 20-Year Commitment to Didinga Education",
-      excerpt: "Despite delayed salaries and challenging conditions, Teacher Lokonyen has been educating Didinga children in Lotukei sub-county for two decades.",
-      content: "Teacher Lokonyen started teaching in 2004, when there were no proper classrooms in the Didinga Hills. He taught under the shade of acacia trees and in makeshift shelters made from local materials. Even when government salaries were delayed for 18 months, he continued teaching. 'These children are our future,' he says. 'I cannot abandon them.' His dedication has inspired 11 other Didinga volunteers to join our teaching staff.",
-      author: "David Lokang",
-      date: "2024-01-10",
-      location: "Lotukei sub-county, Didinga Hills",
-      category: "teachers",
-      image: "/Images/Story000002.jpg",
-      views: 892,
-      shares: 45,
-      comments: 18,
-      featured: false
-    },
-    {
-      id: 3,
-      title: "Building Dreams: How One Classroom Changed Everything",
-      excerpt: "The construction of our first permanent classroom in the Didinga Hills has transformed education access for over 200 children.",
-      content: "Before we built our first classroom, children in the Didinga Hills were learning under trees and in temporary shelters. When it rained, classes were cancelled. When it was too hot, children couldn't concentrate. The new classroom has changed everything. 'Now we can learn every day, no matter the weather,' says 12-year-old student Peter Lokang. 'I want to become a teacher so I can help other children like me.'",
-      author: "Grace Nadai",
-      date: "2024-01-05",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "community",
-      image: "/Images/Story000003.jpg",
-      views: 756,
-      shares: 34,
-      comments: 12,
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Empowering Girls Through Education in the Didinga Hills",
-      excerpt: "Our girls' education program has increased female enrollment by 300% in the Didinga community.",
-      content: "Traditionally, Didinga girls were expected to stay home and help with household chores. Education was seen as unnecessary for them. But our program has changed this mindset. 'My daughter will be the first woman in our family to read and write,' says mother Akuol Loboi. 'This changes everything for our family.' Today, girls make up 45% of our student body, and many are our top performers.",
-      author: "Rebecca Lodai",
-      date: "2023-12-28",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "students",
-      image: "/Images/Story000004.jpg",
-      views: 634,
-      shares: 28,
-      comments: 15,
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Volunteer Teachers: The Heart of Didinga Education",
-      excerpt: "Our 11 volunteer teachers work without pay to ensure Didinga children receive quality education.",
-      content: "When government salaries are delayed, our volunteer teachers continue working. They believe in the power of education to transform the Didinga community. 'I teach because I want to see my community prosper,' says volunteer teacher Michael Lokang. 'These children are our future leaders.' The volunteers work alongside our paid teachers, providing additional support and ensuring no child is left behind.",
-      author: "Michael Lokang",
-      date: "2023-12-22",
-      location: "Lotukei sub-county, Didinga Hills",
-      category: "teachers",
-      image: "/Images/Story000005.jpg",
-      views: 589,
-      shares: 22,
-      comments: 9,
-      featured: false
-    },
-    {
-      id: 6,
-      title: "From Student to Teacher: Peter's Journey",
-      excerpt: "Peter Lokang, once a student in our program, is now inspiring the next generation as a teacher.",
-      content: "Peter Lokang was one of our first students when we started in 2010. Today, he's a teacher in the same classroom where he learned to read and write. 'I want to give back to my community what was given to me,' he says. 'Education opened doors I never knew existed.' His story inspires other students to dream big. 'If Peter can do it, so can I,' says his student, 12-year-old Nakang.",
-      author: "James Lokang",
-      date: "2023-12-18",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "teachers",
-      image: "/Images/Story000006.jpg",
-      views: 523,
-      shares: 19,
-      comments: 7,
-      featured: false
-    },
-    {
-      id: 7,
-      title: "Community Fundraising: Building Schools One Bottle at a Time",
-      excerpt: "The Didinga community has raised funds for 3 classrooms through bottle and can collection programs.",
-      content: "When we couldn't afford to build classrooms, the Didinga community took action. They started collecting bottles and cans, selling them to recycling companies. The proceeds have funded 3 classrooms. 'Every bottle counts,' says Didinga community leader Thomas Lokang. 'We're building our children's future one bottle at a time.' This program has created a sense of ownership and pride in the Didinga community.",
-      author: "Anna Nadai",
-      date: "2023-12-20",
-      location: "Lotukei sub-county, Didinga Hills",
-      category: "community",
-      image: "/Images/Story000007.jpg",
-      views: 567,
-      shares: 23,
-      comments: 8,
-      featured: false
-    },
-    {
-      id: 8,
-      title: "International Partnership: Building Bridges Through Didinga Education",
-      excerpt: "Our partnership with international organizations has brought resources and expertise to our Didinga programs.",
-      content: "Through partnerships with international NGOs, we've received educational materials, teacher training, and technical support for our Didinga communities. These partnerships have helped us improve our curriculum and teaching methods. 'The support we receive helps us provide better education for our Didinga children,' says program coordinator Mary Loboi. 'We're not alone in this mission.'",
-      author: "David Lokang",
-      date: "2023-12-18",
-      location: "South Sudan, Didinga Hills",
-      category: "community",
-      image: "/Images/Story000008.jpg",
-      views: 432,
-      shares: 19,
-      comments: 6,
-      featured: false
-    },
-    {
-      id: 9,
-      title: "The Ripple Effect: How One Didinga Education Changes Everything",
-      excerpt: "When one Didinga child receives an education, it creates a ripple effect that transforms entire families and communities.",
-      content: "Education doesn't just change one Didinga life—it changes everything. When a child learns to read, they can help their parents with business transactions. When they learn math, they can manage family finances better. When they learn about health, they can care for their families. This ripple effect is why we believe education is the key to sustainable development in the Didinga Hills.",
-      author: "Grace Nadai",
-      date: "2023-12-15",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "community",
-      image: "/Images/Story000009.jpg",
-      views: 398,
-      shares: 16,
-      comments: 5,
-      featured: false
-    },
-    {
-      id: 10,
-      title: "A New Beginning: The Future of Didinga Education",
-      excerpt: "As we look ahead, the foundation we've built continues to grow stronger, promising brighter futures for generations to come.",
-      content: "Our journey in the Didinga Hills has been one of transformation and hope. From humble beginnings under acacia trees to permanent classrooms, from a handful of students to hundreds of educated children, we've witnessed the power of community-driven education. The impact extends beyond individual students—it reaches families, villages, and the entire Didinga community. As we continue to expand our programs and build more classrooms, we're not just educating children; we're building a sustainable future for the Didinga people.",
-      author: "Community Leaders",
-      date: "2023-12-10",
-      location: "Didinga Hills, Budi County, South Sudan",
-      category: "community",
-      image: "/Images/Story000010.jpg",
-      views: 345,
-      shares: 12,
-      comments: 4,
-      featured: false
-    }
-  ];
+  useEffect(() => {
+    loadStories();
+    
+    // Listen for storage changes (when admin updates stories)
+    const handleStorageChange = (e) => {
+      if (e.key === 'stories_data') {
+        loadStories();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event (same-tab updates)
+    const handleStoriesUpdate = () => {
+      loadStories();
+    };
+    
+    window.addEventListener('storiesUpdated', handleStoriesUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storiesUpdated', handleStoriesUpdate);
+    };
+  }, []);
 
-  const filteredStories = selectedCategory === 'all' 
+  const loadStories = async () => {
+    try {
+      // Load stories - prioritizes localStorage (has admin changes)
+      const allStories = await storiesService.getPublished();
+      setStories(allStories);
+    } catch (error) {
+      console.error('Failed to load stories:', error);
+    }
+  };
+
+  const filteredStories = (selectedCategory === 'all' 
     ? stories 
-    : stories.filter(story => story.category === selectedCategory);
+    : stories.filter(story => story.category === selectedCategory)
+  ).sort((a, b) => {
+    // Featured stories first
+    if (a.featured && !b.featured) return -1;
+    if (!a.featured && b.featured) return 1;
+    // Then sort by date, newest first
+    return new Date(b.date) - new Date(a.date);
+  });
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -281,15 +173,15 @@ const Stories = () => {
                      <div className="flex items-center space-x-3">
                        <div className="flex items-center">
                          <Eye className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(story.views)}</span>
+                         <span>{formatNumber(interactionsService.getViews(story.id) || story.views)}</span>
                        </div>
                        <div className="flex items-center">
                          <MessageCircle className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(story.comments)}</span>
+                         <span>{formatNumber(interactionsService.getComments(story.id).length || story.comments)}</span>
                        </div>
                        <div className="flex items-center">
                          <Share2 className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(story.shares)}</span>
+                         <span>{formatNumber(interactionsService.getShares(story.id) || story.shares)}</span>
                        </div>
                      </div>
                    </div>

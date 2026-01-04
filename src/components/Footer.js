@@ -66,6 +66,11 @@ const Footer = () => {
                   Get Involved
                 </Link>
               </li>
+              <li>
+                <Link to="/dashboard/login" className="text-gray-300 hover:text-white transition-colors">
+                  Staff Login
+                </Link>
+              </li>
             </ul>
           </div>
 
