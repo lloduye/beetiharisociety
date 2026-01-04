@@ -3,33 +3,45 @@ const USERS_STORAGE_KEY = 'dashboard_users';
 
 // Initialize with a default admin user if no users exist
 const initializeDefaultUser = () => {
-  const users = localStorage.getItem(USERS_STORAGE_KEY);
-  if (!users) {
-    const defaultUser = {
-      id: '1',
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@betiharisociety.org',
-      team: 'Board of Directors',
-      phone: '',
-      position: 'Administrator',
-      password: 'betihari2024', // Default password
-      createdAt: new Date().toISOString(),
-      isActive: true
-    };
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([defaultUser]));
+  // Check if localStorage is available (browser environment)
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+  
+  try {
+    const users = localStorage.getItem(USERS_STORAGE_KEY);
+    if (!users) {
+      const defaultUser = {
+        id: '1',
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@betiharisociety.org',
+        team: 'Board of Directors',
+        phone: '',
+        position: 'Administrator',
+        password: 'betihari2024', // Default password
+        createdAt: new Date().toISOString(),
+        isActive: true
+      };
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([defaultUser]));
+    }
+  } catch (error) {
+    console.error('Failed to initialize default user:', error);
   }
 };
 
-// Initialize on load
-initializeDefaultUser();
-
 export const usersService = {
   /**
-   * Get all users
+   * Get all users - ensures default user exists
    */
   getAll() {
+    // Ensure default user is initialized before getting users
+    initializeDefaultUser();
+    
     try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return [];
+      }
       const users = localStorage.getItem(USERS_STORAGE_KEY);
       return users ? JSON.parse(users) : [];
     } catch (error) {
@@ -42,6 +54,8 @@ export const usersService = {
    * Get a user by email
    */
   getByEmail(email) {
+    // Ensure default user is initialized
+    initializeDefaultUser();
     const users = this.getAll();
     return users.find(user => user.email.toLowerCase() === email.toLowerCase());
   },
@@ -137,6 +151,9 @@ export const usersService = {
    * Authenticate user
    */
   authenticate(email, team, password) {
+    // Ensure default user is initialized before authentication
+    initializeDefaultUser();
+    
     const user = this.getByEmail(email);
     
     if (!user) {

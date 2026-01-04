@@ -19,6 +19,13 @@ export const AuthProvider = ({ children }) => {
   const [userName, setUserName] = useState(null);
 
   useEffect(() => {
+    // Ensure default user is initialized on app load
+    try {
+      usersService.getAll(); // This will trigger initialization if needed
+    } catch (error) {
+      console.error('Failed to initialize users:', error);
+    }
+    
     // Check if user is logged in on mount
     const token = localStorage.getItem('admin_token');
     const team = localStorage.getItem('user_team');
