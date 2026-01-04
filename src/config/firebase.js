@@ -3,15 +3,22 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
-// These values should be set in environment variables or .env file
+// These values MUST be set in environment variables
+// Never commit API keys to the repository!
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyALbeACu2PoaXcdEXB_6VQgSmUA5c-We_8",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "betiharisociety-427f1.firebaseapp.com",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "betiharisociety-427f1",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "betiharisociety-427f1.firebasestorage.app",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "18570375410",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:18570375410:web:e86b12bfa9197c7090206b"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
+
+// Validate that all required environment variables are set
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('Firebase configuration is missing. Please set environment variables.');
+  throw new Error('Firebase configuration is incomplete. Check your environment variables.');
+}
 
 // Initialize Firebase
 let app;
