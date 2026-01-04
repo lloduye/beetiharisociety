@@ -32,12 +32,19 @@ const DashboardOverview = () => {
 
   // Load user position
   useEffect(() => {
-    if (userEmail) {
-      const user = usersService.getByEmail(userEmail);
-      if (user && user.position) {
-        setUserPosition(user.position);
+    const loadUserPosition = async () => {
+      if (userEmail) {
+        try {
+          const user = await usersService.getByEmail(userEmail);
+          if (user && user.position) {
+            setUserPosition(user.position);
+          }
+        } catch (error) {
+          console.error('Error loading user position:', error);
+        }
       }
-    }
+    };
+    loadUserPosition();
   }, [userEmail]);
 
   useEffect(() => {
@@ -76,7 +83,7 @@ const DashboardOverview = () => {
     }
   };
 
-  const calculateStats = useCallback(() => {
+  const calculateStats = useCallback(async () => {
     try {
       const publishedStories = stories.filter(s => s.published);
       
@@ -85,13 +92,13 @@ const DashboardOverview = () => {
       let totalComments = 0;
       let totalShares = 0;
 
-      publishedStories.forEach(story => {
-        const interactions = interactionsService.getStoryInteractions(story.id);
+      for (const story of publishedStories) {
+        const interactions = await interactionsService.getStoryInteractions(story.id);
         totalViews += interactions.views || 0;
         totalLikes += interactions.likes?.length || 0;
         totalComments += interactions.comments?.length || 0;
         totalShares += interactions.shares || 0;
-      });
+      }
 
       setStats({
         publishedStories: publishedStories.length,
@@ -111,9 +118,9 @@ const DashboardOverview = () => {
     }
   }, [stories, calculateStats]);
 
-  const loadRecentActivity = () => {
+  const loadRecentActivity = async () => {
     try {
-      const activities = interactionsService.getRecentActivity(10);
+      const activities = await interactionsService.getRecentActivity(10);
       setRecentActivity(activities);
     } catch (error) {
       console.error('Failed to load recent activity:', error);

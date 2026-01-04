@@ -30,9 +30,9 @@ const DashboardUsers = () => {
     loadUsers();
   }, []);
 
-  const loadUsers = () => {
+  const loadUsers = async () => {
     try {
-      const allUsers = usersService.getAll();
+      const allUsers = await usersService.getAll();
       setUsers(allUsers);
     } catch (error) {
       console.error('Failed to load users:', error);
@@ -74,11 +74,11 @@ const DashboardUsers = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (userId) => {
+  const handleDelete = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        usersService.deleteUser(userId);
-        loadUsers();
+        await usersService.deleteUser(userId);
+        await loadUsers();
       } catch (error) {
         setError('Failed to delete user');
       }

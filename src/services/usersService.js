@@ -1,138 +1,162 @@
-// Users service - manages user accounts for the dashboard
-const USERS_STORAGE_KEY = 'dashboard_users';
+// Users service - manages user accounts using Firebase Firestore
+import { db } from '../config/firebase';
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  setDoc, 
+  deleteDoc,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp
+} from 'firebase/firestore';
 
-// Initialize with a default admin user if no users exist
-const initializeDefaultUser = () => {
-  // Check if localStorage is available (browser environment)
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return;
-  }
-  
-  try {
-    const users = localStorage.getItem(USERS_STORAGE_KEY);
-    if (!users) {
-      const defaultUser = {
-        id: '1',
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@betiharisociety.org',
-        team: 'Board of Directors',
-        phone: '',
-        position: 'Administrator',
-        password: 'betihari2024', // Default password
-        createdAt: new Date().toISOString(),
-        isActive: true
-      };
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([defaultUser]));
-    }
-  } catch (error) {
-    console.error('Failed to initialize default user:', error);
-  }
-};
+const USERS_COLLECTION = 'users';
 
 export const usersService = {
   /**
-   * Get all users - ensures default user exists
+   * Get all users - with optional real-time updates
+   * @param {Function} callback - Optional callback for real-time updates
+   * @returns {Promise|Function} Returns promise or unsubscribe function
    */
-  getAll() {
-    // Ensure default user is initialized before getting users
-    initializeDefaultUser();
+  getAll(callback) {
+    const usersRef = collection(db, USERS_COLLECTION);
     
-    try {
-      if (typeof window === 'undefined' || !window.localStorage) {
+    if (callback) {
+      // Real-time listener
+      return onSnapshot(usersRef, (snapshot) => {
+        const users = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        callback(users);
+      }, (error) => {
+        console.error('Error getting users:', error);
+        callback([]);
+      });
+    } else {
+      // One-time fetch
+      return getDocs(usersRef).then(snapshot => {
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      }).catch(error => {
+        console.error('Error getting users:', error);
         return [];
-      }
-      const users = localStorage.getItem(USERS_STORAGE_KEY);
-      return users ? JSON.parse(users) : [];
-    } catch (error) {
-      console.error('Failed to get users:', error);
-      return [];
+      });
     }
   },
 
   /**
    * Get a user by email
    */
-  getByEmail(email) {
-    // Ensure default user is initialized
-    initializeDefaultUser();
-    const users = this.getAll();
-    return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+  async getByEmail(email) {
+    try {
+      const usersRef = collection(db, USERS_COLLECTION);
+      const q = query(usersRef, where('email', '==', email.toLowerCase()));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) return null;
+      
+      return {
+        id: snapshot.docs[0].id,
+        ...snapshot.docs[0].data()
+      };
+    } catch (error) {
+      console.error('Error getting user by email:', error);
+      return null;
+    }
   },
 
   /**
    * Create a new user
    */
-  createUser(userData) {
-    const users = this.getAll();
-    
-    // Check if user already exists
-    if (this.getByEmail(userData.email)) {
-      throw new Error('User with this email already exists');
+  async createUser(userData) {
+    try {
+      // Check if user already exists
+      const existing = await this.getByEmail(userData.email);
+      if (existing) {
+        throw new Error('User with this email already exists');
+      }
+
+      const userRef = doc(collection(db, USERS_COLLECTION));
+      const newUser = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email.toLowerCase(),
+        team: userData.team,
+        phone: userData.phone || '',
+        position: userData.position || '',
+        password: userData.password, // In production, hash this!
+        createdAt: serverTimestamp(),
+        isActive: userData.isActive !== undefined ? userData.isActive : true
+      };
+      
+      await setDoc(userRef, newUser);
+      return { id: userRef.id, ...newUser };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      email: userData.email.toLowerCase(),
-      team: userData.team,
-      phone: userData.phone || '',
-      position: userData.position || '',
-      password: userData.password, // In production, this should be hashed
-      createdAt: new Date().toISOString(),
-      isActive: true
-    };
-
-    users.push(newUser);
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    return newUser;
   },
 
   /**
    * Update a user
    */
-  updateUser(userId, updates) {
-    const users = this.getAll();
-    const index = users.findIndex(u => u.id === userId);
-    
-    if (index === -1) {
-      throw new Error('User not found');
-    }
-
-    // If email is being updated, check for duplicates
-    if (updates.email && updates.email.toLowerCase() !== users[index].email.toLowerCase()) {
-      if (this.getByEmail(updates.email)) {
-        throw new Error('User with this email already exists');
+  async updateUser(userId, updates) {
+    try {
+      const userRef = doc(db, USERS_COLLECTION, userId);
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp()
+      };
+      
+      // Don't update email if it's the same
+      if (updates.email) {
+        const currentUser = await getDoc(userRef);
+        if (currentUser.exists() && currentUser.data().email === updates.email.toLowerCase()) {
+          delete updateData.email;
+        } else {
+          // Check if new email already exists
+          const existing = await this.getByEmail(updates.email);
+          if (existing && existing.id !== userId) {
+            throw new Error('User with this email already exists');
+          }
+          updateData.email = updates.email.toLowerCase();
+        }
       }
+      
+      await setDoc(userRef, updateData, { merge: true });
+      
+      const updated = await getDoc(userRef);
+      return { id: updated.id, ...updated.data() };
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
     }
-
-    users[index] = {
-      ...users[index],
-      ...updates,
-      email: updates.email ? updates.email.toLowerCase() : users[index].email,
-      updatedAt: new Date().toISOString()
-    };
-
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    return users[index];
   },
 
   /**
    * Delete a user
    */
-  deleteUser(userId) {
-    const users = this.getAll();
-    const filtered = users.filter(u => u.id !== userId);
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(filtered));
-    return true;
+  async deleteUser(userId) {
+    try {
+      await deleteDoc(doc(db, USERS_COLLECTION, userId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
   },
 
   /**
    * Reset user password
    */
-  resetPassword(email, team) {
-    const user = this.getByEmail(email);
+  async resetPassword(email, team) {
+    const user = await this.getByEmail(email);
     if (!user) {
       throw new Error('User not found');
     }
@@ -143,43 +167,71 @@ export const usersService = {
 
     // Generate a temporary password
     const tempPassword = 'temp' + Math.random().toString(36).slice(-8);
-    this.updateUser(user.id, { password: tempPassword });
+    await this.updateUser(user.id, { password: tempPassword });
     return tempPassword;
   },
 
   /**
    * Authenticate user
    */
-  authenticate(email, team, password) {
-    // Ensure default user is initialized before authentication
-    initializeDefaultUser();
-    
-    const user = this.getByEmail(email);
-    
-    if (!user) {
-      return { success: false, error: 'Invalid email or password' };
+  async authenticate(email, team, password) {
+    try {
+      const user = await this.getByEmail(email);
+      
+      if (!user) {
+        return { success: false, error: 'Invalid email or password' };
+      }
+
+      if (!user.isActive) {
+        return { success: false, error: 'Account is inactive' };
+      }
+
+      if (user.password !== password) {
+        return { success: false, error: 'Invalid email or password' };
+      }
+
+      if (user.team !== team) {
+        return { success: false, error: 'Team does not match' };
+      }
+
+      // Ensure firstName and lastName exist (for backward compatibility)
+      const userWithName = {
+        ...user,
+        firstName: user.firstName || 'User',
+        lastName: user.lastName || ''
+      };
+
+      return { success: true, user: userWithName };
+    } catch (error) {
+      console.error('Error authenticating user:', error);
+      return { success: false, error: 'Authentication failed' };
     }
+  },
 
-    if (!user.isActive) {
-      return { success: false, error: 'Account is inactive' };
+  /**
+   * Initialize default user (run once on app start)
+   */
+  async initializeDefaultUser() {
+    try {
+      const existing = await this.getByEmail('admin@betiharisociety.org');
+      if (existing) {
+        return; // Default user already exists
+      }
+
+      await this.createUser({
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@betiharisociety.org',
+        team: 'Board of Directors',
+        position: 'Administrator',
+        password: 'betihari2024',
+        isActive: true
+      });
+      console.log('Default admin user created successfully');
+    } catch (error) {
+      console.error('Error initializing default user:', error);
+      // Don't throw - allow app to continue even if default user creation fails
+      // This prevents the app from crashing if Firestore rules haven't been set up yet
     }
-
-    if (user.password !== password) {
-      return { success: false, error: 'Invalid email or password' };
-    }
-
-    if (user.team !== team) {
-      return { success: false, error: 'Team does not match' };
-    }
-
-    // Ensure firstName and lastName exist (for backward compatibility)
-    const userWithName = {
-      ...user,
-      firstName: user.firstName || 'User',
-      lastName: user.lastName || ''
-    };
-
-    return { success: true, user: userWithName };
   }
 };
-

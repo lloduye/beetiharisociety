@@ -1,67 +1,144 @@
-// Stories service - reads from JSON file (instant) and saves to localStorage
-const STORIES_CACHE_KEY = 'stories_data';
-const STORIES_JSON_PATH = '/stories.json';
+// Stories service - manages stories using Firebase Firestore
+import { db } from '../config/firebase';
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  setDoc, 
+  deleteDoc,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp
+} from 'firebase/firestore';
+
+const STORIES_COLLECTION = 'stories';
 
 export const storiesService = {
   /**
-   * Get all stories - prioritizes localStorage (admin changes) over JSON file
-   * This ensures dashboard changes are reflected immediately
+   * Get all stories - with optional real-time updates
+   * @param {Function} callback - Optional callback for real-time updates
+   * @returns {Promise|Function} Returns promise or unsubscribe function
    */
-  async getAll() {
-    // First check localStorage (has admin changes)
-    const cached = this.getCached();
-    if (cached && cached.length > 0) {
-      // If we have cached data, use it (it has the latest admin changes)
-      return cached;
+  getAll(callback) {
+    const storiesRef = collection(db, STORIES_COLLECTION);
+    
+    if (callback) {
+      // Real-time listener
+      return onSnapshot(storiesRef, (snapshot) => {
+        const stories = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        callback(stories);
+      }, (error) => {
+        console.error('Error getting stories:', error);
+        callback([]);
+      });
+    } else {
+      // One-time fetch
+      return getDocs(storiesRef).then(snapshot => {
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      }).catch(error => {
+        console.error('Error getting stories:', error);
+        return [];
+      });
     }
-
-    // If no cache, load from JSON file (initial load)
-    try {
-      const response = await fetch(STORIES_JSON_PATH);
-      if (response.ok) {
-        const stories = await response.json();
-        // Cache in localStorage for offline access
-        localStorage.setItem(STORIES_CACHE_KEY, JSON.stringify(stories));
-        return stories;
-      }
-    } catch (error) {
-      console.warn('Failed to fetch stories.json:', error);
-    }
-
-    // Last resort: return empty array
-    return [];
   },
 
   /**
    * Get a single story by ID
    */
   async getById(id) {
-    const stories = await this.getAll();
-    return stories.find(s => s.id === parseInt(id));
+    try {
+      const storyRef = doc(db, STORIES_COLLECTION, id.toString());
+      const storySnap = await getDoc(storyRef);
+      
+      if (!storySnap.exists()) {
+        return null;
+      }
+      
+      return {
+        id: storySnap.id,
+        ...storySnap.data()
+      };
+    } catch (error) {
+      console.error('Error getting story by ID:', error);
+      return null;
+    }
   },
 
   /**
    * Get published stories only (for public website)
    */
   async getPublished() {
-    const stories = await this.getAll();
-    return stories.filter(s => s.published);
+    try {
+      const storiesRef = collection(db, STORIES_COLLECTION);
+      const q = query(storiesRef, where('published', '==', true));
+      const snapshot = await getDocs(q);
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Error getting published stories:', error);
+      return [];
+    }
   },
 
   /**
-   * Save stories - saves to localStorage immediately (instant)
-   * Also updates the stories in memory so changes reflect immediately
-   * Dispatches custom event to notify other components
+   * Save stories - saves to Firestore
    */
-  saveStories(stories) {
+  async saveStories(stories) {
     try {
-      localStorage.setItem(STORIES_CACHE_KEY, JSON.stringify(stories));
-      // Dispatch custom event to notify other components in the same tab
-      window.dispatchEvent(new Event('storiesUpdated'));
-      return Promise.resolve({ success: true, message: 'Stories saved locally' });
+      const batch = [];
+      stories.forEach(story => {
+        const storyId = story.id?.toString() || Date.now().toString();
+        const storyRef = doc(db, STORIES_COLLECTION, storyId);
+        const storyData = {
+          ...story,
+          id: storyId,
+          updatedAt: serverTimestamp()
+        };
+        batch.push(setDoc(storyRef, storyData, { merge: true }));
+      });
+      await Promise.all(batch);
+      return { success: true, message: 'Stories saved successfully' };
     } catch (error) {
-      console.error('Failed to save stories:', error);
-      return Promise.reject(error);
+      console.error('Error saving stories:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new story
+   */
+  async createStory(storyData) {
+    try {
+      const storyRef = doc(collection(db, STORIES_COLLECTION));
+      const newStory = {
+        ...storyData,
+        id: storyRef.id,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        views: 0,
+        shares: 0,
+        likes: 0,
+        comments: 0,
+        published: storyData.published || false,
+        featured: storyData.featured || false
+      };
+      
+      await setDoc(storyRef, newStory);
+      return { id: storyRef.id, ...newStory };
+    } catch (error) {
+      console.error('Error creating story:', error);
+      throw error;
     }
   },
 
@@ -69,32 +146,49 @@ export const storiesService = {
    * Update a single story
    */
   async updateStory(storyId, updates) {
-    const allStories = await this.getAll();
-    const updated = allStories.map(story =>
-      story.id === parseInt(storyId) ? { ...story, ...updates } : story
-    );
-    await this.saveStories(updated);
-    return updated.find(s => s.id === parseInt(storyId));
-  },
-
-  /**
-   * Get stories from localStorage cache (for offline/instant access)
-   */
-  getCached() {
     try {
-      const cached = localStorage.getItem(STORIES_CACHE_KEY);
-      return cached ? JSON.parse(cached) : null;
+      const storyRef = doc(db, STORIES_COLLECTION, storyId.toString());
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp()
+      };
+      
+      await setDoc(storyRef, updateData, { merge: true });
+      
+      const updated = await getDoc(storyRef);
+      return { id: updated.id, ...updated.data() };
     } catch (error) {
-      console.error('Failed to read cache:', error);
-      return null;
+      console.error('Error updating story:', error);
+      throw error;
     }
   },
 
   /**
-   * Clear the cache
+   * Delete a story
+   */
+  async deleteStory(storyId) {
+    try {
+      await deleteDoc(doc(db, STORIES_COLLECTION, storyId.toString()));
+      return true;
+    } catch (error) {
+      console.error('Error deleting story:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get cached stories (for backward compatibility - now just calls getAll)
+   */
+  getCached() {
+    // For backward compatibility, return null to trigger fetch
+    return null;
+  },
+
+  /**
+   * Clear the cache (no-op for Firestore)
    */
   clearCache() {
-    localStorage.removeItem(STORIES_CACHE_KEY);
-  },
+    // No-op for Firestore
+    return;
+  }
 };
-

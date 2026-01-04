@@ -84,82 +84,98 @@ const StoryDetail = () => {
     }
   };
 
-  const loadInteractions = (storyId) => {
-    // Increment views
-    const views = interactionsService.incrementViews(storyId);
-    
-    // Load existing interactions
-    const likes = interactionsService.getLikes(storyId);
-    const shares = interactionsService.getShares(storyId);
-    const commentsList = interactionsService.getComments(storyId);
-    const hasLiked = interactionsService.hasLiked(storyId);
+  const loadInteractions = async (storyId) => {
+    try {
+      // Increment views
+      const views = await interactionsService.incrementViews(storyId);
+      
+      // Load existing interactions
+      const likes = await interactionsService.getLikes(storyId);
+      const shares = await interactionsService.getShares(storyId);
+      const commentsList = await interactionsService.getComments(storyId);
+      const hasLiked = await interactionsService.hasLiked(storyId);
 
-    setInteractions({
-      likes,
-      views,
-      shares,
-      comments: commentsList.length,
-    });
-    setLiked(hasLiked);
-    setComments(commentsList);
-  };
-
-  const handleLike = () => {
-    const storyId = parseInt(id);
-    if (liked) {
-      const newCount = interactionsService.removeLike(storyId);
-      setInteractions(prev => ({ ...prev, likes: newCount }));
-      setLiked(false);
-    } else {
-      const newCount = interactionsService.addLike(storyId);
-      setInteractions(prev => ({ ...prev, likes: newCount }));
-      setLiked(true);
+      setInteractions({
+        likes,
+        views,
+        shares,
+        comments: commentsList.length,
+      });
+      setLiked(hasLiked);
+      setComments(commentsList);
+    } catch (error) {
+      console.error('Error loading interactions:', error);
     }
   };
 
-  const handleComment = () => {
+  const handleLike = async () => {
+    const storyId = parseInt(id);
+    try {
+      if (liked) {
+        const newCount = await interactionsService.removeLike(storyId);
+        setInteractions(prev => ({ ...prev, likes: newCount }));
+        setLiked(false);
+      } else {
+        const newCount = await interactionsService.addLike(storyId);
+        setInteractions(prev => ({ ...prev, likes: newCount }));
+        setLiked(true);
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
+    }
+  };
+
+  const handleComment = async () => {
     if (commentText.trim()) {
       const storyId = parseInt(id);
-      const newComments = interactionsService.addComment(storyId, {
-        text: commentText,
+      try {
+        const newComments = await interactionsService.addComment(storyId, {
+          text: commentText,
         author: 'Anonymous User',
       });
-      setComments(newComments);
-      setInteractions(prev => ({ ...prev, comments: newComments.length }));
-      setCommentText('');
+        setComments(newComments);
+        setInteractions(prev => ({ ...prev, comments: newComments.length }));
+        setCommentText('');
+      } catch (error) {
+        console.error('Error adding comment:', error);
+      }
     }
   };
 
-  const handleShare = (platform) => {
+  const handleShare = async (platform) => {
     const storyId = parseInt(id);
-    interactionsService.incrementShares(storyId);
-    setInteractions(prev => ({ ...prev, shares: prev.shares + 1 }));
+    try {
+      const newShares = await interactionsService.incrementShares(storyId);
+      setInteractions(prev => ({ ...prev, shares: newShares }));
 
-    const url = window.location.href;
-    const text = story.title;
-    
-    let shareUrl = '';
-    switch (platform) {
-      case 'facebook':
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-        break;
-      case 'twitter':
-        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-        break;
-      case 'linkedin':
-        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-        break;
-      case 'email':
-        shareUrl = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(`Check out this story: ${url}`)}`;
-        break;
-      default:
-        break;
+      const url = window.location.href;
+      const text = story.title;
+      
+      let shareUrl = '';
+      switch (platform) {
+        case 'facebook':
+          shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+          break;
+        case 'twitter':
+          shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+          break;
+        case 'linkedin':
+          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+          break;
+        case 'email':
+          shareUrl = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(`Check out this story: ${url}`)}`;
+          break;
+        default:
+          break;
+      }
+      
+      if (shareUrl) {
+        window.open(shareUrl, '_blank');
+      }
+      setShowShareMenu(false);
+    } catch (error) {
+      console.error('Error incrementing shares:', error);
     }
-    
-    if (shareUrl) {
-      window.open(shareUrl, '_blank');
-    }
-    setShowShareMenu(false);
   };
 
   if (loading) {

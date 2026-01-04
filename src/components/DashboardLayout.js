@@ -22,12 +22,19 @@ const DashboardLayout = () => {
 
   // Load user position/role
   useEffect(() => {
-    if (userEmail) {
-      const user = usersService.getByEmail(userEmail);
-      if (user && user.position) {
-        setUserPosition(user.position);
+    const loadUserPosition = async () => {
+      if (userEmail) {
+        try {
+          const user = await usersService.getByEmail(userEmail);
+          if (user && user.position) {
+            setUserPosition(user.position);
+          }
+        } catch (error) {
+          console.error('Error loading user position:', error);
+        }
       }
-    }
+    };
+    loadUserPosition();
   }, [userEmail]);
 
   // Define all navigation items with team permissions

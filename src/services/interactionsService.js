@@ -1,14 +1,33 @@
-// Interactions service - handles comments, likes, views, shares
-const INTERACTIONS_KEY = 'story_interactions';
+// Interactions service - handles comments, likes, views, shares using Firebase Firestore
+import { db } from '../config/firebase';
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  setDoc, 
+  updateDoc,
+  increment,
+  serverTimestamp
+} from 'firebase/firestore';
+
+const INTERACTIONS_COLLECTION = 'interactions';
 
 export const interactionsService = {
   /**
    * Get all interactions for all stories
    */
-  getAll() {
+  async getAll() {
     try {
-      const data = localStorage.getItem(INTERACTIONS_KEY);
-      return data ? JSON.parse(data) : {};
+      const interactionsRef = collection(db, INTERACTIONS_COLLECTION);
+      const snapshot = await getDocs(interactionsRef);
+      
+      const interactions = {};
+      snapshot.docs.forEach(doc => {
+        interactions[doc.id] = doc.data();
+      });
+      
+      return interactions;
     } catch (error) {
       console.error('Failed to load interactions:', error);
       return {};
@@ -18,205 +37,347 @@ export const interactionsService = {
   /**
    * Get interactions for a specific story
    */
-  getStoryInteractions(storyId) {
-    const all = this.getAll();
-    return all[storyId] || {
-      likes: [],
-      comments: [],
-      views: 0,
-      shares: 0,
-      activityLog: [],
-    };
+  async getStoryInteractions(storyId) {
+    try {
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      const interactionSnap = await getDoc(interactionRef);
+      
+      if (!interactionSnap.exists()) {
+        // Return default structure
+        return {
+          likes: [],
+          comments: [],
+          views: 0,
+          shares: 0,
+          activityLog: []
+        };
+      }
+      
+      const data = interactionSnap.data();
+      return {
+        likes: data.likes || [],
+        comments: data.comments || [],
+        views: data.views || 0,
+        shares: data.shares || 0,
+        activityLog: data.activityLog || []
+      };
+    } catch (error) {
+      console.error('Error getting story interactions:', error);
+      return {
+        likes: [],
+        comments: [],
+        views: 0,
+        shares: 0,
+        activityLog: []
+      };
+    }
+  },
+
+  /**
+   * Initialize interaction document if it doesn't exist
+   */
+  async ensureInteractionDoc(storyId) {
+    const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+    const interactionSnap = await getDoc(interactionRef);
+    
+    if (!interactionSnap.exists()) {
+      await setDoc(interactionRef, {
+        likes: [],
+        comments: [],
+        views: 0,
+        shares: 0,
+        activityLog: [],
+        createdAt: serverTimestamp()
+      });
+    }
   },
 
   /**
    * Add a like to a story
    */
-  addLike(storyId, userId = null) {
-    const all = this.getAll();
-    if (!all[storyId]) {
-      all[storyId] = { likes: [], comments: [], views: 0, shares: 0, activityLog: [] };
-    }
-    
-    const userKey = userId || `user_${Date.now()}_${Math.random()}`;
-    if (!all[storyId].likes.includes(userKey)) {
-      all[storyId].likes.push(userKey);
-      // Log activity
-      if (!all[storyId].activityLog) {
-        all[storyId].activityLog = [];
+  async addLike(storyId, userId = null) {
+    try {
+      await this.ensureInteractionDoc(storyId);
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      const interaction = await getDoc(interactionRef);
+      const data = interaction.data();
+      
+      const userKey = userId || `user_${Date.now()}_${Math.random()}`;
+      const likes = data.likes || [];
+      
+      if (!likes.includes(userKey)) {
+        likes.push(userKey);
+        const activityLog = data.activityLog || [];
+        activityLog.push({
+          type: 'like',
+          timestamp: new Date().toISOString(),
+          storyId: storyId.toString()
+        });
+        
+        await updateDoc(interactionRef, {
+          likes,
+          activityLog,
+          updatedAt: serverTimestamp()
+        });
       }
-      all[storyId].activityLog.push({
-        type: 'like',
-        timestamp: new Date().toISOString(),
-        storyId: storyId
-      });
-      this.saveAll(all);
+      
+      return likes.length;
+    } catch (error) {
+      console.error('Error adding like:', error);
+      throw error;
     }
-    
-    return all[storyId].likes.length;
   },
 
   /**
    * Remove a like from a story
    */
-  removeLike(storyId, userId = null) {
-    const all = this.getAll();
-    if (!all[storyId]) return 0;
-    
-    const userKey = userId || this.getUserKey(storyId);
-    all[storyId].likes = all[storyId].likes.filter(key => key !== userKey);
-    this.saveAll(all);
-    
-    return all[storyId].likes.length;
+  async removeLike(storyId, userId = null) {
+    try {
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      const interaction = await getDoc(interactionRef);
+      
+      if (!interaction.exists()) {
+        return 0;
+      }
+      
+      const data = interaction.data();
+      const likes = data.likes || [];
+      const userKey = userId || this.getUserKey(storyId);
+      
+      const updatedLikes = likes.filter(key => key !== userKey);
+      
+      await updateDoc(interactionRef, {
+        likes: updatedLikes,
+        updatedAt: serverTimestamp()
+      });
+      
+      return updatedLikes.length;
+    } catch (error) {
+      console.error('Error removing like:', error);
+      throw error;
+    }
   },
 
   /**
    * Check if user has liked a story
    */
-  hasLiked(storyId, userId = null) {
-    const interactions = this.getStoryInteractions(storyId);
-    const userKey = userId || this.getUserKey(storyId);
-    return interactions.likes.includes(userKey);
+  async hasLiked(storyId, userId = null) {
+    try {
+      const interactions = await this.getStoryInteractions(storyId);
+      const userKey = userId || this.getUserKey(storyId);
+      return interactions.likes.includes(userKey);
+    } catch (error) {
+      console.error('Error checking like:', error);
+      return false;
+    }
   },
 
   /**
    * Add a comment to a story
    */
-  addComment(storyId, comment) {
-    const all = this.getAll();
-    if (!all[storyId]) {
-      all[storyId] = { likes: [], comments: [], views: 0, shares: 0, activityLog: [] };
+  async addComment(storyId, comment) {
+    try {
+      await this.ensureInteractionDoc(storyId);
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      const interaction = await getDoc(interactionRef);
+      const data = interaction.data();
+      
+      const newComment = {
+        id: Date.now().toString(),
+        text: comment.text,
+        author: comment.author || 'Anonymous User',
+        date: new Date().toISOString(),
+        likes: 0,
+        userId: comment.userId || null,
+      };
+      
+      const comments = data.comments || [];
+      comments.push(newComment);
+      
+      const activityLog = data.activityLog || [];
+      activityLog.push({
+        type: 'comment',
+        timestamp: new Date().toISOString(),
+        storyId: storyId.toString(),
+        commentId: newComment.id,
+        author: newComment.author
+      });
+      
+      await updateDoc(interactionRef, {
+        comments,
+        activityLog,
+        updatedAt: serverTimestamp()
+      });
+      
+      return comments;
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      throw error;
     }
-    
-    const newComment = {
-      id: Date.now(),
-      text: comment.text,
-      author: comment.author || 'Anonymous User',
-      date: new Date().toISOString(),
-      likes: 0,
-      userId: comment.userId || null,
-    };
-    
-    all[storyId].comments.push(newComment);
-    // Log activity
-    if (!all[storyId].activityLog) {
-      all[storyId].activityLog = [];
-    }
-    all[storyId].activityLog.push({
-      type: 'comment',
-      timestamp: new Date().toISOString(),
-      storyId: storyId,
-      commentId: newComment.id,
-      author: newComment.author
-    });
-    this.saveAll(all);
-    
-    return all[storyId].comments;
   },
 
   /**
    * Get comments for a story
    */
-  getComments(storyId) {
-    const interactions = this.getStoryInteractions(storyId);
-    return interactions.comments || [];
+  async getComments(storyId) {
+    try {
+      const interactions = await this.getStoryInteractions(storyId);
+      return interactions.comments || [];
+    } catch (error) {
+      console.error('Error getting comments:', error);
+      return [];
+    }
   },
 
   /**
    * Increment view count
    */
-  incrementViews(storyId) {
-    const all = this.getAll();
-    if (!all[storyId]) {
-      all[storyId] = { likes: [], comments: [], views: 0, shares: 0, activityLog: [] };
-    }
-    
-    // Only increment once per session
-    const viewKey = `viewed_${storyId}`;
-    if (!sessionStorage.getItem(viewKey)) {
-      all[storyId].views += 1;
-      sessionStorage.setItem(viewKey, 'true');
-      // Log activity
-      if (!all[storyId].activityLog) {
-        all[storyId].activityLog = [];
+  async incrementViews(storyId) {
+    try {
+      await this.ensureInteractionDoc(storyId);
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      
+      // Check sessionStorage to prevent duplicate views in same session
+      const viewKey = `viewed_${storyId}`;
+      if (sessionStorage.getItem(viewKey)) {
+        const interaction = await getDoc(interactionRef);
+        return interaction.data()?.views || 0;
       }
-      all[storyId].activityLog.push({
+      
+      sessionStorage.setItem(viewKey, 'true');
+      
+      await updateDoc(interactionRef, {
+        views: increment(1),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Add to activity log
+      const interaction = await getDoc(interactionRef);
+      const data = interaction.data();
+      const activityLog = data.activityLog || [];
+      activityLog.push({
         type: 'view',
         timestamp: new Date().toISOString(),
-        storyId: storyId
+        storyId: storyId.toString()
       });
-      this.saveAll(all);
+      
+      await updateDoc(interactionRef, {
+        activityLog,
+        updatedAt: serverTimestamp()
+      });
+      
+      const updated = await getDoc(interactionRef);
+      return updated.data()?.views || 0;
+    } catch (error) {
+      console.error('Error incrementing views:', error);
+      throw error;
     }
-    
-    return all[storyId].views;
   },
 
   /**
    * Increment share count
    */
-  incrementShares(storyId) {
-    const all = this.getAll();
-    if (!all[storyId]) {
-      all[storyId] = { likes: [], comments: [], views: 0, shares: 0, activityLog: [] };
+  async incrementShares(storyId) {
+    try {
+      await this.ensureInteractionDoc(storyId);
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      
+      await updateDoc(interactionRef, {
+        shares: increment(1),
+        updatedAt: serverTimestamp()
+      });
+      
+      // Add to activity log
+      const interaction = await getDoc(interactionRef);
+      const data = interaction.data();
+      const activityLog = data.activityLog || [];
+      activityLog.push({
+        type: 'share',
+        timestamp: new Date().toISOString(),
+        storyId: storyId.toString()
+      });
+      
+      await updateDoc(interactionRef, {
+        activityLog,
+        updatedAt: serverTimestamp()
+      });
+      
+      const updated = await getDoc(interactionRef);
+      return updated.data()?.shares || 0;
+    } catch (error) {
+      console.error('Error incrementing shares:', error);
+      throw error;
     }
-    
-    all[storyId].shares += 1;
-    // Log activity
-    if (!all[storyId].activityLog) {
-      all[storyId].activityLog = [];
-    }
-    all[storyId].activityLog.push({
-      type: 'share',
-      timestamp: new Date().toISOString(),
-      storyId: storyId
-    });
-    this.saveAll(all);
-    
-    return all[storyId].shares;
   },
 
   /**
    * Get view count
    */
-  getViews(storyId) {
-    const interactions = this.getStoryInteractions(storyId);
-    return interactions.views || 0;
+  async getViews(storyId) {
+    try {
+      const interactions = await this.getStoryInteractions(storyId);
+      return interactions.views || 0;
+    } catch (error) {
+      console.error('Error getting views:', error);
+      return 0;
+    }
   },
 
   /**
    * Get share count
    */
-  getShares(storyId) {
-    const interactions = this.getStoryInteractions(storyId);
-    return interactions.shares || 0;
+  async getShares(storyId) {
+    try {
+      const interactions = await this.getStoryInteractions(storyId);
+      return interactions.shares || 0;
+    } catch (error) {
+      console.error('Error getting shares:', error);
+      return 0;
+    }
   },
 
   /**
    * Get like count
    */
-  getLikes(storyId) {
-    const interactions = this.getStoryInteractions(storyId);
-    return interactions.likes.length || 0;
-  },
-
-  /**
-   * Save all interactions
-   */
-  saveAll(interactions) {
+  async getLikes(storyId) {
     try {
-      localStorage.setItem(INTERACTIONS_KEY, JSON.stringify(interactions));
+      const interactions = await this.getStoryInteractions(storyId);
+      return interactions.likes?.length || 0;
     } catch (error) {
-      console.error('Failed to save interactions:', error);
+      console.error('Error getting likes:', error);
+      return 0;
     }
   },
 
   /**
-   * Get or create user key for this story
+   * Save all interactions (for backward compatibility)
+   */
+  async saveAll(interactions) {
+    try {
+      const batch = [];
+      Object.keys(interactions).forEach(storyId => {
+        const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+        batch.push(setDoc(interactionRef, {
+          ...interactions[storyId],
+          updatedAt: serverTimestamp()
+        }, { merge: true }));
+      });
+      await Promise.all(batch);
+    } catch (error) {
+      console.error('Failed to save interactions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get or create user key for this story (for backward compatibility)
    */
   getUserKey(storyId) {
     const key = `user_${storyId}`;
     if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, `user_${Date.now()}_${Math.random()}`);
+      const userKey = `user_${Date.now()}_${Math.random()}`;
+      localStorage.setItem(key, userKey);
+      return userKey;
     }
     return localStorage.getItem(key);
   },
@@ -224,28 +385,35 @@ export const interactionsService = {
   /**
    * Get recent activity across all stories
    */
-  getRecentActivity(limit = 10) {
-    const all = this.getAll();
-    const activities = [];
-
-    // Collect all activities from all stories
-    Object.keys(all).forEach(storyId => {
-      const story = all[storyId];
-      if (story.activityLog && story.activityLog.length > 0) {
-        story.activityLog.forEach(activity => {
-          activities.push({
-            ...activity,
-            storyId: parseInt(storyId)
+  async getRecentActivity(activityLimit = 10) {
+    try {
+      const interactionsRef = collection(db, INTERACTIONS_COLLECTION);
+      const snapshot = await getDocs(interactionsRef);
+      
+      const activities = [];
+      
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const storyId = doc.id;
+        
+        if (data.activityLog && data.activityLog.length > 0) {
+          data.activityLog.forEach(activity => {
+            activities.push({
+              ...activity,
+              storyId: parseInt(storyId)
+            });
           });
-        });
-      }
-    });
-
-    // Sort by timestamp (most recent first)
-    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    // Return limited results
-    return activities.slice(0, limit);
-  },
+        }
+      });
+      
+      // Sort by timestamp (most recent first)
+      activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      // Return limited results
+      return activities.slice(0, activityLimit);
+    } catch (error) {
+      console.error('Error getting recent activity:', error);
+      return [];
+    }
+  }
 };
-

@@ -66,19 +66,21 @@ const DashboardLogin = () => {
     
     setIsLoading(true);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const result = login(email, team, password);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.error || 'Invalid email or password. Please try again.');
+    try {
+      const result = await login(email, team, password);
+      
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error || 'Invalid email or password. Please try again.');
+        setPassword('');
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.');
       setPassword('');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleForgotPassword = async (e) => {
