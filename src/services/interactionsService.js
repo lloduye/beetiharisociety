@@ -1,5 +1,5 @@
 // Interactions service - handles comments, likes, views, shares using Firebase Firestore
-import { db } from '../config/firebase';
+import { db, firebaseInitialized } from '../config/firebase';
 import { 
   collection, 
   doc, 
@@ -18,6 +18,10 @@ export const interactionsService = {
    * Get all interactions for all stories
    */
   async getAll() {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Returning empty object.');
+      return {};
+    }
     try {
       const interactionsRef = collection(db, INTERACTIONS_COLLECTION);
       const snapshot = await getDocs(interactionsRef);

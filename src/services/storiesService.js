@@ -1,5 +1,5 @@
 // Stories service - manages stories using Firebase Firestore
-import { db } from '../config/firebase';
+import { db, firebaseInitialized } from '../config/firebase';
 import { 
   collection, 
   doc, 
@@ -22,6 +22,11 @@ export const storiesService = {
    * @returns {Promise|Function} Returns promise or unsubscribe function
    */
   getAll(callback) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Returning empty array.');
+      if (callback) callback([]);
+      return Promise.resolve([]);
+    }
     const storiesRef = collection(db, STORIES_COLLECTION);
     
     if (callback) {

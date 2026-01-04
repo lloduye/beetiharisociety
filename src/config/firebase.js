@@ -14,27 +14,31 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-// Validate that all required environment variables are set
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error('Firebase configuration is missing. Please set environment variables.');
-  throw new Error('Firebase configuration is incomplete. Check your environment variables.');
-}
-
 // Initialize Firebase
 let app;
 let db;
 let auth;
+let firebaseInitialized = false;
 
 try {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  auth = getAuth(app);
-  console.log('Firebase initialized successfully');
+  // Validate that all required environment variables are set
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+    console.warn('Firebase configuration is missing. Some features may not work. Please set environment variables in Netlify.');
+    // Don't throw - allow app to continue, but Firebase won't work
+  } else {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    firebaseInitialized = true;
+    console.log('Firebase initialized successfully');
+  }
 } catch (error) {
   console.error('Error initializing Firebase:', error);
-  throw error;
+  // Don't throw - allow app to continue even if Firebase fails
+  // This prevents white screen of death
 }
 
-export { db, auth };
+// Export with null checks to prevent errors if Firebase isn't initialized
+export { db, auth, firebaseInitialized };
 export default app;
 
