@@ -32,19 +32,39 @@ After creating the database, go to **Rules** tab and update with:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read access to all authenticated users
-    // Allow write access only to authenticated admin users
+    
+    // Users collection - allow read/write
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Stories collection - public read, write allowed
+    match /stories/{storyId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Interactions collection - public read/write
+    match /interactions/{interactionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Default: deny all other access
     match /{document=**} {
-      allow read: if request.auth != null || resource.data.published == true;
-      allow write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }
 ```
 
-**Note:** For production, you'll want stricter rules. The above allows:
-- Public read access to published stories
-- Write access only to authenticated users
+**Note:** These rules allow public access for development. For production, you should:
+1. Set up Firebase Authentication
+2. Update rules to require authentication
+3. Add role-based access control
+
+See `FIRESTORE_RULES.md` for detailed instructions and production-ready rules.
 
 ## Step 3: Get Firebase Configuration
 
