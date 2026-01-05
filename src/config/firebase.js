@@ -6,13 +6,12 @@ import { getAuth } from 'firebase/auth';
 // These values MUST be set in environment variables
 // Never commit API keys to the repository!
 const firebaseConfig = {
-  apiKey: "AIzaSyALbeACu2PoaXcdEXB_6VQgSmUA5c-We_8",
-  authDomain: "betiharisociety-427f1.firebaseapp.com",
-  projectId: "betiharisociety-427f1",
-  storageBucket: "betiharisociety-427f1.firebasestorage.app",
-  messagingSenderId: "18570375410",
-  appId: "1:18570375410:web:e86b12bfa9197c7090206b",
-  measurementId: "G-8LERJGJSCD"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyALbeACu2PoaXcdEXB_6VQgSmUA5c-We_8",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "betiharisociety-427f1.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "betiharisociety-427f1",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "betiharisociety-427f1.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "18570375410",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:18570375410:web:e86b12bfa9197c7090206b"
 };
 
 // Initialize Firebase
