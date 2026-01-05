@@ -26,20 +26,54 @@ const DashboardStories = () => {
   ];
 
   useEffect(() => {
-    loadStories();
+    let unsubscribe;
+    const setup = async () => {
+      unsubscribe = await loadStories();
+    };
+    setup();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, []);
 
-  const loadStories = async () => {
+  const loadStories = () => {
     try {
       setLoading(true);
-      // Load all stories (prioritizes localStorage with admin changes)
-      const data = await storiesService.getAll();
-      setStories(data);
+      let timeoutId;
+      let resolved = false;
+      
+      const cleanup = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        resolved = true;
+        setLoading(false);
+      };
+      
+      // Set 5 second timeout
+      timeoutId = setTimeout(() => {
+        if (!resolved) {
+          console.warn('Stories loading timed out after 5 seconds');
+          setStories([]);
+          cleanup();
+        }
+      }, 5000);
+      
+      // Load stories with callback
+      const unsubscribe = storiesService.getAll((stories) => {
+        if (!resolved) {
+          cleanup();
+          setStories(stories || []);
+        }
+      });
+      
+      // Return unsubscribe function for cleanup
+      return unsubscribe;
     } catch (error) {
       console.error('Failed to load stories:', error);
-      alert('Failed to load stories');
-    } finally {
+      setStories([]);
       setLoading(false);
+      return null;
     }
   };
 

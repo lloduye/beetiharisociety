@@ -24,11 +24,15 @@ export const usersService = {
   getAll(callback) {
     if (!firebaseInitialized || !db) {
       console.warn('Firebase not initialized. Cannot load users. Please check Firebase configuration.');
-      // For login to work, we need Firebase - show helpful error
       if (callback) callback([]);
       return Promise.resolve([]);
     }
     const usersRef = collection(db, USERS_COLLECTION);
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Firestore query timeout after 5 seconds')), 5000);
+    });
     
     if (callback) {
       // Real-time listener
@@ -43,14 +47,17 @@ export const usersService = {
         callback([]);
       });
     } else {
-      // One-time fetch
-      return getDocs(usersRef).then(snapshot => {
-        return snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-      }).catch(error => {
-        console.error('Error getting users:', error);
+      // One-time fetch with timeout
+      return Promise.race([
+        getDocs(usersRef).then(snapshot => {
+          return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+        }),
+        timeoutPromise
+      ]).catch(error => {
+        console.error('Error getting users (timeout or error):', error);
         return [];
       });
     }
@@ -67,7 +74,16 @@ export const usersService = {
     try {
       const usersRef = collection(db, USERS_COLLECTION);
       const q = query(usersRef, where('email', '==', email.toLowerCase()));
-      const snapshot = await getDocs(q);
+      
+      // Add 5 second timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout')), 5000);
+      });
+      
+      const snapshot = await Promise.race([
+        getDocs(q),
+        timeoutPromise
+      ]);
       
       if (snapshot.empty) return null;
       
@@ -235,33 +251,57 @@ export const usersService = {
   },
 
   /**
-   * Initialize default user (run once on app start)
+   * Initialize default user (run once per session)
    */
   async initializeDefaultUser() {
     if (!firebaseInitialized || !db) {
       console.warn('Firebase not initialized. Cannot initialize default user.');
       return; // Silently fail - Firebase not configured
     }
+    
+    // Check session storage to avoid running multiple times
+    const alreadyChecked = sessionStorage.getItem('default_user_checked');
+    if (alreadyChecked) {
+      return; // Already checked in this session
+    }
+    
     try {
-      const existing = await this.getByEmail('admin@betiharisociety.org');
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout checking default user')), 3000);
+      });
+      
+      const existing = await Promise.race([
+        this.getByEmail('admin@betiharisociety.org'),
+        timeoutPromise
+      ]);
+      
       if (existing) {
+        sessionStorage.setItem('default_user_checked', 'true');
         return; // Default user already exists
       }
 
-      await this.createUser({
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@betiharisociety.org',
-        team: 'Board of Directors',
-        position: 'Administrator',
-        password: 'betihari2024',
-        isActive: true
-      });
+      // Create default user with timeout
+      await Promise.race([
+        this.createUser({
+          firstName: 'Admin',
+          lastName: 'User',
+          email: 'admin@betiharisociety.org',
+          team: 'Board of Directors',
+          position: 'Administrator',
+          password: 'betihari2024',
+          isActive: true
+        }),
+        timeoutPromise
+      ]);
+      
+      sessionStorage.setItem('default_user_checked', 'true');
       console.log('Default admin user created successfully');
     } catch (error) {
+      // Mark as checked even on error to prevent retrying
+      sessionStorage.setItem('default_user_checked', 'true');
       console.error('Error initializing default user:', error);
-      // Don't throw - allow app to continue even if default user creation fails
-      // This prevents the app from crashing if Firestore rules haven't been set up yet
+      // Don't throw - allow app to continue
     }
   }
 };

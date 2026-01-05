@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
@@ -49,6 +49,9 @@ if (missingVars.length > 0) {
     firebaseInitialized = true;
     console.log('✅ Firebase initialized successfully');
     console.log('Firebase Project:', firebaseConfig.projectId);
+    
+    // Enable offline persistence (helps with connection issues)
+    // Note: This is enabled by default in newer Firebase versions
   } catch (error) {
     firebaseError = error.message;
     console.error('❌ Error initializing Firebase:', error);

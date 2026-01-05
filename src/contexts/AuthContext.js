@@ -21,11 +21,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Initialize default user and check authentication
     const initialize = async () => {
-      try {
-        // Ensure default user is initialized on app load
-        await usersService.initializeDefaultUser();
-      } catch (error) {
-        console.error('Failed to initialize users:', error);
+      // Only initialize default user once per session (not on every login)
+      const defaultUserInitialized = sessionStorage.getItem('default_user_initialized');
+      if (!defaultUserInitialized) {
+        try {
+          // Ensure default user is initialized on app load (only once)
+          await usersService.initializeDefaultUser();
+          sessionStorage.setItem('default_user_initialized', 'true');
+        } catch (error) {
+          console.error('Failed to initialize users:', error);
+        }
       }
       
       // Check if user is logged in on mount

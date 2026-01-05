@@ -31,9 +31,14 @@ export const storiesService = {
     }
     const storiesRef = collection(db, STORIES_COLLECTION);
     
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Firestore query timeout after 5 seconds')), 5000);
+    });
+    
     if (callback) {
-      // Real-time listener
-      return onSnapshot(storiesRef, (snapshot) => {
+      // Real-time listener with timeout
+      const listener = onSnapshot(storiesRef, (snapshot) => {
         const stories = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -43,15 +48,21 @@ export const storiesService = {
         console.error('Error getting stories:', error);
         callback([]);
       });
+      
+      // Return unsubscribe function
+      return listener;
     } else {
-      // One-time fetch
-      return getDocs(storiesRef).then(snapshot => {
-        return snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-      }).catch(error => {
-        console.error('Error getting stories:', error);
+      // One-time fetch with timeout
+      return Promise.race([
+        getDocs(storiesRef).then(snapshot => {
+          return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+        }),
+        timeoutPromise
+      ]).catch(error => {
+        console.error('Error getting stories (timeout or error):', error);
         return [];
       });
     }
@@ -120,7 +131,16 @@ export const storiesService = {
     try {
       const storiesRef = collection(db, STORIES_COLLECTION);
       const q = query(storiesRef, where('published', '==', true));
-      const snapshot = await getDocs(q);
+      
+      // Add 5 second timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Firestore query timeout')), 5000);
+      });
+      
+      const snapshot = await Promise.race([
+        getDocs(q),
+        timeoutPromise
+      ]);
       
       return snapshot.docs.map(doc => ({
         id: doc.id,
@@ -128,7 +148,8 @@ export const storiesService = {
       }));
     } catch (error) {
       console.error('Error getting published stories:', error);
-      throw error;
+      // Return empty array instead of throwing to prevent page crashes
+      return [];
     }
   },
 
