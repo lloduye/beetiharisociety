@@ -7,7 +7,15 @@ Netlify's secrets scanner is detecting Firebase configuration values in the buil
 
 Since Firebase API keys are meant to be public in client-side applications (they're protected by Firebase security rules), we need to tell Netlify to ignore these specific keys.
 
-### Step 1: Add SECRETS_SCAN_OMIT_KEYS to Netlify
+### ✅ Solution: netlify.toml (Already Configured)
+
+The `netlify.toml` file has been created with the correct configuration. This tells Netlify to ignore Firebase config keys during secrets scanning.
+
+**No additional steps needed** - just commit and push the `netlify.toml` file, and Netlify will automatically use it.
+
+### Alternative: Manual Configuration in Netlify UI
+
+If you prefer to set it manually in the Netlify UI instead:
 
 1. Go to **Netlify Dashboard** → Your Site
 2. **Site settings** → **Environment variables**
@@ -21,10 +29,9 @@ Since Firebase API keys are meant to be public in client-side applications (they
 
 ### Step 2: Trigger New Deploy
 
-After adding the variable:
-1. Go to **Deploys** tab
-2. Click **Trigger deploy** → **Deploy site**
-3. The build should now succeed
+After the `netlify.toml` file is committed and pushed:
+1. Netlify will automatically detect the new configuration
+2. The build should now succeed
 
 ## Why This Is Safe
 

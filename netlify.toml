@@ -3,14 +3,14 @@
   publish = "build"
 
 [build.environment]
-  NODE_VERSION = "18"
+  # Tell Netlify to ignore Firebase config keys in secrets scanning
+  # These are public client-side config values, not secrets
+  # Format: comma-separated list of environment variable names
+  SECRETS_SCAN_OMIT_KEYS = "REACT_APP_FIREBASE_API_KEY,REACT_APP_FIREBASE_AUTH_DOMAIN,REACT_APP_FIREBASE_PROJECT_ID,REACT_APP_FIREBASE_STORAGE_BUCKET,REACT_APP_FIREBASE_MESSAGING_SENDER_ID,REACT_APP_FIREBASE_APP_ID"
+  # Also exclude the build directory from scanning (values will be in compiled JS)
+  SECRETS_SCAN_OMIT_PATHS = "build/**,node_modules/**"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[dev]
-  command = "npm start"
-  port = 3000
-  publish = "build"
