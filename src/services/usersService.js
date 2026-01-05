@@ -85,6 +85,10 @@ export const usersService = {
    * Create a new user
    */
   async createUser(userData) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot create user.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       // Check if user already exists
       const existing = await this.getByEmail(userData.email);
@@ -234,6 +238,10 @@ export const usersService = {
    * Initialize default user (run once on app start)
    */
   async initializeDefaultUser() {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot initialize default user.');
+      return; // Silently fail - Firebase not configured
+    }
     try {
       const existing = await this.getByEmail('admin@betiharisociety.org');
       if (existing) {

@@ -6,12 +6,13 @@ import { getAuth } from 'firebase/auth';
 // These values MUST be set in environment variables
 // Never commit API keys to the repository!
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
+  apiKey: "AIzaSyALbeACu2PoaXcdEXB_6VQgSmUA5c-We_8",
+  authDomain: "betiharisociety-427f1.firebaseapp.com",
+  projectId: "betiharisociety-427f1",
+  storageBucket: "betiharisociety-427f1.firebasestorage.app",
+  messagingSenderId: "18570375410",
+  appId: "1:18570375410:web:e86b12bfa9197c7090206b",
+  measurementId: "G-8LERJGJSCD"
 };
 
 // Initialize Firebase
@@ -19,42 +20,44 @@ let app;
 let db;
 let auth;
 let firebaseInitialized = false;
+let firebaseError = null;
 
-try {
-  // Validate that all required environment variables are set
-  if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.error('❌ Firebase configuration is missing!');
-    console.error('Missing values:', {
-      apiKey: !firebaseConfig.apiKey ? 'MISSING' : 'OK',
-      projectId: !firebaseConfig.projectId ? 'MISSING' : 'OK',
-      authDomain: !firebaseConfig.authDomain ? 'MISSING' : 'OK',
-      storageBucket: !firebaseConfig.storageBucket ? 'MISSING' : 'OK',
-      messagingSenderId: !firebaseConfig.messagingSenderId ? 'MISSING' : 'OK',
-      appId: !firebaseConfig.appId ? 'MISSING' : 'OK'
-    });
-    console.error('Please set environment variables in Netlify:');
-    console.error('- REACT_APP_FIREBASE_API_KEY');
-    console.error('- REACT_APP_FIREBASE_AUTH_DOMAIN');
-    console.error('- REACT_APP_FIREBASE_PROJECT_ID');
-    console.error('- REACT_APP_FIREBASE_STORAGE_BUCKET');
-    console.error('- REACT_APP_FIREBASE_MESSAGING_SENDER_ID');
-    console.error('- REACT_APP_FIREBASE_APP_ID');
-  } else {
+// Validate all required environment variables are present
+const requiredVars = {
+  apiKey: firebaseConfig.apiKey,
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  storageBucket: firebaseConfig.storageBucket,
+  messagingSenderId: firebaseConfig.messagingSenderId,
+  appId: firebaseConfig.appId
+};
+
+const missingVars = Object.entries(requiredVars)
+  .filter(([key, value]) => !value)
+  .map(([key]) => `REACT_APP_FIREBASE_${key.toUpperCase()}`);
+
+if (missingVars.length > 0) {
+  firebaseError = `Missing environment variables: ${missingVars.join(', ')}`;
+  console.error('❌ Firebase configuration is missing!');
+  console.error('Missing variables:', missingVars);
+  console.error('Please set these in Netlify Dashboard → Site Settings → Environment Variables');
+  console.error('Then trigger a new deploy.');
+} else {
+  try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
     firebaseInitialized = true;
     console.log('✅ Firebase initialized successfully');
     console.log('Firebase Project:', firebaseConfig.projectId);
+  } catch (error) {
+    firebaseError = error.message;
+    console.error('❌ Error initializing Firebase:', error);
+    console.error('Error details:', error.message);
   }
-} catch (error) {
-  console.error('❌ Error initializing Firebase:', error);
-  console.error('Error details:', error.message);
-  // Don't throw - allow app to continue even if Firebase fails
-  // This prevents white screen of death
 }
 
-// Export with null checks to prevent errors if Firebase isn't initialized
-export { db, auth, firebaseInitialized };
+// Export error state so UI can show it
+export { db, auth, firebaseInitialized, firebaseError };
 export default app;
 

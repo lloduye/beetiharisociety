@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './utils/firebaseDiagnostics'; // Run diagnostics on app load
 import { ZeffyProvider } from './contexts/ZeffyContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { firebaseError } from './config/firebase';
+import FirebaseError from './components/FirebaseError';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import DashboardLayout from './components/DashboardLayout';
@@ -27,8 +29,10 @@ import DashboardLogin from './pages/DashboardLogin';
 
 function App() {
   return (
-    <AuthProvider>
-      <ZeffyProvider>
+    <>
+      {firebaseError && <FirebaseError />}
+      <AuthProvider>
+        <ZeffyProvider>
         <Router>
           <ScrollToTop />
           <Routes>
@@ -92,6 +96,7 @@ function App() {
         </Router>
       </ZeffyProvider>
     </AuthProvider>
+    </>
   );
 }
 

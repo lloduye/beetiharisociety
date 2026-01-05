@@ -1,6 +1,6 @@
 // Stories service - manages stories using Firebase Firestore
+// REQUIRES Firebase to be initialized - no fallbacks
 import { db, firebaseInitialized } from '../config/firebase';
-import { storiesData } from '../data/storiesData';
 import { 
   collection, 
   doc, 
@@ -15,7 +15,6 @@ import {
 } from 'firebase/firestore';
 
 const STORIES_COLLECTION = 'stories';
-const STORIES_CACHE_KEY = 'stories_data';
 
 export const storiesService = {
   /**
@@ -25,22 +24,10 @@ export const storiesService = {
    */
   getAll(callback) {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Loading stories from fallback data.');
-      // Fallback to localStorage or initial data
-      try {
-        const cached = localStorage.getItem(STORIES_CACHE_KEY);
-        if (cached) {
-          const stories = JSON.parse(cached);
-          if (callback) callback(stories);
-          return Promise.resolve(stories);
-        }
-      } catch (e) {
-        console.warn('Failed to load from cache:', e);
-      }
-      // Use initial data as last resort
-      const fallbackStories = storiesData || [];
-      if (callback) callback(fallbackStories);
-      return Promise.resolve(fallbackStories);
+      const error = new Error('Firebase is not initialized. Please configure environment variables in Netlify.');
+      console.error('❌ Firebase required for stories:', error);
+      if (callback) callback([]);
+      return Promise.reject(error);
     }
     const storiesRef = collection(db, STORIES_COLLECTION);
     
@@ -75,30 +62,16 @@ export const storiesService = {
    */
   async getById(id) {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Loading story from fallback data.');
-      // Fallback to localStorage or initial data
-      try {
-        const cached = localStorage.getItem(STORIES_CACHE_KEY);
-        if (cached) {
-          const stories = JSON.parse(cached);
-          const story = stories.find(s => s.id === parseInt(id) || s.id === id);
-          return story || null;
-        }
-      } catch (e) {
-        console.warn('Failed to load from cache:', e);
-      }
-      // Use initial data as last resort
-      const fallbackStories = storiesData || [];
-      return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
+      const error = new Error('Firebase is not initialized. Please configure environment variables in Netlify.');
+      console.error('❌ Firebase required for stories:', error);
+      throw error;
     }
     try {
       const storyRef = doc(db, STORIES_COLLECTION, id.toString());
       const storySnap = await getDoc(storyRef);
       
       if (!storySnap.exists()) {
-        // Fallback check
-        const fallbackStories = storiesData || [];
-        return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
+        return null;
       }
       
       return {
@@ -107,9 +80,7 @@ export const storiesService = {
       };
     } catch (error) {
       console.error('Error getting story by ID:', error);
-      // Fallback on error
-      const fallbackStories = storiesData || [];
-      return fallbackStories.find(s => s.id === parseInt(id) || s.id === id) || null;
+      throw error;
     }
   },
 
@@ -118,20 +89,9 @@ export const storiesService = {
    */
   async getPublished() {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Loading published stories from fallback data.');
-      // Fallback to localStorage or initial data
-      try {
-        const cached = localStorage.getItem(STORIES_CACHE_KEY);
-        if (cached) {
-          const stories = JSON.parse(cached);
-          return stories.filter(s => s.published);
-        }
-      } catch (e) {
-        console.warn('Failed to load from cache:', e);
-      }
-      // Use initial data as last resort
-      const fallbackStories = storiesData || [];
-      return fallbackStories.filter(s => s.published);
+      const error = new Error('Firebase is not initialized. Please configure environment variables in Netlify.');
+      console.error('❌ Firebase required for stories:', error);
+      throw error;
     }
     try {
       const storiesRef = collection(db, STORIES_COLLECTION);
@@ -144,9 +104,7 @@ export const storiesService = {
       }));
     } catch (error) {
       console.error('Error getting published stories:', error);
-      // Fallback on error
-      const fallbackStories = storiesData || [];
-      return fallbackStories.filter(s => s.published);
+      throw error;
     }
   },
 
@@ -155,14 +113,9 @@ export const storiesService = {
    */
   async saveStories(stories) {
     if (!firebaseInitialized || !db) {
-      console.warn('Firebase not initialized. Cannot save stories to Firestore.');
-      // Fallback to localStorage
-      try {
-        localStorage.setItem(STORIES_CACHE_KEY, JSON.stringify(stories));
-        return { success: true, message: 'Stories saved to local storage (Firebase not available)' };
-      } catch (error) {
-        throw new Error('Firebase is not initialized and local storage save failed.');
-      }
+      const error = new Error('Firebase is not initialized. Please configure environment variables in Netlify.');
+      console.error('❌ Firebase required to save stories:', error);
+      throw error;
     }
     try {
       const batch = [];

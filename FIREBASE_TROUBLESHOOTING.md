@@ -13,12 +13,9 @@ This means `db` is `null` because Firebase didn't initialize.
 
 ## Solution: Set Environment Variables in Netlify
 
-### Step 1: Get Your Firebase Config Values
+### Step 1: Your Firebase Config Values
 
-From your Firebase Console:
-1. Go to **Project Settings** (gear icon)
-2. Scroll to **Your apps** → Web app
-3. Copy these values:
+Here are your exact Firebase configuration values:
 
 ```
 apiKey: AIzaSyALbeACu2PoaXcdEXB_6VQgSmUA5c-We_8
@@ -33,7 +30,7 @@ appId: 1:18570375410:web:e86b12bfa9197c7090206b
 
 1. Go to **Netlify Dashboard** → Your Site
 2. **Site settings** → **Environment variables**
-3. Click **Add variable** for each:
+3. Click **Add variable** for each (copy and paste these exact values):
 
 | Variable Name | Value |
 |--------------|-------|
@@ -43,6 +40,11 @@ appId: 1:18570375410:web:e86b12bfa9197c7090206b
 | `REACT_APP_FIREBASE_STORAGE_BUCKET` | `betiharisociety-427f1.firebasestorage.app` |
 | `REACT_APP_FIREBASE_MESSAGING_SENDER_ID` | `18570375410` |
 | `REACT_APP_FIREBASE_APP_ID` | `1:18570375410:web:e86b12bfa9197c7090206b` |
+
+**Important:** 
+- Variable names MUST start with `REACT_APP_` (this is required for React to read them)
+- Copy the values exactly as shown above
+- No spaces before or after the values
 
 ### Step 3: Trigger New Deploy
 
