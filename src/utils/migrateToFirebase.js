@@ -9,27 +9,58 @@ import { firebaseInitialized } from '../config/firebase';
 
 export const migrateToFirebase = async () => {
   console.log('🔄 Starting automatic migration to Firebase...');
+  console.log('📋 This will migrate: users, stories, and interactions');
   
   try {
-    // 1. Migrate users (only if they don't exist)
-    const usersKey = 'dashboard_users';
-    const localUsers = localStorage.getItem(usersKey);
-    if (localUsers) {
-      const users = JSON.parse(localUsers);
-      console.log(`📦 Found ${users.length} users in localStorage. Migrating...`);
-      for (const user of users) {
+    // 1. Migrate users - Always ensure users exist
+    console.log('👤 Checking users in Firestore...');
+    try {
+      // First, check if any users exist in Firestore
+      const existingUsers = await usersService.getAll();
+      console.log(`📊 Found ${existingUsers.length} users in Firestore`);
+      
+      // Migrate users from localStorage if they exist
+      const usersKey = 'dashboard_users';
+      const localUsers = localStorage.getItem(usersKey);
+      if (localUsers) {
         try {
-          // Check if user already exists
-          const existing = await usersService.getByEmail(user.email);
-          if (!existing) {
-            await usersService.createUser(user);
-            console.log(`✅ Migrated user: ${user.email}`);
-          } else {
-            console.log(`⏭️  User already exists: ${user.email}`);
+          const users = JSON.parse(localUsers);
+          console.log(`📦 Found ${users.length} users in localStorage. Migrating...`);
+          for (const user of users) {
+            try {
+              // Check if user already exists
+              const existing = await usersService.getByEmail(user.email);
+              if (!existing) {
+                await usersService.createUser(user);
+                console.log(`✅ Migrated user: ${user.email}`);
+              } else {
+                console.log(`⏭️  User already exists: ${user.email}`);
+              }
+            } catch (error) {
+              console.error(`❌ Error migrating user ${user.email}:`, error);
+            }
           }
         } catch (error) {
-          console.error(`❌ Error migrating user ${user.email}:`, error);
+          console.error('❌ Error parsing users from localStorage:', error);
         }
+      }
+      
+      // Always ensure default admin user exists (won't duplicate if already exists)
+      console.log('👤 Ensuring default admin user exists...');
+      await usersService.initializeDefaultUser();
+      console.log('✅ Default user check completed');
+      
+      // Final count
+      const finalUsers = await usersService.getAll();
+      console.log(`✅ Total users in Firestore: ${finalUsers.length}`);
+    } catch (error) {
+      console.error('❌ Error during user migration:', error);
+      // Still try to create default user
+      try {
+        console.log('👤 Attempting to create default user as fallback...');
+        await usersService.initializeDefaultUser();
+      } catch (defaultUserError) {
+        console.error('❌ Error creating default user:', defaultUserError);
       }
     }
 

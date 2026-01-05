@@ -67,15 +67,36 @@ const StoryDetail = () => {
   const loadStories = async () => {
     try {
       setLoading(true);
-      // Load stories - prioritizes localStorage (has admin changes)
+      // Try to get story directly by ID first
+      try {
+        const storyById = await storiesService.getById(id);
+        if (storyById) {
+          setStory(storyById);
+          setStories([storyById]);
+          loadInteractions(storyById.id);
+          return;
+        }
+      } catch (error) {
+        console.log('Could not get story by ID, trying from list...', error);
+      }
+      
+      // Fallback: Load all stories and find by ID
       const allStories = await storiesService.getPublished();
       setStories(allStories);
-      const found = allStories.find(s => s.id === parseInt(id));
+      // Try both string and numeric ID comparison
+      const found = allStories.find(s => 
+        s.id === id || 
+        s.id === parseInt(id) || 
+        s.id?.toString() === id?.toString() ||
+        parseInt(s.id) === parseInt(id)
+      );
       setStory(found);
 
       // Load interactions
       if (found) {
-        loadInteractions(parseInt(id));
+        // Use the story's ID (could be string or number)
+        const storyIdForInteractions = found.id?.toString() || found.id;
+        loadInteractions(storyIdForInteractions);
       }
     } catch (error) {
       console.error('Failed to load stories:', error);
@@ -109,7 +130,7 @@ const StoryDetail = () => {
   };
 
   const handleLike = async () => {
-    const storyId = parseInt(id);
+    const storyId = story?.id || id;
     try {
       if (liked) {
         const newCount = await interactionsService.removeLike(storyId);
@@ -127,7 +148,7 @@ const StoryDetail = () => {
 
   const handleComment = async () => {
     if (commentText.trim()) {
-      const storyId = parseInt(id);
+      const storyId = story?.id || id;
       try {
         const newComments = await interactionsService.addComment(storyId, {
           text: commentText,
@@ -143,7 +164,7 @@ const StoryDetail = () => {
   };
 
   const handleShare = async (platform) => {
-    const storyId = parseInt(id);
+    const storyId = story?.id || id;
     try {
       const newShares = await interactionsService.incrementShares(storyId);
       setInteractions(prev => ({ ...prev, shares: newShares }));

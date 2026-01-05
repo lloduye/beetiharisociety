@@ -59,6 +59,7 @@ export const storiesService = {
 
   /**
    * Get a single story by ID
+   * Supports both string and numeric IDs
    */
   async getById(id) {
     if (!firebaseInitialized || !db) {
@@ -67,17 +68,40 @@ export const storiesService = {
       throw error;
     }
     try {
-      const storyRef = doc(db, STORIES_COLLECTION, id.toString());
-      const storySnap = await getDoc(storyRef);
+      // Try the ID as-is first (string)
+      let storyRef = doc(db, STORIES_COLLECTION, id.toString());
+      let storySnap = await getDoc(storyRef);
       
-      if (!storySnap.exists()) {
-        return null;
+      if (storySnap.exists()) {
+        return {
+          id: storySnap.id,
+          ...storySnap.data()
+        };
       }
       
-      return {
-        id: storySnap.id,
-        ...storySnap.data()
-      };
+      // If not found, try querying by the id field in the document
+      const storiesRef = collection(db, STORIES_COLLECTION);
+      const q = query(storiesRef, where('id', '==', id.toString()));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const docData = querySnapshot.docs[0];
+        return {
+          id: docData.id,
+          ...docData.data()
+        };
+      }
+      
+      // Also try numeric comparison
+      const allStories = await this.getAll();
+      const found = allStories.find(s => 
+        s.id === id || 
+        s.id === parseInt(id) || 
+        s.id?.toString() === id?.toString() ||
+        parseInt(s.id) === parseInt(id)
+      );
+      
+      return found || null;
     } catch (error) {
       console.error('Error getting story by ID:', error);
       throw error;
