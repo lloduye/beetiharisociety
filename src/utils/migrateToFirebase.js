@@ -1,11 +1,11 @@
 // Migration utility to move data from localStorage to Firebase
-// Auto-runs when Firebase is ready
+// MANUAL MIGRATION ONLY - Run migrateToFirebase() in browser console when needed
+// Automatic migration removed for faster page load
 
 import { usersService } from '../services/usersService';
 import { storiesService } from '../services/storiesService';
 import { interactionsService } from '../services/interactionsService';
 import { storiesData } from '../data/storiesData';
-import { firebaseInitialized } from '../config/firebase';
 
 export const migrateToFirebase = async () => {
   console.log('🔄 Starting automatic migration to Firebase...');
@@ -108,61 +108,13 @@ export const migrateToFirebase = async () => {
   }
 };
 
-// Auto-run migration when Firebase is ready
-let migrationAttempted = false;
-let migrationInProgress = false;
+// Manual migration only - no automatic migration
+// To run migration manually, open browser console and run: migrateToFirebase()
 
-export const autoMigrate = async () => {
-  // Only run once
-  if (migrationAttempted || migrationInProgress) {
-    return;
-  }
-  
-  // Check if Firebase is initialized
-  if (!firebaseInitialized) {
-    console.log('⏳ Waiting for Firebase to initialize...');
-    // Retry after a short delay
-    setTimeout(() => {
-      autoMigrate();
-    }, 2000);
-    return;
-  }
-  
-  migrationInProgress = true;
-  console.log('🚀 Firebase ready. Starting automatic migration...');
-  
-  try {
-    // Run migration
-    await migrateToFirebase();
-    migrationAttempted = true;
-  } catch (error) {
-    console.error('❌ Auto-migration failed:', error);
-  } finally {
-    migrationInProgress = false;
-  }
-};
-
-// Function to check if migration is needed
-export const needsMigration = () => {
-  const hasLocalUsers = !!localStorage.getItem('dashboard_users');
-  const hasLocalStories = !!localStorage.getItem('stories_data');
-  const hasLocalInteractions = !!localStorage.getItem('story_interactions');
-  
-  return hasLocalUsers || hasLocalStories || hasLocalInteractions;
-};
-
-// Auto-run migration when module loads (if Firebase is ready)
 if (typeof window !== 'undefined') {
-  // Make function available in console for manual migration
+  // Make function available in console for manual migration only
   window.migrateToFirebase = migrateToFirebase;
-  window.autoMigrate = autoMigrate;
-  
-  // Auto-run migration after a short delay to ensure Firebase is initialized
-  setTimeout(() => {
-    autoMigrate();
-  }, 3000);
-  
-  console.log('💡 Automatic migration will run when Firebase is ready');
-  console.log('💡 To manually migrate, run: migrateToFirebase() in browser console');
+  console.log('💡 To manually migrate data, run: migrateToFirebase() in browser console');
+  console.log('💡 Automatic migration is disabled for faster page load');
 }
 
