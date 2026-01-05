@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './utils/firebaseDiagnostics'; // Run diagnostics on app load
 import { ZeffyProvider } from './contexts/ZeffyContext';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';

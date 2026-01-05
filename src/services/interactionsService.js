@@ -42,6 +42,16 @@ export const interactionsService = {
    * Get interactions for a specific story
    */
   async getStoryInteractions(storyId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot get interactions.');
+      return {
+        likes: [],
+        comments: [],
+        views: 0,
+        shares: 0,
+        activityLog: []
+      };
+    }
     try {
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
       const interactionSnap = await getDoc(interactionRef);
@@ -81,6 +91,10 @@ export const interactionsService = {
    * Initialize interaction document if it doesn't exist
    */
   async ensureInteractionDoc(storyId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot create interaction document.');
+      return;
+    }
     const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
     const interactionSnap = await getDoc(interactionRef);
     
@@ -100,6 +114,10 @@ export const interactionsService = {
    * Add a like to a story
    */
   async addLike(storyId, userId = null) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot add like.');
+      return 0;
+    }
     try {
       await this.ensureInteractionDoc(storyId);
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
@@ -136,6 +154,10 @@ export const interactionsService = {
    * Remove a like from a story
    */
   async removeLike(storyId, userId = null) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot remove like.');
+      return 0;
+    }
     try {
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
       const interaction = await getDoc(interactionRef);
@@ -166,6 +188,9 @@ export const interactionsService = {
    * Check if user has liked a story
    */
   async hasLiked(storyId, userId = null) {
+    if (!firebaseInitialized || !db) {
+      return false;
+    }
     try {
       const interactions = await this.getStoryInteractions(storyId);
       const userKey = userId || this.getUserKey(storyId);
@@ -180,6 +205,10 @@ export const interactionsService = {
    * Add a comment to a story
    */
   async addComment(storyId, comment) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot add comment.');
+      return [];
+    }
     try {
       await this.ensureInteractionDoc(storyId);
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
@@ -224,6 +253,9 @@ export const interactionsService = {
    * Get comments for a story
    */
   async getComments(storyId) {
+    if (!firebaseInitialized || !db) {
+      return [];
+    }
     try {
       const interactions = await this.getStoryInteractions(storyId);
       return interactions.comments || [];
@@ -237,6 +269,10 @@ export const interactionsService = {
    * Increment view count
    */
   async incrementViews(storyId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot increment views.');
+      return 0;
+    }
     try {
       await this.ensureInteractionDoc(storyId);
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
@@ -282,6 +318,10 @@ export const interactionsService = {
    * Increment share count
    */
   async incrementShares(storyId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot increment shares.');
+      return 0;
+    }
     try {
       await this.ensureInteractionDoc(storyId);
       const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
@@ -318,6 +358,9 @@ export const interactionsService = {
    * Get view count
    */
   async getViews(storyId) {
+    if (!firebaseInitialized || !db) {
+      return 0;
+    }
     try {
       const interactions = await this.getStoryInteractions(storyId);
       return interactions.views || 0;
@@ -331,6 +374,9 @@ export const interactionsService = {
    * Get share count
    */
   async getShares(storyId) {
+    if (!firebaseInitialized || !db) {
+      return 0;
+    }
     try {
       const interactions = await this.getStoryInteractions(storyId);
       return interactions.shares || 0;
@@ -344,6 +390,9 @@ export const interactionsService = {
    * Get like count
    */
   async getLikes(storyId) {
+    if (!firebaseInitialized || !db) {
+      return 0;
+    }
     try {
       const interactions = await this.getStoryInteractions(storyId);
       return interactions.likes?.length || 0;
@@ -357,6 +406,10 @@ export const interactionsService = {
    * Save all interactions (for backward compatibility)
    */
   async saveAll(interactions) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot save interactions.');
+      return;
+    }
     try {
       const batch = [];
       Object.keys(interactions).forEach(storyId => {
@@ -390,6 +443,9 @@ export const interactionsService = {
    * Get recent activity across all stories
    */
   async getRecentActivity(activityLimit = 10) {
+    if (!firebaseInitialized || !db) {
+      return [];
+    }
     try {
       const interactionsRef = collection(db, INTERACTIONS_COLLECTION);
       const snapshot = await getDocs(interactionsRef);

@@ -154,6 +154,16 @@ export const storiesService = {
    * Save stories - saves to Firestore
    */
   async saveStories(stories) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot save stories to Firestore.');
+      // Fallback to localStorage
+      try {
+        localStorage.setItem(STORIES_CACHE_KEY, JSON.stringify(stories));
+        return { success: true, message: 'Stories saved to local storage (Firebase not available)' };
+      } catch (error) {
+        throw new Error('Firebase is not initialized and local storage save failed.');
+      }
+    }
     try {
       const batch = [];
       stories.forEach(story => {
@@ -178,6 +188,10 @@ export const storiesService = {
    * Create a new story
    */
   async createStory(storyData) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot create story.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       const storyRef = doc(collection(db, STORIES_COLLECTION));
       const newStory = {
@@ -205,6 +219,10 @@ export const storiesService = {
    * Update a single story
    */
   async updateStory(storyId, updates) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot update story.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       const storyRef = doc(db, STORIES_COLLECTION, storyId.toString());
       const updateData = {
@@ -226,6 +244,10 @@ export const storiesService = {
    * Delete a story
    */
   async deleteStory(storyId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot delete story.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       await deleteDoc(doc(db, STORIES_COLLECTION, storyId.toString()));
       return true;

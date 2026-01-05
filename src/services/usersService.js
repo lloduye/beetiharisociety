@@ -60,6 +60,10 @@ export const usersService = {
    * Get a user by email
    */
   async getByEmail(email) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot get user by email.');
+      return null;
+    }
     try {
       const usersRef = collection(db, USERS_COLLECTION);
       const q = query(usersRef, where('email', '==', email.toLowerCase()));
@@ -113,6 +117,10 @@ export const usersService = {
    * Update a user
    */
   async updateUser(userId, updates) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot update user.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       const userRef = doc(db, USERS_COLLECTION, userId);
       const updateData = {
@@ -149,6 +157,10 @@ export const usersService = {
    * Delete a user
    */
   async deleteUser(userId) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot delete user.');
+      throw new Error('Firebase is not initialized. Please check environment variables.');
+    }
     try {
       await deleteDoc(doc(db, USERS_COLLECTION, userId));
       return true;
@@ -181,6 +193,10 @@ export const usersService = {
    * Authenticate user
    */
   async authenticate(email, team, password) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot authenticate user.');
+      return { success: false, error: 'Firebase is not configured. Please check environment variables in Netlify.' };
+    }
     try {
       const user = await this.getByEmail(email);
       
