@@ -17,6 +17,12 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env
+.env.*
+
+# Documentation files with sensitive values (optional - you can keep them but be aware)
+# NETLIFY_ENV_VARS.md
+# FIREBASE_TROUBLESHOOTING.md
 
 npm-debug.log*
 yarn-debug.log*
