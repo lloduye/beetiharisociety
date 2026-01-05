@@ -27,10 +27,7 @@ const DashboardStories = () => {
 
   useEffect(() => {
     let unsubscribe;
-    const setup = async () => {
-      unsubscribe = await loadStories();
-    };
-    setup();
+    unsubscribe = loadStories();
     return () => {
       if (unsubscribe && typeof unsubscribe === 'function') {
         unsubscribe();
