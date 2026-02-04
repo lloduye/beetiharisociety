@@ -79,8 +79,8 @@ const DashboardLayout = () => {
             <Link to="/dashboard" className="flex items-center space-x-2">
               <Globe className="h-8 w-8 text-primary-600" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">BETI-HARI SOCIETY</h1>
-                <p className="text-xs text-gray-600">
+                <h1 className="text-sm md:text-xl font-bold text-gray-900 whitespace-nowrap">BETI-HARI SOCIETY</h1>
+                <p className="text-xs text-gray-600 hidden sm:block">
                   {userTeam && userPosition 
                     ? `${userTeam} - ${userPosition}`
                     : userTeam 

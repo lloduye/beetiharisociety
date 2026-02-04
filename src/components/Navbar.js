@@ -35,8 +35,8 @@ const Navbar = () => {
           <Link to="/" className="flex items-center space-x-2 md:static absolute left-1/2 md:left-0 transform md:transform-none -translate-x-1/2 md:translate-x-0">
             <Globe className="h-8 w-8 text-primary-600" />
             <div>
-              <h1 className="text-xl font-bold text-gray-900">BETI-HARI SOCIETY</h1>
-              <p className="text-xs text-gray-600">Education & Economic Development</p>
+              <h1 className="text-sm md:text-xl font-bold text-gray-900 whitespace-nowrap">BETI-HARI SOCIETY</h1>
+              <p className="text-xs text-gray-600 hidden sm:block">Education & Economic Development</p>
             </div>
           </Link>
 
