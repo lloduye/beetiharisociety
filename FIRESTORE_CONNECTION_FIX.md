@@ -83,3 +83,4 @@ After fixing:
 
 The app will work in offline mode, but data won't sync until connection is established.
 
+

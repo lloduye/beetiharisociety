@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Users, BookOpen, Heart, Target, ArrowRight } from 'lucide-react';
+import { Users, Heart, Target, ArrowRight } from 'lucide-react';
 import { useZeffy } from '../contexts/ZeffyContext';
 
 const Home = () => {
@@ -15,11 +15,6 @@ const Home = () => {
       icon: <Users className="h-8 w-8" />,
       number: "1,200+",
       label: "Students enrolled since 2010"
-    },
-    {
-      icon: <BookOpen className="h-8 w-8" />,
-      number: "5",
-      label: "Classrooms built through grassroots fundraising"
     },
     {
       icon: <Heart className="h-8 w-8" />,
