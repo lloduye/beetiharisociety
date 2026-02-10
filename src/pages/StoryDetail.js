@@ -245,7 +245,7 @@ const StoryDetail = () => {
     <div>
       {/* Back Navigation */}
       <div className="bg-white border-b">
-        <div className="container-custom py-4">
+        <div className="container-custom px-4 sm:px-6 lg:px-8 py-4">
           <Link 
             to="/stories" 
             className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium"
@@ -272,7 +272,7 @@ const StoryDetail = () => {
       </div>
 
       {/* Story Content */}
-      <div className="container-custom py-12">
+      <div className="container-custom px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">

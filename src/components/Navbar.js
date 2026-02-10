@@ -29,7 +29,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="container-custom">
+      <div className="container-custom px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4 relative">
           {/* Logo - left-aligned so it has room on mobile and shows full name + tagline */}
           <Link to="/" className="flex items-center gap-2 min-w-0 flex-1 md:flex-initial">

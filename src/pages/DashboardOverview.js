@@ -22,6 +22,10 @@ const DashboardOverview = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [stories, setStories] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
+  const [donationSummary, setDonationSummary] = useState(null);
+  const [donationRecent, setDonationRecent] = useState([]);
+  const [donationLoading, setDonationLoading] = useState(true);
+  const [donationError, setDonationError] = useState(null);
   const [stats, setStats] = useState({
     publishedStories: 0,
     totalViews: 0,
@@ -72,6 +76,7 @@ const DashboardOverview = () => {
   const loadData = async () => {
     await loadStories();
     loadRecentActivity();
+    loadDonations();
   };
 
   const loadStories = async () => {
@@ -80,6 +85,22 @@ const DashboardOverview = () => {
       setStories(allStories);
     } catch (error) {
       console.error('Failed to load stories:', error);
+    }
+  };
+
+  const loadDonations = async () => {
+    try {
+      setDonationLoading(true);
+      const res = await fetch('/.netlify/functions/get-donations');
+      const json = await res.json();
+      setDonationSummary(json.summary || null);
+      setDonationRecent(json.recentDonations || []);
+      setDonationError(json.error || null);
+    } catch (error) {
+      console.error('Failed to load donation overview:', error);
+      setDonationError(error.message || 'Failed to load donation data');
+    } finally {
+      setDonationLoading(false);
     }
   };
 
@@ -421,7 +442,12 @@ const DashboardOverview = () => {
   };
 
   const quickActions = getRoleBasedQuickActions();
-
+  const formatCurrency = (value) => {
+    if (typeof value !== 'number') return value;
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+    return `$${value.toLocaleString()}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -433,6 +459,55 @@ const DashboardOverview = () => {
         <p className="text-gray-600 text-sm leading-relaxed">
           {getRoleBasedMessage(userTeam, userPosition)}
         </p>
+      </div>
+
+      {/* High-priority donation overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Total Raised (Stripe)
+            </p>
+            <p className="mt-2 text-3xl font-bold text-gray-900">
+              {donationSummary ? formatCurrency(donationSummary.totalAmount) : '—'}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              {donationSummary
+                ? `${donationSummary.totalCount} completed donations`
+                : donationLoading
+                ? 'Loading live donation data…'
+                : donationError || 'No donation data yet'}
+            </p>
+          </div>
+          <Link
+            to="/dashboard/donations"
+            className="inline-flex items-center px-3 py-2 rounded-lg bg-primary-600 text-white text-xs font-medium shadow-sm hover:bg-primary-700 transition-colors"
+          >
+            <DollarSign className="h-4 w-4 mr-1" />
+            View Details
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              Last 30 Days (Stripe)
+            </p>
+            <p className="mt-2 text-2xl font-bold text-gray-900">
+              {donationSummary ? formatCurrency(donationSummary.last30DaysAmount) : '—'}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              {donationSummary
+                ? `${donationSummary.last30DaysCount} donations in the last month`
+                : donationLoading
+                ? 'Refreshing from Stripe…'
+                : ''}
+            </p>
+          </div>
+          <div className="bg-green-100 rounded-full p-3">
+            <TrendingUp className="h-6 w-6 text-green-600" />
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -469,70 +544,107 @@ const DashboardOverview = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Quick Actions */}
-        {quickActions.length > 0 && (
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
-                  const colorClasses = {
-                    primary: 'bg-primary-600 hover:bg-primary-700',
-                    secondary: 'bg-secondary-500 hover:bg-secondary-600',
-                    green: 'bg-green-600 hover:bg-green-700',
-                    purple: 'bg-purple-600 hover:bg-purple-700',
-                  };
-                  
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Story & donation activity */}
+        <div className="space-y-6 xl:col-span-2">
+          {/* Recent Story Activity */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
+            <div className="space-y-4">
+              {recentActivity.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No recent activity yet</p>
+                  <p className="text-sm mt-2">
+                    Activity will appear here as visitors interact with stories.
+                  </p>
+                </div>
+              ) : (
+                recentActivity.map((activity, index) => {
+                  const Icon = getActivityIcon(activity.type);
                   return (
-                    <Link
-                      key={action.title}
-                      to={action.link}
-                      className={`${colorClasses[action.color]} text-white rounded-lg p-6 hover:shadow-lg transition-all group`}
+                    <div
+                      key={`${activity.storyId}-${activity.timestamp}-${index}`}
+                      className="flex items-start space-x-3 pb-4 border-b border-gray-200 last:border-0"
                     >
-                      <div className="flex items-start justify-between mb-4">
-                        <Icon className="h-8 w-8" />
-                        <ArrowRight className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className={`rounded-full p-2 ${getActivityColor(activity.type)}`}>
+                        <Icon className="h-4 w-4" />
                       </div>
-                      <h3 className="text-lg font-bold mb-2">{action.title}</h3>
-                      <p className="text-sm opacity-90">{action.description}</p>
-                    </Link>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900">{getActivityMessage(activity)}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formatTimeAgo(activity.timestamp)}
+                        </p>
+                      </div>
+                    </div>
                   );
-                })}
-              </div>
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Recent Donations Activity */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
+            <div className="space-y-3">
+              {donationLoading ? (
+                <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
+              ) : donationError ? (
+                <p className="text-sm text-gray-500">{donationError}</p>
+              ) : donationRecent.length === 0 ? (
+                <p className="text-sm text-gray-500">No donations yet.</p>
+              ) : (
+                donationRecent.slice(0, 8).map((d, index) => (
+                  <div
+                    key={`${d.time}-${index}`}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{d.name}</p>
+                      <p className="text-xs text-gray-500">{d.time}</p>
+                    </div>
+                    <div className="text-sm font-bold text-green-600">
+                      {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Compact quick actions */}
+        {quickActions.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Links</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Frequently used tools in one place.
+            </p>
+            <div className="space-y-2">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    key={action.title}
+                    to={action.link}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors text-sm"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-gray-100 text-gray-600">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <p className="font-medium text-gray-900">{action.title}</p>
+                        <p className="text-xs text-gray-500">{action.description}</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-400" />
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
-          <div className="space-y-4">
-            {recentActivity.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No recent activity yet</p>
-                <p className="text-sm mt-2">Activity will appear here as visitors interact with stories</p>
-              </div>
-            ) : (
-              recentActivity.map((activity, index) => {
-                const Icon = getActivityIcon(activity.type);
-                return (
-                  <div key={`${activity.storyId}-${activity.timestamp}-${index}`} className="flex items-start space-x-3 pb-4 border-b border-gray-200 last:border-0">
-                    <div className={`rounded-full p-2 ${getActivityColor(activity.type)}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">{getActivityMessage(activity)}</p>
-                      <p className="text-xs text-gray-500 mt-1">{formatTimeAgo(activity.timestamp)}</p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
