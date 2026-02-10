@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
 import { storiesService } from '../services/storiesService';
@@ -7,6 +7,7 @@ import { interactionsService } from '../services/interactionsService';
 const Stories = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [stories, setStories] = useState([]);
+  const [interactionsByStory, setInteractionsByStory] = useState({});
 
   const categories = [
     { id: 'all', name: 'All Stories' },
@@ -16,30 +17,66 @@ const Stories = () => {
     { id: 'donors', name: 'Donor Stories' }
   ];
 
+  const loadInteractions = useCallback(async (storiesList) => {
+    if (!storiesList || storiesList.length === 0) return;
+    try {
+      const next = {};
+      await Promise.all(
+        storiesList.map(async (story) => {
+          const storyId = story.id?.toString();
+          if (!storyId) return;
+          try {
+            const data = await interactionsService.getStoryInteractions(storyId);
+            next[storyId] = {
+              views: data.views || 0,
+              comments: (data.comments || []).length,
+              shares: data.shares || 0,
+            };
+          } catch (err) {
+            console.error('Failed to load interactions for story', storyId, err);
+          }
+        })
+      );
+      setInteractionsByStory(next);
+    } catch (error) {
+      console.error('Failed to load interactions for stories', error);
+    }
+  }, []);
+
+  const loadStories = useCallback(async () => {
+    try {
+      const allStories = await storiesService.getPublished();
+      setStories(allStories);
+      await loadInteractions(allStories);
+    } catch (error) {
+      console.error('Failed to load stories:', error);
+    }
+  }, [loadInteractions]);
+
   useEffect(() => {
     loadStories();
-    
+
     // Listen for storage changes (when admin updates stories)
     const handleStorageChange = (e) => {
       if (e.key === 'stories_data') {
         loadStories();
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
-    
+
     // Also listen for custom event (same-tab updates)
     const handleStoriesUpdate = () => {
       loadStories();
     };
-    
+
     window.addEventListener('storiesUpdated', handleStoriesUpdate);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('storiesUpdated', handleStoriesUpdate);
     };
-  }, []);
+  }, [loadStories]);
 
   const loadStories = async () => {
     try {
@@ -72,10 +109,11 @@ const Stories = () => {
   };
 
   const formatNumber = (num) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'k';
+    const value = typeof num === 'number' && !Number.isNaN(num) ? num : 0;
+    if (value >= 1000) {
+      return (value / 1000).toFixed(1) + 'k';
     }
-    return num.toString();
+    return value.toString();
   };
 
   return (
@@ -171,18 +209,34 @@ const Stories = () => {
                                      {/* Engagement Stats */}
                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
                      <div className="flex items-center space-x-3">
-                       <div className="flex items-center">
-                         <Eye className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getViews(story.id) || story.views)}</span>
-                       </div>
-                       <div className="flex items-center">
-                         <MessageCircle className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getComments(story.id).length || story.comments)}</span>
-                       </div>
-                       <div className="flex items-center">
-                         <Share2 className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getShares(story.id) || story.shares)}</span>
-                       </div>
+                      <div className="flex items-center">
+                        <Eye className="h-3 w-3 mr-1" />
+                        <span>
+                          {formatNumber(
+                            interactionsByStory[story.id?.toString()]?.views ?? story.views ?? 0
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        <span>
+                          {formatNumber(
+                            interactionsByStory[story.id?.toString()]?.comments ??
+                              story.comments ??
+                              0
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <Share2 className="h-3 w-3 mr-1" />
+                        <span>
+                          {formatNumber(
+                            interactionsByStory[story.id?.toString()]?.shares ??
+                              story.shares ??
+                              0
+                          )}
+                        </span>
+                      </div>
                      </div>
                    </div>
 
