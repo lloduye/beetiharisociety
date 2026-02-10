@@ -16,6 +16,7 @@ const DashboardStories = () => {
   const [selectedStory, setSelectedStory] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [storyInteractions, setStoryInteractions] = useState({});
 
   const categories = [
     { id: 'all', name: 'All Categories' },
@@ -35,6 +36,34 @@ const DashboardStories = () => {
     };
   }, []);
 
+  const loadInteractionsForStories = async (storiesList) => {
+    if (!storiesList || storiesList.length === 0) return;
+    try {
+      const interactionsByStory = {};
+      await Promise.all(
+        storiesList.map(async (story) => {
+          const storyId = story.id?.toString();
+          if (!storyId) return;
+          try {
+            const data = await interactionsService.getStoryInteractions(storyId);
+            interactionsByStory[storyId] = {
+              views: data.views || 0,
+              likes: (data.likes || []).length,
+              shares: data.shares || 0,
+              comments: (data.comments || []).length,
+              commentsList: data.comments || []
+            };
+          } catch (error) {
+            console.error('Failed to load interactions for story:', storyId, error);
+          }
+        })
+      );
+      setStoryInteractions((prev) => ({ ...prev, ...interactionsByStory }));
+    } catch (error) {
+      console.error('Failed to load interactions for stories:', error);
+    }
+  };
+
   const loadStories = () => {
     try {
       setLoading(true);
@@ -52,6 +81,7 @@ const DashboardStories = () => {
         if (!resolved) {
           console.warn('Stories loading timed out after 5 seconds');
           setStories([]);
+          setStoryInteractions({});
           cleanup();
         }
       }, 5000);
@@ -60,7 +90,10 @@ const DashboardStories = () => {
       const unsubscribe = storiesService.getAll((stories) => {
         if (!resolved) {
           cleanup();
-          setStories(stories || []);
+          const safeStories = stories || [];
+          setStories(safeStories);
+          // Load engagement data separately to avoid async calls during render
+          loadInteractionsForStories(safeStories);
         }
       });
       
@@ -276,19 +309,27 @@ const DashboardStories = () => {
                       <div className="flex flex-col space-y-1">
                         <div className="flex items-center text-sm text-gray-600">
                           <Eye className="h-3 w-3 mr-1 text-gray-400" />
-                          <span>{interactionsService.getViews(story.id) || 0} views</span>
+                          <span>
+                            {(storyInteractions[story.id?.toString()]?.views ?? 0)} views
+                          </span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <Heart className="h-3 w-3 mr-1 text-red-400" />
-                          <span>{interactionsService.getLikes(story.id) || 0} likes</span>
+                          <span>
+                            {(storyInteractions[story.id?.toString()]?.likes ?? 0)} likes
+                          </span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <MessageCircle className="h-3 w-3 mr-1 text-blue-400" />
-                          <span>{interactionsService.getComments(story.id).length || 0} comments</span>
+                          <span>
+                            {(storyInteractions[story.id?.toString()]?.comments ?? 0)} comments
+                          </span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                           <Share2 className="h-3 w-3 mr-1 text-green-400" />
-                          <span>{interactionsService.getShares(story.id) || 0} shares</span>
+                          <span>
+                            {(storyInteractions[story.id?.toString()]?.shares ?? 0)} shares
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -325,9 +366,9 @@ const DashboardStories = () => {
                           title="View Comments"
                         >
                           <MessageCircle className="h-5 w-5" />
-                          {interactionsService.getComments(story.id).length > 0 && (
+                          {(storyInteractions[story.id?.toString()]?.comments ?? 0) > 0 && (
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                              {interactionsService.getComments(story.id).length}
+                              {storyInteractions[story.id?.toString()]?.comments ?? 0}
                             </span>
                           )}
                         </button>
@@ -395,14 +436,16 @@ const DashboardStories = () => {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-6">
-              {interactionsService.getComments(selectedStory.id).length === 0 ? (
+              {(storyInteractions[selectedStory.id?.toString()]?.comments ?? 0) === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                   <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg">No comments yet</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {interactionsService.getComments(selectedStory.id).map((comment) => (
+                  {(
+                    storyInteractions[selectedStory.id?.toString()]?.commentsList || []
+                  ).map((comment) => (
                     <div key={comment.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center space-x-2">
@@ -431,7 +474,9 @@ const DashboardStories = () => {
             </div>
             <div className="px-6 py-4 border-t bg-gray-50">
               <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>Total: {interactionsService.getComments(selectedStory.id).length} comments</span>
+                <span>
+                  Total: {storyInteractions[selectedStory.id?.toString()]?.comments ?? 0} comments
+                </span>
                 <button
                   onClick={() => {
                     setShowComments(false);
