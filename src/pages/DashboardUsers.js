@@ -33,6 +33,8 @@ const DashboardUsers = () => {
     team: '',
     phone: '',
     address: '',
+    country: '',
+    stateProvince: '',
     position: '',
     password: '',
     isActive: true
@@ -188,6 +190,8 @@ const DashboardUsers = () => {
       'Position',
       'Phone',
       'Address',
+      'Country',
+      'State / Province',
       'Status',
       'Created At',
       'Last Login At'
@@ -202,6 +206,8 @@ const DashboardUsers = () => {
       user.position || '',
       user.phone || '',
       user.address || '',
+      user.country || '',
+      user.stateProvince || '',
       user.isActive ? 'Active' : 'Inactive',
       formatDateTime(user.createdAt),
       formatDateTime(user.lastLoginAt)
@@ -294,6 +300,8 @@ const DashboardUsers = () => {
       team: '',
       phone: '',
       address: '',
+      country: '',
+      stateProvince: '',
       position: '',
       password: '',
       isActive: true
@@ -312,6 +320,8 @@ const DashboardUsers = () => {
       phone: user.phone || '',
       personalEmail: user.personalEmail || '',
       address: user.address || '',
+      country: user.country || '',
+      stateProvince: user.stateProvince || '',
       position: user.position || '',
       password: '', // Don't show password
       isActive: user.isActive
@@ -345,6 +355,8 @@ const DashboardUsers = () => {
           phone: formData.phone,
           personalEmail: formData.personalEmail,
           address: formData.address,
+          country: formData.country,
+          stateProvince: formData.stateProvince,
           position: formData.position,
           isActive: formData.isActive
         };
@@ -908,7 +920,38 @@ const DashboardUsers = () => {
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="+1 (555) 123-4567"
+                      placeholder="+211 9 123 456"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.country}
+                      onChange={(e) =>
+                        setFormData({ ...formData, country: e.target.value })
+                      }
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="Country"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      State / Province
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.stateProvince}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stateProvince: e.target.value })
+                      }
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="State or province"
                     />
                   </div>
                 </div>
@@ -924,7 +967,7 @@ const DashboardUsers = () => {
                     }
                     rows={2}
                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                    placeholder="Street, city, country (optional)"
+                    placeholder="Street and city"
                   />
                 </div>
 

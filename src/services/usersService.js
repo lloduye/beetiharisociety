@@ -126,6 +126,13 @@ export const usersService = {
         position: userData.position || '',
         personalEmail: userData.personalEmail || '',
         address: userData.address || '',
+        country: userData.country || '',
+        stateProvince: userData.stateProvince || '',
+        // Public profile fields
+        profileImageUrl: userData.profileImageUrl || '',
+        bio: userData.bio || '',
+        showOnTeamPage: userData.showOnTeamPage ?? false,
+        // Auth fields
         password: userData.password, // In production, hash this!
         createdAt: serverTimestamp(),
         isActive: userData.isActive !== undefined ? userData.isActive : true
@@ -209,6 +216,34 @@ export const usersService = {
     const tempPassword = 'temp' + Math.random().toString(36).slice(-8);
     await this.updateUser(user.id, { password: tempPassword });
     return tempPassword;
+  },
+
+  /**
+   * Get public team profiles (for website team section)
+   * Only returns active users who opted in to be shown.
+   */
+  async getTeamProfiles() {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot get team profiles.');
+      return [];
+    }
+
+    try {
+      const usersRef = collection(db, USERS_COLLECTION);
+      const q = query(
+        usersRef,
+        where('showOnTeamPage', '==', true),
+        where('isActive', '==', true)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+    } catch (error) {
+      console.error('Error getting team profiles:', error);
+      return [];
+    }
   },
 
   /**

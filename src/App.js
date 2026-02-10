@@ -26,6 +26,7 @@ import DashboardStories from './pages/DashboardStories';
 import StoryEdit from './pages/StoryEdit';
 import DashboardEmails from './pages/DashboardEmails';
 import DashboardUsers from './pages/DashboardUsers';
+import DashboardProfile from './pages/DashboardProfile';
 import DashboardLogin from './pages/DashboardLogin';
 
 function App() {
@@ -72,6 +73,11 @@ function App() {
               <Route path="users" element={
                 <RoleProtectedRoute>
                   <DashboardUsers />
+                </RoleProtectedRoute>
+              } />
+              <Route path="profile" element={
+                <RoleProtectedRoute>
+                  <DashboardProfile />
                 </RoleProtectedRoute>
               } />
               <Route path="emails" element={

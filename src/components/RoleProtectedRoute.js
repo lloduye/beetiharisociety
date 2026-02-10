@@ -8,6 +8,10 @@ const getRoutePermissions = (pathname) => {
   if (pathname === '/dashboard' || pathname === '/dashboard/') {
     return ['all'];
   }
+  // Profile - available to all authenticated users
+  if (pathname === '/dashboard/profile') {
+    return ['all'];
+  }
   // Stories - Administration and Communications
   if (pathname.startsWith('/dashboard/stories')) {
     return ['Administration', 'Communications'];

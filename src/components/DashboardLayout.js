@@ -64,11 +64,13 @@ const DashboardLayout = () => {
   const navigation = getNavigationItems();
 
   const getUserSubtitle = () => {
-    if (userName && userTeam && userPosition) {
-      return `${userName} • ${userTeam} - ${userPosition}`;
+    // Keep this line simple so the role doesn't feel duplicated elsewhere:
+    // show name + one role label, nothing more.
+    if (userName && userPosition) {
+      return `${userName} - ${userPosition}`;
     }
     if (userName && userTeam) {
-      return `${userName} • ${userTeam}`;
+      return `${userName} - ${userTeam}`;
     }
     if (userName) {
       return userName;

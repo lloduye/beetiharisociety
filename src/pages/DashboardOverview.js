@@ -459,13 +459,32 @@ const DashboardOverview = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {userName ? `Welcome, ${userName.split(' ')[0]}!` : 'Welcome!'}
-        </h1>
-        <p className="text-gray-600 text-sm leading-relaxed">
-          {getRoleBasedMessage(userTeam, userPosition)}
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start justify-between space-x-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {userName ? `Welcome, ${userName.split(' ')[0]}!` : 'Welcome!'}
+          </h1>
+          <p className="text-gray-600 text-sm leading-relaxed max-w-3xl">
+            {getRoleBasedMessage(userTeam, userPosition)}
+          </p>
+        </div>
+        {/* Profile quick access */}
+        <Link
+          to="/dashboard/profile"
+          className="hidden sm:flex items-center space-x-3 px-3 py-2 rounded-full border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors text-sm"
+        >
+          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold">
+            {userName ? (userName[0] || 'U').toUpperCase() : 'U'}
+          </div>
+          <div className="text-left">
+            <p className="font-medium text-gray-900 text-xs">
+              {userName || 'Your profile'}
+            </p>
+            <p className="text-[11px] text-gray-500">
+              View & update your profile
+            </p>
+          </div>
+        </Link>
       </div>
 
       {/* High-priority donation overview (Admin, Finance, Board only) */}
