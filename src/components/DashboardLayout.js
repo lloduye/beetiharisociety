@@ -38,21 +38,19 @@ const DashboardLayout = () => {
     loadUserPosition();
   }, [userEmail]);
 
-  // Define all navigation items with team permissions
+  // Define all navigation items with team permissions (order: Overview, Donations, Stories, Mailbox, Users)
   const allNavigationItems = [
-    // Ordered: Overview, Donations, Stories, Mailbox, Users
-    { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] }, // Available to all
+    { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] },
     { name: 'Donations', href: '/dashboard/donations', icon: DollarSign, teams: ['Board of Directors', 'Finance', 'Administration'] },
-    { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications'] },
-    { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] }, // Available to all
+    { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
+    { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] },
     { name: 'Users', href: '/dashboard/users', icon: Users, teams: ['Administration'] },
   ];
 
   // Filter navigation based on user's team
+  const tl = userTeam && String(userTeam).toLowerCase();
   const normalizedTeam =
-    userTeam && String(userTeam).toLowerCase() === 'board of directors'
-      ? 'Board of Directors'
-      : userTeam;
+    !userTeam ? userTeam : tl === 'board of directors' || tl === 'board of director' || (tl && tl.includes('board')) ? 'Board of Directors' : userTeam;
 
   const getNavigationItems = () => {
     if (!normalizedTeam) return allNavigationItems.filter(item => item.teams.includes('all'));

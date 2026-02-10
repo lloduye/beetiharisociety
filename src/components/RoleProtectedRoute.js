@@ -12,9 +12,9 @@ const getRoutePermissions = (pathname) => {
   if (pathname === '/dashboard/profile') {
     return ['all'];
   }
-  // Stories - Administration and Communications
+  // Stories - Administration, Communications, and Board of Directors
   if (pathname.startsWith('/dashboard/stories')) {
-    return ['Administration', 'Communications'];
+    return ['Administration', 'Communications', 'Board of Directors'];
   }
   // Donations - Board of Directors, Finance, and Administration
   if (pathname === '/dashboard/donations') {
@@ -48,10 +48,9 @@ const RoleProtectedRoute = ({ children }) => {
     return <Navigate to="/dashboard/login" replace />;
   }
 
+  const tl = userTeam && String(userTeam).toLowerCase();
   const normalizedTeam =
-    userTeam && String(userTeam).toLowerCase() === 'board of directors'
-      ? 'Board of Directors'
-      : userTeam;
+    !userTeam ? userTeam : tl === 'board of directors' || tl === 'board of director' || (tl && tl.includes('board')) ? 'Board of Directors' : userTeam;
 
   // Check if user has access to this route
   const allowedTeams = getRoutePermissions(location.pathname);

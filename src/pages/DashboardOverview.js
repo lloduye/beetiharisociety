@@ -248,8 +248,9 @@ const DashboardOverview = () => {
   };
 
   const getRoleBasedMessage = (team, position) => {
+    const tl = team && String(team).toLowerCase();
     const t =
-      team && String(team).toLowerCase() === 'board of directors' ? 'Board of Directors' : team;
+      !team ? team : tl === 'board of directors' || tl === 'board of director' || (tl && tl.includes('board')) ? 'Board of Directors' : team;
     if (!t) {
       return "Use this dashboard to keep track of donations, stories, and engagement across BETI-HARI SOCIETY.";
     }
@@ -273,8 +274,13 @@ const DashboardOverview = () => {
   };
 
   const normalizedTeam = userTeam && String(userTeam).trim();
+  const teamLower = normalizedTeam && normalizedTeam.toLowerCase();
   const teamKey =
-    normalizedTeam && normalizedTeam.toLowerCase() === 'board of directors'
+    !normalizedTeam
+      ? null
+      : teamLower === 'board of directors' || teamLower === 'board of director' || teamLower === 'board members'
+      ? 'Board of Directors'
+      : teamLower && teamLower.includes('board')
       ? 'Board of Directors'
       : normalizedTeam;
 
@@ -465,7 +471,7 @@ const DashboardOverview = () => {
         icon: BookOpen,
         link: '/dashboard/stories',
         color: 'primary',
-        teams: ['Administration', 'Communications']
+        teams: ['Administration', 'Communications', 'Board of Directors']
       },
       {
         title: 'View Donations',
@@ -639,8 +645,8 @@ const DashboardOverview = () => {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Story Activity - Administration & Communications */}
-        {(teamKey === 'Administration' || teamKey === 'Communications' || !teamKey) && (
+        {/* Recent Story Activity - Administration, Communications & Board of Directors */}
+        {(teamKey === 'Administration' || teamKey === 'Communications' || teamKey === 'Board of Directors' || !teamKey) && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
             <div className="space-y-4">
