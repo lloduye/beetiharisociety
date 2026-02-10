@@ -52,8 +52,17 @@ export const interactionsService = {
         activityLog: []
       };
     }
+    if (storyId == null || storyId === '') {
+      return {
+        likes: [],
+        comments: [],
+        views: 0,
+        shares: 0,
+        activityLog: []
+      };
+    }
     try {
-      const interactionRef = doc(db, INTERACTIONS_COLLECTION, storyId.toString());
+      const interactionRef = doc(db, INTERACTIONS_COLLECTION, String(storyId));
       const interactionSnap = await getDoc(interactionRef);
       
       if (!interactionSnap.exists()) {

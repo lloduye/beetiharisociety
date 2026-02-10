@@ -169,6 +169,12 @@ const DashboardUsers = () => {
     }
   };
 
+  const getDisplayName = (user) => {
+    if (!user) return '—';
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    return name || user.email || '—';
+  };
+
   const formatTimeAgo = (value) => {
     if (!value) return 'Never';
     let time;
@@ -547,9 +553,7 @@ const DashboardUsers = () => {
               <div className="space-y-3">
                 {loginActivity.map((event) => {
                   const user = users.find((u) => u.id === event.userId);
-                  const name = user
-                    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-                    : event.email;
+                  const name = user ? getDisplayName(user) : (event.email || 'Unknown user');
 
                   return (
                     <div
@@ -605,9 +609,7 @@ const DashboardUsers = () => {
               <div className="space-y-3">
                 {profileActivity.map((event) => {
                   const user = users.find((u) => u.id === event.userId);
-                  const name = user
-                    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
-                    : event.email || 'Unknown user';
+                  const name = user ? getDisplayName(user) : (event.email || 'Unknown user');
 
                   const fields = Array.isArray(event.fieldsChanged)
                     ? event.fieldsChanged
@@ -683,7 +685,7 @@ const DashboardUsers = () => {
                   >
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {user.firstName} {user.lastName}
+                        {getDisplayName(user)}
                       </p>
                       <p className="text-xs text-gray-500">
                         {user.team || 'No team'} • {user.position || 'Role not set'}
@@ -831,7 +833,7 @@ const DashboardUsers = () => {
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.firstName} {user.lastName}
+                          {getDisplayName(user)}
                         </div>
                         <div className="mt-1 text-xs text-gray-500">
                           ID: {user.id}

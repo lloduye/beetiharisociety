@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { storiesService } from '../services/storiesService';
 import { interactionsService } from '../services/interactionsService';
+import { toDate } from '../utils/dateUtils';
 import { 
   Plus,
   Edit,
@@ -275,9 +276,9 @@ const DashboardStories = () => {
   };
 
   const formatActivityTime = (timestamp) => {
-    if (!timestamp) return '';
+    const date = toDate(timestamp);
+    if (!date) return '';
     try {
-      const date = new Date(timestamp);
       return date.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',

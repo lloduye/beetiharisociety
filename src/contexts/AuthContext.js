@@ -11,6 +11,10 @@ export const useAuth = () => {
   return context;
 };
 
+// When authenticated, we never expose null userName/displayName so dashboard UI never crashes.
+const safeDisplayName = (name, email) =>
+  (name && String(name).trim()) || (email && String(email).trim()) || 'User';
+
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,19 +51,19 @@ export const AuthProvider = ({ children }) => {
         if (!name && email) {
           try {
             const user = await usersService.getByEmail(email);
-            if (user && user.firstName) {
-              const fullName = `${user.firstName} ${user.lastName || ''}`.trim();
+            if (user && (user.firstName || user.lastName)) {
+              const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || email;
               localStorage.setItem('user_name', fullName);
               setUserName(fullName);
             } else {
-              setUserName(null);
+              setUserName(email || 'User');
             }
           } catch (error) {
             console.error('Error fetching user:', error);
-            setUserName(name);
+            setUserName(email || name || 'User');
           }
         } else {
-          setUserName(name);
+          setUserName(safeDisplayName(name, email));
         }
       }
       setIsLoading(false);
@@ -75,12 +79,16 @@ export const AuthProvider = ({ children }) => {
       
       if (result.success) {
         const token = 'admin_' + Date.now();
-        const fullName = `${result.user.firstName} ${result.user.lastName}`;
-        const team = result.user.team;
+        const u = result.user || {};
+        const fullName = safeDisplayName(
+          [u.firstName, u.lastName].filter(Boolean).join(' ').trim(),
+          email
+        );
+        const team = u.team ?? null;
         localStorage.setItem('admin_token', token);
         localStorage.setItem('user_team', team);
         localStorage.setItem('user_email', email);
-        localStorage.setItem('user_id', result.user.id);
+        localStorage.setItem('user_id', u.id || '');
         localStorage.setItem('user_name', fullName);
         setIsAuthenticated(true);
         setUserTeam(team);
@@ -107,8 +115,19 @@ export const AuthProvider = ({ children }) => {
     setUserName(null);
   };
 
+  const displayName = isAuthenticated ? safeDisplayName(userName, userEmail) : null;
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, userTeam, userEmail, userName, login, logout }}>
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      isLoading,
+      userTeam,
+      userEmail,
+      userName: isAuthenticated ? (userName || userEmail || 'User') : userName,
+      displayName,
+      login,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
   );

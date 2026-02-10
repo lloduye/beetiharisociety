@@ -18,7 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usersService } from '../services/usersService';
 
 const DashboardOverview = () => {
-  const { userName, userTeam, userEmail } = useAuth();
+  const { displayName, userTeam, userEmail } = useAuth();
   const [recentActivity, setRecentActivity] = useState([]);
   const [stories, setStories] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
@@ -46,8 +46,9 @@ const DashboardOverview = () => {
             if (user.position) {
               setUserPosition(user.position);
             }
-            if (user.profileImageUrl) {
-              setUserAvatarUrl(user.profileImageUrl);
+            const img = user.profileImageUrl;
+            if (typeof img === 'string' && img.length > 0 && (img.startsWith('data:') || img.startsWith('http'))) {
+              setUserAvatarUrl(img);
             }
           }
         } catch (error) {
@@ -121,6 +122,7 @@ const DashboardOverview = () => {
       let totalShares = 0;
 
       for (const story of publishedStories) {
+        if (story?.id == null) continue;
         const interactions = await interactionsService.getStoryInteractions(story.id);
         totalViews += interactions.views || 0;
         totalLikes += interactions.likes?.length || 0;
@@ -156,15 +158,30 @@ const DashboardOverview = () => {
   };
 
   const getStoryTitle = (storyId) => {
-    const story = stories.find(s => s.id === storyId);
-    return story ? story.title : `Story #${storyId}`;
+    if (storyId == null || storyId === '') return 'Story';
+    const story = stories.find(s => s?.id != null && (s.id === storyId || String(s.id) === String(storyId)));
+    return story?.title ? story.title : `Story #${storyId}`;
   };
 
   const formatTimeAgo = (timestamp) => {
+    if (timestamp == null) return '';
+    let time;
+    try {
+      if (typeof timestamp?.toDate === 'function') {
+        time = timestamp.toDate();
+      } else if (typeof timestamp?.toMillis === 'function') {
+        time = new Date(timestamp.toMillis());
+      } else {
+        time = new Date(timestamp);
+      }
+      if (!time || isNaN(time.getTime())) return '';
+    } catch {
+      return '';
+    }
     const now = new Date();
-    const time = new Date(timestamp);
     const diffInSeconds = Math.floor((now - time) / 1000);
-    
+    if (Number.isNaN(diffInSeconds) || diffInSeconds < 0) return '';
+
     if (diffInSeconds < 60) {
       return 'just now';
     } else if (diffInSeconds < 3600) {
@@ -180,8 +197,10 @@ const DashboardOverview = () => {
   };
 
   const getActivityMessage = (activity) => {
+    if (!activity || typeof activity !== 'object') return 'Activity';
     const storyTitle = getStoryTitle(activity.storyId);
-    switch (activity.type) {
+    const type = activity.type || 'activity';
+    switch (type) {
       case 'like':
         return `Someone liked "${storyTitle}"`;
       case 'view':
@@ -196,6 +215,7 @@ const DashboardOverview = () => {
   };
 
   const getActivityIcon = (type) => {
+    if (type == null) return BookOpen;
     switch (type) {
       case 'like':
         return Heart;
@@ -468,7 +488,7 @@ const DashboardOverview = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-start justify-between space-x-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {userName ? `Welcome, ${userName.split(' ')[0]}!` : 'Welcome!'}
+            {displayName ? `Welcome, ${(displayName.split(' ')[0] || displayName).trim()}!` : 'Welcome!'}
           </h1>
           <p className="text-gray-600 text-sm leading-relaxed max-w-3xl">
             {getRoleBasedMessage(userTeam, userPosition)}
@@ -483,16 +503,16 @@ const DashboardOverview = () => {
             {userAvatarUrl ? (
               <img
                 src={userAvatarUrl}
-                alt={userName || 'Profile'}
+                alt={displayName || 'Profile'}
                 className="h-full w-full object-cover"
               />
             ) : (
-              (userName ? (userName[0] || 'U').toUpperCase() : 'U')
+              (displayName ? (displayName[0] || 'U').toUpperCase() : 'U')
             )}
           </div>
           <div className="text-left">
             <p className="font-medium text-gray-900 text-xs">
-              {userName || 'Your profile'}
+              {displayName || 'Your profile'}
             </p>
             <p className="text-[11px] text-gray-500">
               View & update your profile

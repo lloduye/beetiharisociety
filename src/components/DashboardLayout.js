@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import DashboardErrorBoundary from './DashboardErrorBoundary';
 import { usersService } from '../services/usersService';
 import { 
   LogOut, 
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 
 const DashboardLayout = () => {
-  const { logout, userTeam, userEmail, userName } = useAuth();
+  const { logout, userTeam, userEmail, displayName } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [userPosition, setUserPosition] = useState(null);
@@ -64,23 +65,12 @@ const DashboardLayout = () => {
   const navigation = getNavigationItems();
 
   const getUserSubtitle = () => {
-    // Keep this line simple so the role doesn't feel duplicated elsewhere:
-    // show name + one role label, nothing more.
-    if (userName && userPosition) {
-      return `${userName} - ${userPosition}`;
-    }
-    if (userName && userTeam) {
-      return `${userName} - ${userTeam}`;
-    }
-    if (userName) {
-      return userName;
-    }
-    if (userTeam && userPosition) {
-      return `${userTeam} - ${userPosition}`;
-    }
-    if (userTeam) {
-      return `${userTeam} Dashboard`;
-    }
+    const name = displayName || '';
+    if (name && userPosition) return `${name} - ${userPosition}`;
+    if (name && userTeam) return `${name} - ${userTeam}`;
+    if (name) return name;
+    if (userTeam && userPosition) return `${userTeam} - ${userPosition}`;
+    if (userTeam) return `${userTeam} Dashboard`;
     return 'Dashboard';
   };
 
@@ -189,7 +179,9 @@ const DashboardLayout = () => {
 
           {/* Main content - centered with max width */}
           <main className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <Outlet />
+            <DashboardErrorBoundary>
+              <Outlet />
+            </DashboardErrorBoundary>
           </main>
     </div>
   );
