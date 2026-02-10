@@ -284,6 +284,14 @@ const DashboardOverview = () => {
       ? 'Board of Directors'
       : normalizedTeam;
 
+  const formatCurrency = (value) => {
+    const n = typeof value === 'number' && !Number.isNaN(value) ? value : null;
+    if (n === null) return '—';
+    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`;
+    return `$${Number(n).toLocaleString()}`;
+  };
+
   // Get role-based stats
   const getRoleBasedStats = () => {
     if (!teamKey) {
@@ -507,13 +515,6 @@ const DashboardOverview = () => {
   };
 
   const quickActions = getRoleBasedQuickActions();
-  const formatCurrency = (value) => {
-    const n = typeof value === 'number' && !Number.isNaN(value) ? value : null;
-    if (n === null) return '—';
-    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-    if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`;
-    return `$${Number(n).toLocaleString()}`;
-  };
 
   return (
     <div className="space-y-6">
