@@ -157,26 +157,76 @@ const DashboardStories = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this story? This will remove it from the website.')) {
-      const updated = stories.filter(story => story.id !== id);
-      setStories(updated);
-      await saveStories(updated);
+      try {
+        // Delete from Firestore
+        await storiesService.deleteStory(id);
+
+        // Optimistically update local state
+        setStories(prev => prev.filter(story => story.id !== id));
+        setStoryInteractions(prev => {
+          const next = { ...prev };
+          delete next[id?.toString()];
+          return next;
+        });
+      } catch (error) {
+        console.error('Failed to delete story:', error);
+        alert('Failed to delete story');
+      }
     }
   };
 
   const handleToggleFeatured = async (id) => {
-    const updated = stories.map(story => 
-      story.id === id ? { ...story, featured: !story.featured } : story
+    const current = stories.find(story => story.id === id);
+    if (!current) return;
+
+    const newFeatured = !current.featured;
+
+    // Optimistic UI update
+    setStories(prev =>
+      prev.map(story =>
+        story.id === id ? { ...story, featured: newFeatured } : story
+      )
     );
-    setStories(updated);
-    await saveStories(updated);
+
+    try {
+      await storiesService.updateStory(id, { featured: newFeatured });
+    } catch (error) {
+      console.error('Failed to update featured status:', error);
+      alert('Failed to update featured status');
+      // Revert change on error
+      setStories(prev =>
+        prev.map(story =>
+          story.id === id ? { ...story, featured: current.featured } : story
+        )
+      );
+    }
   };
 
   const handleTogglePublished = async (id) => {
-    const updated = stories.map(story => 
-      story.id === id ? { ...story, published: !story.published } : story
+    const current = stories.find(story => story.id === id);
+    if (!current) return;
+
+    const newPublished = !current.published;
+
+    // Optimistic UI update
+    setStories(prev =>
+      prev.map(story =>
+        story.id === id ? { ...story, published: newPublished } : story
+      )
     );
-    setStories(updated);
-    await saveStories(updated);
+
+    try {
+      await storiesService.updateStory(id, { published: newPublished });
+    } catch (error) {
+      console.error('Failed to update published status:', error);
+      alert('Failed to update published status');
+      // Revert change on error
+      setStories(prev =>
+        prev.map(story =>
+          story.id === id ? { ...story, published: current.published } : story
+        )
+      );
+    }
   };
 
   const filteredStories = stories.filter(story => {

@@ -81,31 +81,17 @@ const StoryEdit = () => {
     setSaving(true);
 
     try {
-      const allStories = await storiesService.getAll();
-      let updatedStories;
-
       if (isNew) {
-        // Create new story
-        const newId = Math.max(...allStories.map(s => s.id), 0) + 1;
-        const newStory = {
-          ...formData,
-          id: newId,
-          views: 0,
-          shares: 0,
-          comments: 0,
-          likes: 0,
-        };
-        updatedStories = [...allStories, newStory];
+        // Create new story in Firestore
+        await storiesService.createStory(formData);
       } else {
-        // Update existing story
-        updatedStories = allStories.map(story =>
-          story.id === parseInt(id)
-            ? { ...story, ...formData }
-            : story
-        );
+        // Update existing story in Firestore
+        await storiesService.updateStory(id, formData);
       }
 
-      await storiesService.saveStories(updatedStories);
+      // Notify other tabs/pages that stories changed (for public stories page listeners)
+      window.dispatchEvent(new Event('storiesUpdated'));
+
       navigate('/dashboard/stories');
     } catch (error) {
       console.error('Failed to save story:', error);
