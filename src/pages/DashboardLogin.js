@@ -15,13 +15,6 @@ const DashboardLogin = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const teams = [
-    'Board of Directors',
-    'Finance',
-    'Administration',
-    'Communications'
-  ];
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -176,7 +169,6 @@ const DashboardLogin = () => {
                 onClick={() => {
                   setShowForgotPassword(false);
                   setForgotPasswordEmail('');
-                  setForgotPasswordTeam('');
                   setForgotPasswordMessage('');
                 }}
                 className="text-gray-500 hover:text-gray-700"
