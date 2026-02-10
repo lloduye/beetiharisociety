@@ -12,6 +12,7 @@ const DashboardProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [userId, setUserId] = useState(null);
+  const [initialData, setInitialData] = useState(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -92,7 +93,7 @@ const DashboardProfile = () => {
           return;
         }
         setUserId(user.id);
-        setFormData({
+        const loadedData = {
           firstName: user.firstName || '',
           lastName: user.lastName || '',
           email: user.email || '',
@@ -106,7 +107,9 @@ const DashboardProfile = () => {
           profileImageUrl: user.profileImageUrl || '',
           bio: user.bio || '',
           showOnTeamPage: !!user.showOnTeamPage,
-        });
+        };
+        setFormData(loadedData);
+        setInitialData(loadedData);
 
         // Check if this profile currently appears on the team page
         try {
@@ -222,6 +225,35 @@ const DashboardProfile = () => {
     setSuccess('');
     setSaving(true);
     try {
+      const trackedFields = [
+        'firstName',
+        'lastName',
+        'personalEmail',
+        'phone',
+        'address',
+        'country',
+        'stateProvince',
+        'position',
+        'profileImageUrl',
+        'bio',
+        'showOnTeamPage',
+      ];
+
+      let changedFields = [];
+      if (initialData) {
+        changedFields = trackedFields.filter((field) => {
+          const before = initialData[field] ?? '';
+          const after = formData[field] ?? '';
+          return before !== after;
+        });
+      }
+
+      if (initialData && changedFields.length === 0) {
+        setSuccess('No changes to save.');
+        setSaving(false);
+        return;
+      }
+
       const updates = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
@@ -238,6 +270,20 @@ const DashboardProfile = () => {
       };
 
       await usersService.updateUser(userId, updates);
+
+      if (changedFields.length > 0) {
+        await usersService.logProfileActivity({
+          userId,
+          email: formData.email || userEmail,
+          fieldsChanged: changedFields,
+        });
+      }
+
+      setInitialData((prev) => ({
+        ...(prev || {}),
+        ...updates,
+      }));
+
       setSuccess('Your profile has been updated.');
     } catch (err) {
       console.error('Failed to update profile:', err);

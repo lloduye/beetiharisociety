@@ -22,6 +22,7 @@ const DashboardOverview = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [stories, setStories] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
+  const [userAvatarUrl, setUserAvatarUrl] = useState(null);
   const [storyActivityLimit, setStoryActivityLimit] = useState(5);
   const [donationSummary, setDonationSummary] = useState(null);
   const [donationRecent, setDonationRecent] = useState([]);
@@ -41,8 +42,13 @@ const DashboardOverview = () => {
       if (userEmail) {
         try {
           const user = await usersService.getByEmail(userEmail);
-          if (user && user.position) {
-            setUserPosition(user.position);
+          if (user) {
+            if (user.position) {
+              setUserPosition(user.position);
+            }
+            if (user.profileImageUrl) {
+              setUserAvatarUrl(user.profileImageUrl);
+            }
           }
         } catch (error) {
           console.error('Error loading user position:', error);
@@ -473,8 +479,16 @@ const DashboardOverview = () => {
           to="/dashboard/profile"
           className="hidden sm:flex items-center space-x-3 px-3 py-2 rounded-full border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors text-sm"
         >
-          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold">
-            {userName ? (userName[0] || 'U').toUpperCase() : 'U'}
+          <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold overflow-hidden">
+            {userAvatarUrl ? (
+              <img
+                src={userAvatarUrl}
+                alt={userName || 'Profile'}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              (userName ? (userName[0] || 'U').toUpperCase() : 'U')
+            )}
           </div>
           <div className="text-left">
             <p className="font-medium text-gray-900 text-xs">

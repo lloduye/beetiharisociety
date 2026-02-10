@@ -43,6 +43,9 @@ const DashboardUsers = () => {
   const [loginActivity, setLoginActivity] = useState([]);
   const [activityError, setActivityError] = useState('');
   const [activityLoading, setActivityLoading] = useState(false);
+  const [profileActivity, setProfileActivity] = useState([]);
+  const [profileActivityError, setProfileActivityError] = useState('');
+  const [profileActivityLoading, setProfileActivityLoading] = useState(false);
 
   const teams = [
     'Board of Directors',
@@ -103,6 +106,28 @@ const DashboardUsers = () => {
       setActivityLoading(false);
     }
   }, [users, loading]);
+
+  // Load recent profile/account activity for the "Account Activity" panel
+  useEffect(() => {
+    if (loading) return;
+
+    const loadProfileActivity = async () => {
+      setProfileActivityLoading(true);
+      try {
+        const events = await usersService.getRecentProfileActivities(10);
+        setProfileActivity(events);
+        setProfileActivityError('');
+      } catch (err) {
+        console.error('Failed to load account activity:', err);
+        setProfileActivityError('Failed to load account activity');
+        setProfileActivity([]);
+      } finally {
+        setProfileActivityLoading(false);
+      }
+    };
+
+    loadProfileActivity();
+  }, [loading]);
 
   const formatDate = (value) => {
     if (!value) return '—';
@@ -558,53 +583,76 @@ const DashboardUsers = () => {
             )}
           </div>
 
-          {/* Account activity summary */}
+          {/* Account activity summary / feed */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Account Activity</h2>
             <p className="text-xs text-gray-500 mb-4">
-              Snapshot of how accounts have changed recently.
+              Track recent profile changes your team members have made to their accounts.
             </p>
-            {users.length === 0 ? (
-              <p className="text-sm text-gray-500">No accounts yet.</p>
+            {profileActivityLoading ? (
+              <div className="py-6 text-center text-gray-500 text-sm">
+                Loading recent account changes…
+              </div>
+            ) : profileActivityError ? (
+              <div className="py-6 text-center text-sm text-red-600">
+                {profileActivityError}
+              </div>
+            ) : profileActivity.length === 0 ? (
+              <div className="py-8 text-center text-gray-500 text-sm">
+                No recent profile changes yet. As staff update their details, those changes will appear here.
+              </div>
             ) : (
-              (() => {
-                const now = Date.now();
-                const days = (d) => d * 24 * 60 * 60 * 1000;
-                const getMillis = (value) => {
-                  if (!value) return 0;
-                  if (typeof value.toMillis === 'function') return value.toMillis();
-                  if (typeof value.toDate === 'function') return value.toDate().getTime();
-                  const date = new Date(value);
-                  return isNaN(date.getTime()) ? 0 : date.getTime();
-                };
+              <div className="space-y-3">
+                {profileActivity.map((event) => {
+                  const user = users.find((u) => u.id === event.userId);
+                  const name = user
+                    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+                    : event.email || 'Unknown user';
 
-                const newLast30 = users.filter(
-                  (u) => getMillis(u.createdAt) >= now - days(30)
-                ).length;
-                const loginsLast7 = loginActivity.filter(
-                  (e) => getMillis(e.timestamp) >= now - days(7)
-                ).length;
-                const deactivatedLast30 = users.filter(
-                  (u) => !u.isActive && getMillis(u.updatedAt) >= now - days(30)
-                ).length;
+                  const fields = Array.isArray(event.fieldsChanged)
+                    ? event.fieldsChanged
+                    : [];
 
-                return (
-                  <dl className="space-y-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <dt className="text-gray-600">New accounts (last 30 days)</dt>
-                      <dd className="font-semibold text-gray-900">{newLast30}</dd>
+                  const humanReadableFields =
+                    fields.length === 0
+                      ? 'Profile updated'
+                      : `Updated ${fields
+                          .map((field) =>
+                            field
+                              .replace(/([A-Z])/g, ' $1')
+                              .replace(/^./, (c) => c.toUpperCase())
+                          )
+                          .join(', ')}`;
+
+                  return (
+                    <div
+                      key={event.id}
+                      className="flex items-start justify-between rounded-lg border border-gray-100 px-3 py-2"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="mt-1 rounded-full bg-blue-100 p-2">
+                          <Activity className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {humanReadableFields}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {formatTimeAgo(event.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1 text-xs text-gray-400">
+                        <Clock className="h-3 w-3" />
+                        <span>{formatDateTime(event.timestamp)}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-gray-600">Sign-ins (last 7 days)</dt>
-                      <dd className="font-semibold text-gray-900">{loginsLast7}</dd>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <dt className="text-gray-600">Deactivated (last 30 days)</dt>
-                      <dd className="font-semibold text-gray-900">{deactivatedLast30}</dd>
-                    </div>
-                  </dl>
-                );
-              })()
+                  );
+                })}
+              </div>
             )}
           </div>
 

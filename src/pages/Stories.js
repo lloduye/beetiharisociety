@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
 import { storiesService } from '../services/storiesService';
@@ -6,6 +6,7 @@ import { interactionsService } from '../services/interactionsService';
 
 const Stories = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedAuthor, setSelectedAuthor] = useState('all');
   const [stories, setStories] = useState([]);
   const [storyInteractions, setStoryInteractions] = useState({});
 
@@ -83,10 +84,24 @@ const Stories = () => {
     };
   }, [loadStories]);
 
-  const filteredStories = (selectedCategory === 'all' 
-    ? stories 
-    : stories.filter(story => story.category === selectedCategory)
-  ).sort((a, b) => {
+  const authors = useMemo(() => {
+    const unique = new Set();
+    stories.forEach((story) => {
+      if (story.author) {
+        unique.add(story.author);
+      }
+    });
+    return Array.from(unique).sort();
+  }, [stories]);
+
+  const filteredStories = stories
+    .filter((story) =>
+      selectedCategory === 'all' ? true : story.category === selectedCategory
+    )
+    .filter((story) =>
+      selectedAuthor === 'all' ? true : story.author === selectedAuthor
+    )
+    .sort((a, b) => {
     // Featured stories first
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
@@ -143,6 +158,22 @@ const Stories = () => {
               </button>
             ))}
           </div>
+          {authors.length > 0 && (
+            <div className="mt-6 flex justify-center">
+              <select
+                value={selectedAuthor}
+                onChange={(e) => setSelectedAuthor(e.target.value)}
+                className="px-4 py-2 rounded-full border border-gray-300 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="all">All authors</option>
+                {authors.map((author) => (
+                  <option key={author} value={author}>
+                    {author}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </section>
 

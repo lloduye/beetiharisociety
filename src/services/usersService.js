@@ -18,6 +18,7 @@ import {
 
 const USERS_COLLECTION = 'users';
 const USER_LOGINS_COLLECTION = 'userLogins';
+const USER_ACTIVITY_COLLECTION = 'userActivities';
 
 export const usersService = {
   /**
@@ -333,6 +334,56 @@ export const usersService = {
       }));
     } catch (error) {
       console.error('Error getting recent logins:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Log profile/account activity for a user
+   */
+  async logProfileActivity({ userId, email, fieldsChanged }) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot log profile activity.');
+      return;
+    }
+
+    try {
+      const activityRef = collection(db, USER_ACTIVITY_COLLECTION);
+      await addDoc(activityRef, {
+        userId,
+        email: (email || '').toLowerCase() || null,
+        type: 'profile_update',
+        fieldsChanged: Array.isArray(fieldsChanged) ? fieldsChanged : [],
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error logging profile activity:', error);
+    }
+  },
+
+  /**
+   * Get recent profile/account activity across all users
+   */
+  async getRecentProfileActivities(limit = 20) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot get profile activities.');
+      return [];
+    }
+
+    try {
+      const activityRef = collection(db, USER_ACTIVITY_COLLECTION);
+      const q = query(
+        activityRef,
+        orderBy('timestamp', 'desc'),
+        limitQuery(limit)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+    } catch (error) {
+      console.error('Error getting profile activities:', error);
       return [];
     }
   },
