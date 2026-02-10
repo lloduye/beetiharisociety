@@ -323,9 +323,6 @@ const About = () => {
                   <div className="min-w-0">
                     <h2 id="profile-title" className="text-2xl font-bold text-gray-900">{selectedMember.name}</h2>
                     <p className="text-primary-600 font-semibold">{selectedMember.role}</p>
-                    {selectedMember.roleDescription && (
-                      <p className="text-sm text-gray-600 mt-1">{selectedMember.roleDescription}</p>
-                    )}
                   </div>
                 </div>
                 <button

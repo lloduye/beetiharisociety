@@ -40,6 +40,7 @@ const DashboardProfile = () => {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [onTeamPage, setOnTeamPage] = useState(false);
 
   const countries = [
     { code: 'SS', name: 'South Sudan', dialCode: '+211' },
@@ -107,6 +108,18 @@ const DashboardProfile = () => {
           bio: user.bio || '',
           showOnTeamPage: !!user.showOnTeamPage,
         });
+
+        // Check if this profile currently appears on the team page
+        try {
+          const teamProfiles = await usersService.getTeamProfiles();
+          const isOnTeam = teamProfiles.some(
+            (p) => p.email && p.email.toLowerCase() === (user.email || '').toLowerCase()
+          );
+          setOnTeamPage(isOnTeam);
+        } catch (profileErr) {
+          console.error('Failed to check team page status:', profileErr);
+          setOnTeamPage(false);
+        }
       } catch (err) {
         console.error('Failed to load profile:', err);
         setError('Failed to load your profile. Please try again.');
@@ -332,6 +345,12 @@ const DashboardProfile = () => {
               </div>
               <p className="mt-1 text-xs text-gray-500">
                 This is the email used to sign in and match you on the website. It can be changed by an administrator.
+              </p>
+              <p className="mt-1 text-xs font-medium text-gray-600">
+                Team page status:{' '}
+                <span className={onTeamPage ? 'text-green-600' : 'text-gray-500'}>
+                  {onTeamPage ? 'Shown on Our Leadership page' : 'Not currently shown'}
+                </span>
               </p>
             </div>
             <div>
