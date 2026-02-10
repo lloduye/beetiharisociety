@@ -18,12 +18,22 @@ class DashboardErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const err = this.state.error;
+      const message = err?.message || (err && String(err)) || 'Unknown error';
       return (
         <div className="max-w-md mx-auto mt-16 p-6 bg-white rounded-xl shadow-lg border border-gray-200 text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-600 text-sm mb-4">
             The dashboard hit an error. You can try refreshing or logging in again.
           </p>
+          <details className="text-left mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <summary className="text-sm font-medium text-gray-700 cursor-pointer">
+              Error details
+            </summary>
+            <pre className="mt-2 text-xs text-red-700 whitespace-pre-wrap break-words overflow-auto max-h-32">
+              {message}
+            </pre>
+          </details>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               type="button"

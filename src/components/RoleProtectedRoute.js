@@ -48,12 +48,17 @@ const RoleProtectedRoute = ({ children }) => {
     return <Navigate to="/dashboard/login" replace />;
   }
 
+  const normalizedTeam =
+    userTeam && String(userTeam).toLowerCase() === 'board of directors'
+      ? 'Board of Directors'
+      : userTeam;
+
   // Check if user has access to this route
   const allowedTeams = getRoutePermissions(location.pathname);
-  const hasAccess = 
-    allowedTeams.includes('all') || 
-    allowedTeams.includes(userTeam) ||
-    userTeam === 'Administration'; // Administration has access to everything
+  const hasAccess =
+    allowedTeams.includes('all') ||
+    allowedTeams.includes(normalizedTeam) ||
+    normalizedTeam === 'Administration';
 
   if (!hasAccess) {
     // Redirect to overview if user doesn't have access

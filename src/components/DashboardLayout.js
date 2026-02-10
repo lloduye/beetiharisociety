@@ -49,16 +49,18 @@ const DashboardLayout = () => {
   ];
 
   // Filter navigation based on user's team
+  const normalizedTeam =
+    userTeam && String(userTeam).toLowerCase() === 'board of directors'
+      ? 'Board of Directors'
+      : userTeam;
+
   const getNavigationItems = () => {
-    if (!userTeam) return allNavigationItems.filter(item => item.teams.includes('all'));
-    
+    if (!normalizedTeam) return allNavigationItems.filter(item => item.teams.includes('all'));
+
     return allNavigationItems.filter(item => {
-      // Always show items available to all
       if (item.teams.includes('all')) return true;
-      // Administration has access to everything
-      if (userTeam === 'Administration') return true;
-      // Check if user's team is in the allowed teams
-      return item.teams.includes(userTeam);
+      if (normalizedTeam === 'Administration') return true;
+      return item.teams.includes(normalizedTeam);
     });
   };
 
@@ -66,11 +68,12 @@ const DashboardLayout = () => {
 
   const getUserSubtitle = () => {
     const name = displayName || '';
+    const team = normalizedTeam || userTeam;
     if (name && userPosition) return `${name} - ${userPosition}`;
-    if (name && userTeam) return `${name} - ${userTeam}`;
+    if (name && team) return `${name} - ${team}`;
     if (name) return name;
-    if (userTeam && userPosition) return `${userTeam} - ${userPosition}`;
-    if (userTeam) return `${userTeam} Dashboard`;
+    if (team && userPosition) return `${team} - ${userPosition}`;
+    if (team) return `${team} Dashboard`;
     return 'Dashboard';
   };
 

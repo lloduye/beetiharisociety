@@ -100,13 +100,15 @@ const DashboardOverview = () => {
     try {
       setDonationLoading(true);
       const res = await fetch('/.netlify/functions/get-donations');
-      const json = await res.json();
-      setDonationSummary(json.summary || null);
-      setDonationRecent(json.recentDonations || []);
-      setDonationError(json.error || null);
+      const json = await res.json().catch(() => ({}));
+      const data = json && typeof json === 'object' ? json : {};
+      setDonationSummary(data.summary && typeof data.summary === 'object' ? data.summary : null);
+      setDonationRecent(Array.isArray(data.recentDonations) ? data.recentDonations : []);
+      setDonationError(data.error && typeof data.error === 'string' ? data.error : null);
     } catch (error) {
       console.error('Failed to load donation overview:', error);
       setDonationError(error.message || 'Failed to load donation data');
+      setDonationRecent([]);
     } finally {
       setDonationLoading(false);
     }
@@ -246,11 +248,13 @@ const DashboardOverview = () => {
   };
 
   const getRoleBasedMessage = (team, position) => {
-    if (!team) {
+    const t =
+      team && String(team).toLowerCase() === 'board of directors' ? 'Board of Directors' : team;
+    if (!t) {
       return "Use this dashboard to keep track of donations, stories, and engagement across BETI-HARI SOCIETY.";
     }
 
-    switch (team) {
+    switch (t) {
       case 'Administration':
         return `You have full access${position ? ` as ${position}` : ''}. From here you can oversee stories, donations, users, and emails to keep the whole organization running smoothly.`;
 
@@ -268,19 +272,33 @@ const DashboardOverview = () => {
     }
   };
 
+  const normalizedTeam = userTeam && String(userTeam).trim();
+  const teamKey =
+    normalizedTeam && normalizedTeam.toLowerCase() === 'board of directors'
+      ? 'Board of Directors'
+      : normalizedTeam;
+
   // Get role-based stats
   const getRoleBasedStats = () => {
-    if (!userTeam) {
+    if (!teamKey) {
       return [];
     }
 
-    switch (userTeam) {
+    const safeStats = {
+      publishedStories: Number(stats.publishedStories) || 0,
+      totalViews: Number(stats.totalViews) || 0,
+      totalLikes: Number(stats.totalLikes) || 0,
+      totalComments: Number(stats.totalComments) || 0,
+      totalShares: Number(stats.totalShares) || 0,
+    };
+
+    switch (teamKey) {
       case 'Administration':
         // Administration sees all stats
         return [
           {
             name: 'Total Views',
-            value: stats.totalViews.toLocaleString(),
+            value: safeStats.totalViews.toLocaleString(),
             change: 'All Stories',
             icon: Eye,
             color: 'primary',
@@ -288,7 +306,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Total Likes',
-            value: stats.totalLikes.toLocaleString(),
+            value: safeStats.totalLikes.toLocaleString(),
             change: 'All Stories',
             icon: Heart,
             color: 'green',
@@ -296,7 +314,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Published Stories',
-            value: stats.publishedStories.toString(),
+            value: String(safeStats.publishedStories),
             change: 'Active',
             icon: BookOpen,
             color: 'secondary',
@@ -304,7 +322,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Total Comments',
-            value: stats.totalComments.toLocaleString(),
+            value: safeStats.totalComments.toLocaleString(),
             change: 'All Stories',
             icon: MessageCircle,
             color: 'purple',
@@ -317,7 +335,7 @@ const DashboardOverview = () => {
         return [
           {
             name: 'Total Views',
-            value: stats.totalViews.toLocaleString(),
+            value: safeStats.totalViews.toLocaleString(),
             change: 'All Stories',
             icon: Eye,
             color: 'primary',
@@ -325,7 +343,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Total Likes',
-            value: stats.totalLikes.toLocaleString(),
+            value: safeStats.totalLikes.toLocaleString(),
             change: 'All Stories',
             icon: Heart,
             color: 'green',
@@ -333,7 +351,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Published Stories',
-            value: stats.publishedStories.toString(),
+            value: String(safeStats.publishedStories),
             change: 'Active',
             icon: BookOpen,
             color: 'secondary',
@@ -341,7 +359,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Total Comments',
-            value: stats.totalComments.toLocaleString(),
+            value: safeStats.totalComments.toLocaleString(),
             change: 'All Stories',
             icon: MessageCircle,
             color: 'purple',
@@ -352,10 +370,18 @@ const DashboardOverview = () => {
       case 'Board of Directors':
       case 'Finance': {
         // Finance and Board: donation-focused stats only
-        const totalAmount = donationSummary?.totalAmount || 0;
-        const totalCount = donationSummary?.totalCount || 0;
-        const last30Amount = donationSummary?.last30DaysAmount || 0;
-        const last30Count = donationSummary?.last30DaysCount || 0;
+        const totalAmount =
+          typeof donationSummary?.totalAmount === 'number' ? donationSummary.totalAmount : 0;
+        const totalCount =
+          typeof donationSummary?.totalCount === 'number' ? donationSummary.totalCount : 0;
+        const last30Amount =
+          typeof donationSummary?.last30DaysAmount === 'number'
+            ? donationSummary.last30DaysAmount
+            : 0;
+        const last30Count =
+          typeof donationSummary?.last30DaysCount === 'number'
+            ? donationSummary.last30DaysCount
+            : 0;
 
         return [
           {
@@ -394,11 +420,11 @@ const DashboardOverview = () => {
       }
 
       default:
-        // Default: show basic engagement stats
+        // Default: show basic engagement stats (e.g. unknown team name)
         return [
           {
             name: 'Total Views',
-            value: stats.totalViews.toLocaleString(),
+            value: safeStats.totalViews.toLocaleString(),
             change: 'All Stories',
             icon: Eye,
             color: 'primary',
@@ -406,7 +432,7 @@ const DashboardOverview = () => {
           },
           {
             name: 'Published Stories',
-            value: stats.publishedStories.toString(),
+            value: String(safeStats.publishedStories),
             change: 'Active',
             icon: BookOpen,
             color: 'secondary',
@@ -420,7 +446,7 @@ const DashboardOverview = () => {
 
   // Get role-based quick actions
   const getRoleBasedQuickActions = () => {
-    if (!userTeam) {
+    if (!teamKey) {
       return [];
     }
 
@@ -469,17 +495,18 @@ const DashboardOverview = () => {
 
     return allActions.filter(action => {
       if (action.teams.includes('all')) return true;
-      if (userTeam === 'Administration') return true; // Administration sees all
-      return action.teams.includes(userTeam);
+      if (teamKey === 'Administration') return true; // Administration sees all
+      return action.teams.includes(teamKey);
     });
   };
 
   const quickActions = getRoleBasedQuickActions();
   const formatCurrency = (value) => {
-    if (typeof value !== 'number') return value;
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-    return `$${value.toLocaleString()}`;
+    const n = typeof value === 'number' && !Number.isNaN(value) ? value : null;
+    if (n === null) return '—';
+    if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`;
+    return `$${Number(n).toLocaleString()}`;
   };
 
   return (
@@ -522,7 +549,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* High-priority donation overview (Admin, Finance, Board only) */}
-      {(userTeam === 'Administration' || userTeam === 'Finance' || userTeam === 'Board of Directors') && (
+      {(teamKey === 'Administration' || teamKey === 'Finance' || teamKey === 'Board of Directors') && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
             <div>
@@ -576,27 +603,32 @@ const DashboardOverview = () => {
       {statsData.length > 0 && (
         <div className={`grid grid-cols-1 md:grid-cols-2 ${statsData.length === 4 ? 'lg:grid-cols-4' : statsData.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6 mb-8`}>
           {statsData.map((stat) => {
-            const Icon = stat.icon;
+            const Icon = stat?.icon && typeof stat.icon === 'function' ? stat.icon : BookOpen;
             const colorClasses = {
               primary: 'bg-primary-100 text-primary-600',
               green: 'bg-green-100 text-green-600',
               secondary: 'bg-secondary-100 text-secondary-600',
               purple: 'bg-purple-100 text-purple-600',
             };
-            
+            const colorClass = colorClasses[stat?.color] || colorClasses.primary;
+            const link = stat?.link || '/dashboard';
+            const value = stat?.value != null ? String(stat.value) : '—';
+            const change = stat?.change != null ? String(stat.change) : '';
+            const name = stat?.name != null ? String(stat.name) : '';
+
             return (
               <Link
-                key={stat.name}
-                to={stat.link}
+                key={name || link}
+                to={link}
                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md hover:border-primary-200 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                    <p className="text-sm text-gray-500 mt-1">{stat.change}</p>
+                    <p className="text-sm font-medium text-gray-600">{name}</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+                    <p className="text-sm text-gray-500 mt-1">{change}</p>
                   </div>
-                  <div className={`rounded-full p-3 ${colorClasses[stat.color]}`}>
+                  <div className={`rounded-full p-3 ${colorClass}`}>
                     <Icon className="h-6 w-6" />
                   </div>
                 </div>
@@ -608,7 +640,7 @@ const DashboardOverview = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Recent Story Activity - Administration & Communications */}
-        {(userTeam === 'Administration' || userTeam === 'Communications' || !userTeam) && (
+        {(teamKey === 'Administration' || teamKey === 'Communications' || !teamKey) && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
             <div className="space-y-4">
@@ -663,7 +695,7 @@ const DashboardOverview = () => {
         )}
 
         {/* Recent Donations Activity - Administration, Finance & Board */}
-        {(userTeam === 'Administration' || userTeam === 'Finance' || userTeam === 'Board of Directors' || !userTeam) && (
+        {(teamKey === 'Administration' || teamKey === 'Finance' || teamKey === 'Board of Directors' || !teamKey) && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
             <div className="space-y-3">
@@ -671,20 +703,20 @@ const DashboardOverview = () => {
                 <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
               ) : donationError ? (
                 <p className="text-sm text-gray-500">{donationError}</p>
-              ) : donationRecent.length === 0 ? (
+              ) : !Array.isArray(donationRecent) || donationRecent.length === 0 ? (
                 <p className="text-sm text-gray-500">No donations yet.</p>
               ) : (
-                donationRecent.slice(0, 8).map((d, index) => (
+                (donationRecent.slice(0, 8).filter(Boolean) || []).map((d, index) => (
                   <div
-                    key={`${d.time}-${index}`}
+                    key={`${d?.time ?? index}-${index}`}
                     className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{d.name}</p>
-                      <p className="text-xs text-gray-500">{d.time}</p>
+                      <p className="text-sm font-semibold text-gray-900">{d?.name ?? '—'}</p>
+                      <p className="text-xs text-gray-500">{d?.time ?? ''}</p>
                     </div>
                     <div className="text-sm font-bold text-green-600">
-                      {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
+                      {typeof d?.amount === 'number' ? formatCurrency(d.amount) : (d?.amount != null ? String(d.amount) : '—')}
                     </div>
                   </div>
                 ))
