@@ -3,10 +3,7 @@ import { Link } from 'react-router-dom';
 import { Users, Heart, Target, ArrowRight, X, User, Mail } from 'lucide-react';
 import { usersService } from '../services/usersService';
 
-const About = () => {
-  const [selectedMember, setSelectedMember] = useState(null);
-
-  const boardMembers = [
+const boardMembers = [
     {
       name: 'Alex Atiol',
       role: 'Chairman',
@@ -73,11 +70,10 @@ const About = () => {
     },
   ];
 
+const About = () => {
+  const [selectedMember, setSelectedMember] = useState(null);
   const [leadership, setLeadership] = useState(boardMembers);
 
-  // Load live leadership info from user profiles once on mount.
-  // boardMembers is static in this component, so it's safe to omit from deps.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadProfiles = async () => {
       try {
@@ -113,7 +109,7 @@ const About = () => {
     };
 
     loadProfiles();
-  }, []);
+  }, [boardMembers]);
 
   const values = [
     {

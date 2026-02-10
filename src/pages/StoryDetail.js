@@ -17,7 +17,8 @@ import {
   Twitter,
   Linkedin,
   Mail,
-  Send
+  Send,
+  Whatsapp
 } from 'lucide-react';
 
 const StoryDetail = () => {
@@ -172,8 +173,8 @@ const StoryDetail = () => {
       const newShares = await interactionsService.incrementShares(storyId);
       setInteractions(prev => ({ ...prev, shares: newShares }));
 
-      const url = window.location.href;
-      const text = story.title;
+      const url = `${window.location.origin}/stories/${storyId}`;
+      const text = story.title || 'Story from BETI-HARI SOCIETY';
       
       let shareUrl = '';
       switch (platform) {
@@ -186,15 +187,21 @@ const StoryDetail = () => {
         case 'linkedin':
           shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
           break;
+        case 'whatsapp':
+          shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text} ${url}`)}`;
+          break;
         case 'email':
           shareUrl = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(`Check out this story: ${url}`)}`;
           break;
         default:
           break;
       }
-      
-      if (shareUrl) {
-        window.open(shareUrl, '_blank');
+
+      if (navigator.share && (platform === 'native' || !shareUrl)) {
+        // Use the native share sheet on supported devices
+        await navigator.share({ title: text, text, url });
+      } else if (shareUrl) {
+        window.open(shareUrl, '_blank', 'noopener,noreferrer');
       }
       setShowShareMenu(false);
     } catch (error) {
@@ -364,6 +371,13 @@ const StoryDetail = () => {
                     >
                       <Linkedin className="h-4 w-4 mr-3 text-blue-700" />
                       LinkedIn
+                    </button>
+                    <button
+                      onClick={() => handleShare('whatsapp')}
+                      className="flex items-center w-full px-4 py-2 text-left hover:bg-gray-50"
+                    >
+                      <Whatsapp className="h-4 w-4 mr-3 text-green-500" />
+                      WhatsApp
                     </button>
                     <button
                       onClick={() => handleShare('email')}
