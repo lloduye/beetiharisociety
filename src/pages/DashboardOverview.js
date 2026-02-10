@@ -22,6 +22,7 @@ const DashboardOverview = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [stories, setStories] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
+  const [storyActivityLimit, setStoryActivityLimit] = useState(5);
   const [donationSummary, setDonationSummary] = useState(null);
   const [donationRecent, setDonationRecent] = useState([]);
   const [donationLoading, setDonationLoading] = useState(true);
@@ -545,22 +546,21 @@ const DashboardOverview = () => {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Story & donation activity */}
-        <div className="space-y-6 xl:col-span-2">
-          {/* Recent Story Activity */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
-            <div className="space-y-4">
-              {recentActivity.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>No recent activity yet</p>
-                  <p className="text-sm mt-2">
-                    Activity will appear here as visitors interact with stories.
-                  </p>
-                </div>
-              ) : (
-                recentActivity.map((activity, index) => {
+        {/* Recent Story Activity */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
+          <div className="space-y-4">
+            {recentActivity.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>No recent activity yet</p>
+                <p className="text-sm mt-2">
+                  Activity will appear here as visitors interact with stories.
+                </p>
+              </div>
+            ) : (
+              <>
+                {recentActivity.slice(0, storyActivityLimit).map((activity, index) => {
                   const Icon = getActivityIcon(activity.type);
                   return (
                     <div
@@ -578,38 +578,53 @@ const DashboardOverview = () => {
                       </div>
                     </div>
                   );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Recent Donations Activity */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
-            <div className="space-y-3">
-              {donationLoading ? (
-                <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
-              ) : donationError ? (
-                <p className="text-sm text-gray-500">{donationError}</p>
-              ) : donationRecent.length === 0 ? (
-                <p className="text-sm text-gray-500">No donations yet.</p>
-              ) : (
-                donationRecent.slice(0, 8).map((d, index) => (
-                  <div
-                    key={`${d.time}-${index}`}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{d.name}</p>
-                      <p className="text-xs text-gray-500">{d.time}</p>
-                    </div>
-                    <div className="text-sm font-bold text-green-600">
-                      {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
-                    </div>
+                })}
+                {recentActivity.length > storyActivityLimit && (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setStoryActivityLimit((prev) =>
+                          Math.min(prev + 5, recentActivity.length)
+                        )
+                      }
+                      className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                    >
+                      Load more activity
+                    </button>
                   </div>
-                ))
-              )}
-            </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Donations Activity */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
+          <div className="space-y-3">
+            {donationLoading ? (
+              <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
+            ) : donationError ? (
+              <p className="text-sm text-gray-500">{donationError}</p>
+            ) : donationRecent.length === 0 ? (
+              <p className="text-sm text-gray-500">No donations yet.</p>
+            ) : (
+              donationRecent.slice(0, 8).map((d, index) => (
+                <div
+                  key={`${d.time}-${index}`}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{d.name}</p>
+                    <p className="text-xs text-gray-500">{d.time}</p>
+                  </div>
+                  <div className="text-sm font-bold text-green-600">
+                    {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

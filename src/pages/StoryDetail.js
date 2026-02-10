@@ -67,35 +67,38 @@ const StoryDetail = () => {
   const loadStories = async () => {
     try {
       setLoading(true);
-      // Try to get story directly by ID first
+
+      let mainStory = null;
+
+      // Try to get story directly by ID first for reliability
       try {
         const storyById = await storiesService.getById(id);
         if (storyById) {
-          setStory(storyById);
-          setStories([storyById]);
-          loadInteractions(storyById.id);
-          return;
+          mainStory = storyById;
         }
       } catch (error) {
-        console.log('Could not get story by ID, trying from list...', error);
+        console.log('Could not get story by ID, will try from published list...', error);
       }
       
-      // Fallback: Load all stories and find by ID
+      // Always load all published stories so we can show "More Stories"
       const allStories = await storiesService.getPublished();
       setStories(allStories);
-      // Try both string and numeric ID comparison
-      const found = allStories.find(s => 
-        s.id === id || 
-        s.id === parseInt(id) || 
-        s.id?.toString() === id?.toString() ||
-        parseInt(s.id) === parseInt(id)
-      );
-      setStory(found);
 
-      // Load interactions
-      if (found) {
-        // Use the story's ID (could be string or number)
-        const storyIdForInteractions = found.id?.toString() || found.id;
+      // If we didn't get the story earlier, try to find it in the list
+      if (!mainStory && allStories && allStories.length > 0) {
+        mainStory = allStories.find(s => 
+          s.id === id || 
+          s.id === parseInt(id) || 
+          s.id?.toString() === id?.toString() ||
+          parseInt(s.id) === parseInt(id)
+        ) || null;
+      }
+
+      setStory(mainStory);
+
+      // Load interactions for the main story
+      if (mainStory) {
+        const storyIdForInteractions = mainStory.id?.toString() || mainStory.id;
         loadInteractions(storyIdForInteractions);
       }
     } catch (error) {
