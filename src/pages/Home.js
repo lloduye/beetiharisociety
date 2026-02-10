@@ -35,7 +35,7 @@ const Home = () => {
     {
       icon: <Target className="h-8 w-8" />,
       number: "2",
-      label: "Active service areas: Budi County and Lotukei sub-county"
+      label: "Active service area: Lotukei sub-county"
     }
   ];
 

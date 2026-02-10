@@ -137,10 +137,15 @@ exports.handler = async (event) => {
     };
   }
 
+  const donationSuccessUrl = body.successUrl || `${baseUrl}/?donate=success`;
+  const donationCancelUrl = body.cancelUrl || baseUrl;
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       ...sessionOptions({
+        success_url: donationSuccessUrl,
+        cancel_url: donationCancelUrl,
         line_items: [
           {
             price_data: {

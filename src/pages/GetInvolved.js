@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X, CheckCircle, ExternalLink, TrendingUp, Target } from 'lucide-react';
 import { useDonation } from '../contexts/DonationContext';
 
 const GetInvolved = () => {
-  const { openModal, openMembership } = useDonation();
+  const { openModal, openMembership, openDonationWithAmount } = useDonation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showMembershipThankYou, setShowMembershipThankYou] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
@@ -23,14 +23,13 @@ const GetInvolved = () => {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [recentDonations, setRecentDonations] = useState([]);
-  const [showDonationPopup, setShowDonationPopup] = useState(false);
+  const [stripeDonations, setStripeDonations] = useState({ recentDonations: [], topDonors: [], loading: true, error: null });
 
   const waysToHelp = [
     {
       icon: <Heart className="h-8 w-8" />,
       title: "Become a Member",
-      description: "Support our mission by joining our community of advocates. Membership means standing with the children of Budi County and Lotukei sub-county in their right to learn, grow, and thrive.",
+      description: "Support our mission by joining our community of advocates. Membership means standing with the Didinga children in Lotukei sub-county in their right to learn, grow, and thrive.",
       action: "Join Our Community",
       actionType: "membership"
     },
@@ -60,140 +59,59 @@ const GetInvolved = () => {
   const donationOptions = [
     {
       title: "Sponsor a Classroom",
-      amount: "$5,000",
+      amount: "$10,000",
+      amountCents: 1000000,
       description: "Help build a new classroom to provide education for 30-40 students.",
       project: "Classroom Construction"
     },
     {
       title: "Support a Teacher",
-      amount: "$100/month",
+      amount: "$25",
+      amountCents: 2500,
       description: "Provide ongoing support for a dedicated teacher serving the community.",
       project: "Teacher Support"
     },
     {
       title: "Student Supplies",
       amount: "$50",
+      amountCents: 5000,
       description: "Provide essential school supplies for multiple students.",
       project: "Student Supplies"
     },
     {
       title: "General Support",
       amount: "Any Amount",
+      amountCents: null,
       description: "Your donation will be used where it's needed most.",
       project: "General Fund"
     }
   ];
 
-  const donationProjects = useMemo(() => [
-    { 
-      id: 'classroom', 
-      name: 'Classroom Construction', 
-      description: 'Build new classrooms for 30-40 students each',
-      target: 50000,
-      raised: 32450,
-      donors: 127,
-      image: '🏫'
-    },
-    { 
-      id: 'teacher', 
-      name: 'Teacher Support', 
-      description: 'Provide ongoing support for dedicated teachers',
-      target: 12000,
-      raised: 8900,
-      donors: 89,
-      image: '👨‍🏫'
-    },
-    { 
-      id: 'supplies', 
-      name: 'Student Supplies', 
-      description: 'Provide essential school supplies and materials',
-      target: 8000,
-      raised: 5670,
-      donors: 234,
-      image: '📚'
-    },
-    { 
-      id: 'library', 
-      name: 'School Library', 
-      description: 'Establish and maintain school libraries',
-      target: 15000,
-      raised: 12340,
-      donors: 156,
-      image: '📖'
-    },
-    { 
-      id: 'water', 
-      name: 'Clean Water Access', 
-      description: 'Provide clean drinking water to schools',
-      target: 25000,
-      raised: 18900,
-      donors: 203,
-      image: '💧'
-    },
-    { 
-      id: 'nutrition', 
-      name: 'School Nutrition', 
-      description: 'Provide meals and nutrition programs',
-      target: 18000,
-      raised: 14560,
-      donors: 178,
-      image: '🍎'
-    },
-    { 
-      id: 'technology', 
-      name: 'Technology Access', 
-      description: 'Provide computers and educational technology',
-      target: 30000,
-      raised: 22340,
-      donors: 145,
-      image: '💻'
-    },
-    { 
-      id: 'transportation', 
-      name: 'Student Transportation', 
-      description: 'Help students get to and from school safely',
-      target: 12000,
-      raised: 8900,
-      donors: 112,
-      image: '🚌'
-    },
-    { 
-      id: 'general', 
-      name: 'General Fund', 
-      description: 'Support where it\'s needed most',
-      target: 50000,
-      raised: 45670,
-      donors: 445,
-      image: '🤝'
+  const fetchStripeDonations = useCallback(async () => {
+    try {
+      const res = await fetch('/.netlify/functions/get-donations');
+      const data = await res.json();
+      setStripeDonations((prev) => ({
+        ...prev,
+        recentDonations: data.recentDonations || [],
+        topDonors: data.topDonors || [],
+        loading: false,
+        error: data.error || null,
+      }));
+    } catch (err) {
+      setStripeDonations((prev) => ({
+        ...prev,
+        loading: false,
+        error: err.message || 'Could not load donations',
+      }));
     }
-  ], []);
+  }, []);
 
-  // Simulate recent donations
   useEffect(() => {
-    const mockRecentDonations = [
-      { name: "Sarah M.", amount: 100, project: "Student Supplies", time: "2 minutes ago" },
-      { name: "Michael R.", amount: 500, project: "Teacher Support", time: "5 minutes ago" },
-      { name: "Anonymous", amount: 250, project: "Clean Water Access", time: "8 minutes ago" },
-      { name: "Jennifer L.", amount: 75, project: "School Nutrition", time: "12 minutes ago" },
-      { name: "David K.", amount: 1000, project: "Classroom Construction", time: "15 minutes ago" }
-    ];
-    setRecentDonations(mockRecentDonations);
-
-    // Simulate new donations every 30 seconds
-    const interval = setInterval(() => {
-      const newDonation = {
-        name: ["Alex", "Maria", "John", "Lisa", "Robert", "Emma", "James", "Anna"][Math.floor(Math.random() * 8)] + ".",
-        amount: [25, 50, 75, 100, 150, 200, 250, 500][Math.floor(Math.random() * 8)],
-        project: donationProjects[Math.floor(Math.random() * donationProjects.length)].name,
-        time: "Just now"
-      };
-      setRecentDonations(prev => [newDonation, ...prev.slice(0, 4)]);
-      setShowDonationPopup(true);
-      setTimeout(() => setShowDonationPopup(false), 4000);
-    }, 30000);
-
+    fetchStripeDonations();
+    const interval = setInterval(fetchStripeDonations, 60000);
     return () => clearInterval(interval);
-  }, [donationProjects]);
+  }, [fetchStripeDonations]);
 
   useEffect(() => {
     if (searchParams.get('membership') === 'success') {
@@ -251,8 +169,12 @@ const GetInvolved = () => {
     });
   };
 
-  const handleDonationClick = (option) => {
-    openModal();
+  const handleDonationClick = async (option) => {
+    if (option.amountCents) {
+      await openDonationWithAmount(option.amountCents);
+    } else {
+      openModal();
+    }
   };
 
   const handleSubmit = (type) => {
@@ -342,151 +264,6 @@ const GetInvolved = () => {
           <div className="p-6">
             {children}
           </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ProjectProgressCard = ({ project }) => {
-    const progress = (project.raised / project.target) * 100;
-    const remaining = project.target - project.raised;
-    
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-        <div className="flex items-center mb-4">
-          <span className="text-3xl mr-3">{project.image}</span>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">{project.name}</h3>
-            <p className="text-sm text-gray-600">{project.description}</p>
-          </div>
-        </div>
-        
-        <div className="mb-4">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-600">Progress</span>
-            <span className="font-semibold">{progress.toFixed(1)}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            ></div>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-3 gap-4 text-center mb-4">
-          <div>
-            <div className="text-2xl font-bold text-primary-600">${project.raised.toLocaleString()}</div>
-            <div className="text-xs text-gray-600">Raised</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-gray-700">${project.target.toLocaleString()}</div>
-            <div className="text-xs text-gray-600">Goal</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-green-600">{project.donors}</div>
-            <div className="text-xs text-gray-600">Donors</div>
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-sm text-gray-600 mb-2">
-            ${remaining.toLocaleString()} still needed
-          </div>
-          <button 
-            className="btn-primary text-sm w-full"
-            onClick={openModal}
-          >
-            Support This Project
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const DonationPopup = () => {
-    if (!showDonationPopup || recentDonations.length === 0) return null;
-    
-    const latestDonation = recentDonations[0];
-    
-    return (
-      <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border border-green-200 p-4 max-w-sm z-50 animate-slide-up">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <Heart className="h-5 w-5 text-green-600" />
-          </div>
-          <div className="flex-1">
-            <div className="font-semibold text-gray-900">
-              {latestDonation.name} donated ${latestDonation.amount}
-            </div>
-            <div className="text-sm text-gray-600">
-              to {latestDonation.project}
-            </div>
-            <div className="text-xs text-gray-500">
-              {latestDonation.time}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const RecentDonationsWidget = () => (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-        <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
-        Recent Donations
-      </h3>
-      <div className="space-y-3">
-        {recentDonations.slice(0, 5).map((donation, index) => (
-          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                <Heart className="h-4 w-4 text-primary-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">{donation.name}</div>
-                <div className="text-sm text-gray-600">{donation.project}</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="font-bold text-green-600">${donation.amount}</div>
-              <div className="text-xs text-gray-500">{donation.time}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const OverallProgressWidget = () => {
-    const totalRaised = donationProjects.reduce((sum, project) => sum + project.raised, 0);
-    const totalTarget = donationProjects.reduce((sum, project) => sum + project.target, 0);
-    const totalDonors = donationProjects.reduce((sum, project) => sum + project.donors, 0);
-    const overallProgress = (totalRaised / totalTarget) * 100;
-    
-    return (
-      <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-4">Overall Progress</h3>
-        <div className="grid grid-cols-3 gap-4 text-center mb-4">
-          <div>
-            <div className="text-2xl font-bold">${totalRaised.toLocaleString()}</div>
-            <div className="text-sm opacity-90">Total Raised</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold">{overallProgress.toFixed(1)}%</div>
-            <div className="text-sm opacity-90">Goal Progress</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold">{totalDonors}</div>
-            <div className="text-sm opacity-90">Total Donors</div>
-          </div>
-        </div>
-        <div className="w-full bg-white bg-opacity-20 rounded-full h-2">
-          <div 
-            className="bg-white h-2 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min(overallProgress, 100)}%` }}
-          ></div>
         </div>
       </div>
     );
@@ -920,27 +697,79 @@ const GetInvolved = () => {
         </div>
       </section>
 
-      {/* Project Progress Section */}
+      {/* Top Donors & Recent Donations */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Project Progress</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Donation Impact</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              See how your donations are making a difference. Track the progress of our various projects and join the community of supporters.
+              Thank you to our supporters. We are grateful to our top donors and pleased to share recent donations that are helping empower education in South Sudan.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {donationProjects.slice(0, 6).map((project) => (
-                  <ProjectProgressCard key={project.id} project={project} />
-                ))}
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                Recent Donations
+              </h3>
+              {stripeDonations.loading ? (
+                <p className="text-gray-500 py-4">Loading…</p>
+              ) : stripeDonations.error ? (
+                <p className="text-gray-500 py-4">{stripeDonations.error}</p>
+              ) : stripeDonations.recentDonations.length === 0 ? (
+                <p className="text-gray-500 py-4">No donations yet. Be the first!</p>
+              ) : (
+                <div className="space-y-3">
+                  {stripeDonations.recentDonations.slice(0, 10).map((d, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                          <Heart className="h-4 w-4 text-primary-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{d.name}</div>
+                          <div className="text-xs text-gray-500">{d.time}</div>
+                        </div>
+                      </div>
+                      <div className="font-bold text-green-600">
+                        ${typeof d.amount === 'number' ? d.amount.toLocaleString() : d.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="space-y-6">
-              <OverallProgressWidget />
-              <RecentDonationsWidget />
+
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <Heart className="h-5 w-5 mr-2 text-primary-600" />
+                Top Donors
+              </h3>
+              {stripeDonations.loading ? (
+                <p className="text-gray-500 py-4">Loading…</p>
+              ) : stripeDonations.error ? (
+                <p className="text-gray-500 py-4">{stripeDonations.error}</p>
+              ) : stripeDonations.topDonors.length === 0 ? (
+                <p className="text-gray-500 py-4">No donor data yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {stripeDonations.topDonors.map((d, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg font-bold text-primary-600 w-6">{i + 1}</span>
+                        <div>
+                          <div className="font-medium text-gray-900">{d.name}</div>
+                          <div className="text-xs text-gray-500">{d.count} donation{d.count !== 1 ? 's' : ''}</div>
+                        </div>
+                      </div>
+                      <div className="font-bold text-green-600">
+                        ${typeof d.total === 'number' ? d.total.toLocaleString() : d.total}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -950,7 +779,7 @@ const GetInvolved = () => {
               className="btn-primary text-lg px-8 py-4"
             >
               <Target className="mr-2 h-5 w-5 inline" />
-              Support Our Projects
+              Make a Donation
             </button>
           </div>
         </div>
@@ -1094,9 +923,6 @@ const GetInvolved = () => {
       <Modal isOpen={activeModal !== null} onClose={() => setActiveModal(null)}>
         {renderModalContent()}
       </Modal>
-
-      {/* Donation Popup */}
-      <DonationPopup />
     </div>
   );
 };

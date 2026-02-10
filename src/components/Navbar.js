@@ -31,12 +31,12 @@ const Navbar = () => {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex justify-between items-center py-4 relative">
-          {/* Logo - centered on mobile, left on desktop */}
-          <Link to="/" className="flex items-center space-x-2 md:static absolute left-1/2 md:left-0 transform md:transform-none -translate-x-1/2 md:translate-x-0">
-            <Globe className="h-8 w-8 text-primary-600" />
-            <div>
-              <h1 className="text-sm md:text-xl font-bold text-gray-900 whitespace-nowrap">BETI-HARI SOCIETY</h1>
-              <p className="text-xs text-gray-600 hidden sm:block">Education & Economic Development</p>
+          {/* Logo - left-aligned so it has room on mobile and shows full name + tagline */}
+          <Link to="/" className="flex items-center gap-2 min-w-0 flex-1 md:flex-initial">
+            <Globe className="h-9 w-9 sm:h-10 sm:w-10 text-primary-600 flex-shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 leading-tight">BETI-HARI SOCIETY</h1>
+              <p className="text-[10px] sm:text-xs text-gray-600 leading-tight">Education & Economic Development</p>
             </div>
           </Link>
 

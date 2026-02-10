@@ -176,7 +176,7 @@ src/
 
 - **General Inquiries**: contact@betiharisociety.org
 - **Donations**: donate@betiharisociety.org
-- **Service Areas**: Budi County & Lotukei sub-county, South Sudan
+- **Service Area**: Lotukei sub-county, South Sudan (Didinga people)
 
 ## 🚀 Deployment
 

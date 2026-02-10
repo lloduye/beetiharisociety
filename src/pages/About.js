@@ -1,17 +1,75 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Heart, Target, ArrowRight } from 'lucide-react';
+import { Users, Heart, Target, ArrowRight, X, User, Mail } from 'lucide-react';
 
 const About = () => {
+  const [selectedMember, setSelectedMember] = useState(null);
+
   const boardMembers = [
-    { name: 'Alex Atiol', role: 'Chairman' },
-    { name: 'Charles Lokonyen', role: 'Treasurer' },
-    { name: 'Angelo Gola', role: 'Director (South Sudan)' },
-    { name: 'Lino Lokonobei', role: 'Director (USA)' },
-    { name: 'Amedeo Awai Martin', role: 'Director' },
-    { name: 'Albert Lonyia', role: 'Director' },
-    { name: 'Joseph Nachungura', role: 'Director' },
-    { name: 'Paul Atanya', role: 'Director / Project Officer' },
+    {
+      name: 'Alex Atiol',
+      role: 'Chairman',
+      email: 'alex.atiol@betiharisociety.org',
+      roleDescription: 'Leads the Board and ensures the organization stays true to its mission and governance.',
+      bio: 'Alex Atiol brings leadership and vision to the Beti-Hari Society, guiding strategic direction and governance. His commitment to education and community development in South Sudan has been central to the organization\'s growth and impact in Lotukei sub-county.',
+      image: null,
+    },
+    {
+      name: 'Charles Lokonyen',
+      role: 'Treasurer',
+      email: 'c.lokonyen@betiharisociety.org',
+      roleDescription: 'Oversees financial oversight, budgeting, and transparency for the organization.',
+      bio: 'Charles Lokonyen ensures the Society\'s resources are managed with integrity and accountability. His financial stewardship supports sustainable programs and helps donors trust that their contributions directly serve education and development in South Sudan.',
+      image: null,
+    },
+    {
+      name: 'Angelo Gola',
+      role: 'Director (South Sudan)',
+      email: 'a.gola@betiharisociety.org',
+      roleDescription: 'Represents the organization on the ground and connects board decisions with community realities.',
+      bio: 'Angelo Gola brings essential on-the-ground perspective from South Sudan, linking the Board with the Didinga communities we serve. His local knowledge and field experience help shape programs that truly meet the needs of students and families in Lotukei.',
+      image: null,
+    },
+    {
+      name: 'Lino Lokonobei',
+      role: 'Director (USA)',
+      email: 'l.lokonobei@betiharisociety.org',
+      roleDescription: 'Bridges diaspora engagement and US-based advocacy and fundraising.',
+      bio: 'Lino Lokonobei strengthens ties between the Beti-Hari Society and supporters in the United States, advancing advocacy and community engagement. His work helps amplify the mission and connect resources to education and development in South Sudan.',
+      image: null,
+    },
+    {
+      name: 'Amedeo Awai Martin',
+      role: 'Director',
+      email: 'a.martin@betiharisociety.org',
+      roleDescription: 'Supports governance, strategy, and organizational development.',
+      bio: 'Amedeo Awai Martin contributes to the Board\'s strategic and governance work, drawing on experience in community development and education. His involvement supports the long-term sustainability and impact of the Society\'s programs.',
+      image: null,
+    },
+    {
+      name: 'Albert Lonyia',
+      role: 'Director',
+      email: 'a.lonyia@betiharisociety.org',
+      roleDescription: 'Supports governance, strategy, and organizational development.',
+      bio: 'Albert Lonyia serves as Director, bringing expertise and commitment to the Beti-Hari Society\'s mission. His contributions help ensure effective governance and alignment with the goal of universal child education in South Sudan.',
+      image: null,
+    },
+    {
+      name: 'Joseph Nachungura',
+      role: 'Director',
+      email: 'j.nachungura@betiharisociety.org',
+      roleDescription: 'Supports governance, strategy, and organizational development.',
+      bio: 'Joseph Nachungura is a dedicated Director who supports the Board in advancing education and economic development. His perspective and commitment help the organization stay focused on serving the Didinga community with integrity and impact.',
+      image: null,
+    },
+    {
+      name: 'Paul Atanya',
+      role: 'Director / Project Officer',
+      email: 'p.atanya@betiharisociety.org',
+      roleDescription: 'Combines board governance with day-to-day project coordination and field implementation.',
+      bio: 'Paul Atanya serves both as Director and Project Officer, linking board strategy with program delivery. His dual role helps ensure that decisions made at the board level are effectively translated into action in Lotukei and beyond.',
+      image: null,
+    },
   ];
 
   const values = [
@@ -170,24 +228,101 @@ const About = () => {
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               The organization is governed by a committed Board of Directors representing both South Sudan and the diaspora, bringing together deep cultural knowledge, field experience, and a shared passion for justice, education, and development.
             </p>
+            <p className="text-sm text-gray-500 mt-2">Click a profile to view full information.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {boardMembers.map((member, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md text-center">
+              <button
+                key={index}
+                type="button"
+                onClick={() => setSelectedMember(member)}
+                className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group"
+              >
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                  {member.image ? (
+                    <img src={member.image} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <User className="h-8 w-8 text-primary-600" />
+                  )}
+                </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{member.name}</h3>
-                <p className="text-primary-600 font-medium">{member.role}</p>
-              </div>
+                <p className="text-primary-600 font-medium text-sm">{member.role}</p>
+                <span className="text-xs text-gray-500 mt-2 inline-block">Learn more</span>
+              </button>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Leadership profile modal */}
+      {selectedMember && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setSelectedMember(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="profile-title"
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 sm:p-8">
+              <div className="flex justify-between items-start gap-4 mb-6">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-20 h-20 rounded-full bg-primary-100 flex-shrink-0 flex items-center justify-center">
+                    {selectedMember.image ? (
+                      <img src={selectedMember.image} alt={selectedMember.name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <User className="h-10 w-10 text-primary-600" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h2 id="profile-title" className="text-2xl font-bold text-gray-900">{selectedMember.name}</h2>
+                    <p className="text-primary-600 font-semibold">{selectedMember.role}</p>
+                    {selectedMember.roleDescription && (
+                      <p className="text-sm text-gray-600 mt-1">{selectedMember.roleDescription}</p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMember(null)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0"
+                  aria-label="Close profile"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              {selectedMember.bio && (
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">About</h3>
+                  <p className="text-gray-700 leading-relaxed">{selectedMember.bio}</p>
+                </div>
+              )}
+              {selectedMember.email && (
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Contact</h3>
+                  <a
+                    href={`mailto:${selectedMember.email}`}
+                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
+                  >
+                    <Mail className="h-4 w-4 flex-shrink-0" />
+                    {selectedMember.email}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Call to Action */}
       <section className="section-padding bg-primary-600 text-white">
         <div className="container-custom text-center">
           <h2 className="text-3xl font-bold mb-6">Join Our Mission</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Support our mission by joining our community of advocates. Stand with the children of Budi County and Lotukei sub-county in their right to learn, grow, and thrive.
+            Support our mission by joining our community of advocates. Stand with the Didinga children in Lotukei sub-county in their right to learn, grow, and thrive.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/get-involved" className="btn-secondary text-lg px-8 py-4">

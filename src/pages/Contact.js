@@ -41,7 +41,6 @@ const Contact = () => {
   ];
 
   const serviceAreas = [
-    "Budi County",
     "Lotukei sub-county",
     "Didinga Hills region",
     "Southeastern South Sudan"
@@ -223,7 +222,7 @@ const Contact = () => {
                     <MapPin className="h-5 w-5 text-primary-600" />
                     <div>
                       <p className="text-sm text-gray-600">Serving</p>
-                      <p className="text-gray-900 font-medium">Budi County & Lotukei sub-county</p>
+                      <p className="text-gray-900 font-medium">Lotukei sub-county</p>
                     </div>
                   </div>
                 </div>

@@ -106,7 +106,7 @@ const Footer = () => {
                 <MapPin className="h-5 w-5 text-primary-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-300">Serving</p>
-                  <p className="text-white">Budi County & Lotukei sub-county</p>
+                  <p className="text-white">Lotukei sub-county</p>
                 </div>
               </div>
             </div>

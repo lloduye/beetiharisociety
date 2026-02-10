@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot } from 'lucide-react';
+import { chatbotKnowledge, defaultReply } from '../data/chatbotKnowledge';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm here to help you learn more about the Beti-Hari Society. How can I assist you today?",
+      text: "Hello! I'm the Beti-Hari Society assistant. Ask me anything about our mission, the Didinga in Lotukei (South Sudan), donations, membership, volunteering, impact, or how to contact us.",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -23,70 +24,45 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Common questions and responses
-  const responses = {
-    'donation': {
-      text: "To make a donation, please email us at donate@betiharisociety.org. We accept various donation levels including classroom sponsorship ($5,000), teacher support ($100/month), and general support (any amount).",
-      quickReplies: ['How do I donate?', 'What are the donation options?', 'Contact us']
-    },
-    'contact': {
-      text: "You can reach us at contact@betiharisociety.org for general inquiries or donate@betiharisociety.org for donation-related questions. We typically respond within 24-48 hours.",
-      quickReplies: ['Email addresses', 'Response time', 'Get involved']
-    },
-    'location': {
-      text: "We serve the Didinga people in southeastern South Sudan, specifically in Budi County and Lotukei sub-county. Our work focuses on providing education in these remote areas.",
-      quickReplies: ['Service areas', 'South Sudan', 'Our impact']
-    },
-    'mission': {
-      text: "Our mission is to provide superior academic and life skills development to young people, foster spiritual and moral excellence, and achieve universal child education in South Sudan.",
-      quickReplies: ['Our vision', 'What we do', 'Impact']
-    },
-    'volunteer': {
-      text: "We welcome volunteers with teaching, development, or administrative skills. You can also help by spreading the word about our mission or organizing community events.",
-      quickReplies: ['How to volunteer', 'Spread the word', 'Get involved']
-    },
-    'impact': {
-      text: "Since 2010, we've built 5 classrooms, enrolled over 1,200 students, and supported 20+ teachers (including 11 volunteers). We're making real progress in expanding educational access.",
-      quickReplies: ['Our achievements', 'Student numbers', 'Teacher support']
+  /** Find best-matching knowledge entry by counting keyword hits (normalized message). */
+  const findResponse = (message) => {
+    const normalized = message.toLowerCase().trim();
+    if (!normalized) {
+      return {
+        text: defaultReply.answer,
+        quickReplies: defaultReply.suggestedReplies,
+      };
     }
+    let best = { score: 0, entry: null };
+    for (const entry of chatbotKnowledge) {
+      let score = 0;
+      for (const kw of entry.keywords) {
+        if (normalized.includes(kw)) score += 1;
+      }
+      if (score > best.score) {
+        best = { score, entry };
+      }
+    }
+    if (best.entry) {
+      return {
+        text: best.entry.answer,
+        quickReplies: best.entry.suggestedReplies || defaultReply.suggestedReplies,
+      };
+    }
+    return {
+      text: defaultReply.answer,
+      quickReplies: defaultReply.suggestedReplies,
+    };
   };
 
   const quickQuestions = [
+    'What is Beti-Hari Society?',
     'How can I donate?',
-    'Where are you located?',
+    'Where do you work?',
     'What is your mission?',
-    'How can I volunteer?',
-    'What impact have you made?',
-    'How can I contact you?'
+    'How can I get involved?',
+    'How can I contact you?',
   ];
-
-  const findResponse = (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('donat') || lowerMessage.includes('give') || lowerMessage.includes('support') || lowerMessage.includes('money')) {
-      return responses.donation;
-    }
-    if (lowerMessage.includes('contact') || lowerMessage.includes('email') || lowerMessage.includes('reach') || lowerMessage.includes('get in touch')) {
-      return responses.contact;
-    }
-    if (lowerMessage.includes('location') || lowerMessage.includes('where') || lowerMessage.includes('south sudan') || lowerMessage.includes('budi')) {
-      return responses.location;
-    }
-    if (lowerMessage.includes('mission') || lowerMessage.includes('purpose') || lowerMessage.includes('goal')) {
-      return responses.mission;
-    }
-    if (lowerMessage.includes('volunteer') || lowerMessage.includes('help') || lowerMessage.includes('get involved')) {
-      return responses.volunteer;
-    }
-    if (lowerMessage.includes('impact') || lowerMessage.includes('achievement') || lowerMessage.includes('result') || lowerMessage.includes('student')) {
-      return responses.impact;
-    }
-    
-    return {
-      text: "I'm not sure about that specific question. You can ask me about donations, our mission, location, volunteering, impact, or how to contact us. Or feel free to email us directly at contact@betiharisociety.org.",
-      quickReplies: ['How can I donate?', 'What is your mission?', 'Contact us']
-    };
-  };
 
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
@@ -198,7 +174,7 @@ const Chatbot = () => {
             <div className="p-4 border-t border-gray-200">
               <p className="text-xs text-gray-600 mb-2">Quick questions:</p>
               <div className="flex flex-wrap gap-2">
-                {quickQuestions.slice(0, 3).map((question, index) => (
+                {quickQuestions.slice(0, 4).map((question, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickReply(question)}
