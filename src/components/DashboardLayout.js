@@ -39,11 +39,12 @@ const DashboardLayout = () => {
 
   // Define all navigation items with team permissions
   const allNavigationItems = [
+    // Ordered: Overview, Donations, Stories, Mailbox, Users
     { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] }, // Available to all
-    { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications'] },
     { name: 'Donations', href: '/dashboard/donations', icon: DollarSign, teams: ['Board of Directors', 'Finance', 'Administration'] },
-    { name: 'Users', href: '/dashboard/users', icon: Users, teams: ['Administration'] },
+    { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications'] },
     { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] }, // Available to all
+    { name: 'Users', href: '/dashboard/users', icon: Users, teams: ['Administration'] },
   ];
 
   // Filter navigation based on user's team
