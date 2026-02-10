@@ -491,7 +491,7 @@ const DashboardUsers = () => {
         {/* Activity panels */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent login activity */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:col-span-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <div className="rounded-full bg-primary-100 p-2">
@@ -555,6 +555,56 @@ const DashboardUsers = () => {
                   );
                 })}
               </div>
+            )}
+          </div>
+
+          {/* Account activity summary */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Account Activity</h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Snapshot of how accounts have changed recently.
+            </p>
+            {users.length === 0 ? (
+              <p className="text-sm text-gray-500">No accounts yet.</p>
+            ) : (
+              (() => {
+                const now = Date.now();
+                const days = (d) => d * 24 * 60 * 60 * 1000;
+                const getMillis = (value) => {
+                  if (!value) return 0;
+                  if (typeof value.toMillis === 'function') return value.toMillis();
+                  if (typeof value.toDate === 'function') return value.toDate().getTime();
+                  const date = new Date(value);
+                  return isNaN(date.getTime()) ? 0 : date.getTime();
+                };
+
+                const newLast30 = users.filter(
+                  (u) => getMillis(u.createdAt) >= now - days(30)
+                ).length;
+                const loginsLast7 = loginActivity.filter(
+                  (e) => getMillis(e.timestamp) >= now - days(7)
+                ).length;
+                const deactivatedLast30 = users.filter(
+                  (u) => !u.isActive && getMillis(u.updatedAt) >= now - days(30)
+                ).length;
+
+                return (
+                  <dl className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <dt className="text-gray-600">New accounts (last 30 days)</dt>
+                      <dd className="font-semibold text-gray-900">{newLast30}</dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-gray-600">Sign-ins (last 7 days)</dt>
+                      <dd className="font-semibold text-gray-900">{loginsLast7}</dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-gray-600">Deactivated (last 30 days)</dt>
+                      <dd className="font-semibold text-gray-900">{deactivatedLast30}</dd>
+                    </div>
+                  </dl>
+                );
+              })()
             )}
           </div>
 

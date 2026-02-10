@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Heart, Target, ArrowRight, X, User, Mail } from 'lucide-react';
+import { usersService } from '../services/usersService';
 
 const About = () => {
   const [selectedMember, setSelectedMember] = useState(null);
@@ -71,6 +72,45 @@ const About = () => {
       image: null,
     },
   ];
+
+  const [leadership, setLeadership] = useState(boardMembers);
+
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        const profiles = await usersService.getTeamProfiles();
+        if (!profiles || profiles.length === 0) {
+          setLeadership(boardMembers);
+          return;
+        }
+
+        const updated = boardMembers.map((member) => {
+          const match = profiles.find(
+            (p) => p.email && p.email.toLowerCase() === member.email.toLowerCase()
+          );
+          if (!match) return member;
+
+          const nameFromProfile = `${match.firstName || ''} ${match.lastName || ''}`.trim();
+
+          return {
+            ...member,
+            name: nameFromProfile || member.name,
+            role: match.position || member.role,
+            bio: match.bio || member.bio,
+            image: match.profileImageUrl || member.image,
+          };
+        });
+
+        setLeadership(updated);
+      } catch (err) {
+        console.error('Failed to load leadership profiles from user accounts:', err);
+        // Fallback to static data on error
+        setLeadership(boardMembers);
+      }
+    };
+
+    loadProfiles();
+  }, []);
 
   const values = [
     {
@@ -231,7 +271,7 @@ const About = () => {
             <p className="text-sm text-gray-500 mt-2">Click a profile to view full information.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {boardMembers.map((member, index) => (
+            {leadership.map((member, index) => (
               <button
                 key={index}
                 type="button"

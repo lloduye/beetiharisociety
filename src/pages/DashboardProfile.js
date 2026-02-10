@@ -634,7 +634,14 @@ const DashboardProfile = () => {
                       setSuccess('Profile picture updated.');
                     } catch (err) {
                       console.error('Failed to upload profile image:', err);
-                      setError('Failed to upload profile image. Please try again.');
+                      setError(
+                        err.message ||
+                          'Failed to upload profile image. Please check your connection or storage configuration and try again.'
+                      );
+                      // Close the cropper so the user is not stuck
+                      setAvatarFile(null);
+                      setAvatarPreview(formData.profileImageUrl || null);
+                      setCroppedAreaPixels(null);
                     } finally {
                       setUploadingImage(false);
                     }
