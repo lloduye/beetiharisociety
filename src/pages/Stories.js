@@ -78,16 +78,6 @@ const Stories = () => {
     };
   }, [loadStories]);
 
-  const loadStories = async () => {
-    try {
-      // Load stories - prioritizes localStorage (has admin changes)
-      const allStories = await storiesService.getPublished();
-      setStories(allStories);
-    } catch (error) {
-      console.error('Failed to load stories:', error);
-    }
-  };
-
   const filteredStories = (selectedCategory === 'all' 
     ? stories 
     : stories.filter(story => story.category === selectedCategory)
