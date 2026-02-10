@@ -17,7 +17,10 @@ import {
   EyeOff,
   X,
   LayoutGrid,
-  List
+  List,
+  BarChart2,
+  Clock,
+  RefreshCw
 } from 'lucide-react';
 
 const DashboardStories = () => {
@@ -32,6 +35,7 @@ const DashboardStories = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [storyInteractions, setStoryInteractions] = useState({});
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'grid'
+  const [recentActivity, setRecentActivity] = useState([]);
 
   const categories = [
     { id: 'all', name: 'All Categories' },
@@ -66,6 +70,16 @@ const DashboardStories = () => {
       setStoryInteractions((prev) => ({ ...prev, ...interactionsByStory }));
     } catch (error) {
       console.error('Failed to load interactions for stories:', error);
+    }
+  }, []);
+
+  const loadRecentActivity = useCallback(async () => {
+    try {
+      const activity = await interactionsService.getRecentActivity(8);
+      setRecentActivity(activity || []);
+    } catch (error) {
+      console.error('Failed to load recent activity:', error);
+      setRecentActivity([]);
     }
   }, []);
 
@@ -121,6 +135,10 @@ const DashboardStories = () => {
       }
     };
   }, [loadStories]);
+
+  useEffect(() => {
+    loadRecentActivity();
+  }, [loadRecentActivity]);
 
   const saveStories = async (updatedStories) => {
     try {
@@ -180,6 +198,62 @@ const DashboardStories = () => {
 
   const totalStories = stories.length;
   const filteredStoriesCount = filteredStories.length;
+  const publishedStories = stories.filter(story => story.published).length;
+  const draftStories = totalStories - publishedStories;
+  const featuredStories = stories.filter(story => story.featured).length;
+
+  let totalViews = 0;
+  let totalLikes = 0;
+  let totalComments = 0;
+  let totalShares = 0;
+
+  stories.forEach((story) => {
+    const data = storyInteractions[story.id?.toString()] || {};
+    totalViews += data.views || 0;
+    totalLikes += data.likes || 0;
+    totalComments += data.comments || 0;
+    totalShares += data.shares || 0;
+  });
+
+  const formatActivityLabel = (activity) => {
+    const matchStory = stories.find((story) => {
+      const storyId = story.id?.toString();
+      return (
+        storyId === activity.storyId?.toString() ||
+        parseInt(storyId, 10) === activity.storyId
+      );
+    });
+
+    const title = matchStory?.title || `Story ${activity.storyId}`;
+
+    switch (activity.type) {
+      case 'view':
+        return `New view on "${title}"`;
+      case 'like':
+        return `New like on "${title}"`;
+      case 'share':
+        return `Story "${title}" was shared`;
+      case 'comment':
+        return `New comment on "${title}"${activity.author ? ` from ${activity.author}` : ''}`;
+      default:
+        return `Activity on "${title}"`;
+    }
+  };
+
+  const formatActivityTime = (timestamp) => {
+    if (!timestamp) return '';
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -278,6 +352,107 @@ const DashboardStories = () => {
                 <LayoutGrid className="h-4 w-4 mr-1" />
                 Grid
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats & Recent Activity */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Stats */}
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <BarChart2 className="h-5 w-5 text-primary-600" />
+                  <h2 className="text-lg font-semibold text-gray-900">Stories Overview</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    loadStories();
+                    loadRecentActivity();
+                  }}
+                  className="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Refresh
+                </button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-gray-50">
+                  <p className="text-xs text-gray-500">Total Stories</p>
+                  <p className="mt-1 text-xl font-semibold text-gray-900">{totalStories}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50">
+                  <p className="text-xs text-gray-500">Published</p>
+                  <p className="mt-1 text-xl font-semibold text-green-700">{publishedStories}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-yellow-50">
+                  <p className="text-xs text-gray-500">Drafts</p>
+                  <p className="mt-1 text-xl font-semibold text-yellow-700">{draftStories}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-purple-50">
+                  <p className="text-xs text-gray-500">Featured</p>
+                  <p className="mt-1 text-xl font-semibold text-purple-700">{featuredStories}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-gray-50">
+                  <p className="text-xs text-gray-500">Total Views</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {totalViews.toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-50">
+                  <p className="text-xs text-gray-500">Total Likes</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {totalLikes.toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-50">
+                  <p className="text-xs text-gray-500">Total Comments</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {totalComments.toLocaleString()}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-50">
+                  <p className="text-xs text-gray-500">Total Shares</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {totalShares.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="w-full lg:w-72">
+              <div className="flex items-center space-x-2 mb-3">
+                <Clock className="h-4 w-4 text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-900">Recent Activity</h3>
+              </div>
+              {recentActivity && recentActivity.length > 0 ? (
+                <ul className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {recentActivity.map((activity) => (
+                    <li
+                      key={`${activity.timestamp}-${activity.storyId}-${activity.type}-${activity.commentId || ''}`}
+                      className="text-xs text-gray-600 bg-gray-50 rounded-md px-3 py-2"
+                    >
+                      <p className="font-medium text-gray-800">
+                        {formatActivityLabel(activity)}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-gray-500">
+                        {formatActivityTime(activity.timestamp)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-500 bg-gray-50 rounded-md px-3 py-3">
+                  No recent activity yet. As visitors read, like, comment, and share stories,
+                  updates will appear here.
+                </p>
+              )}
             </div>
           </div>
         </div>
