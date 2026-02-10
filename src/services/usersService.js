@@ -10,10 +10,14 @@ import {
   query,
   where,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  addDoc,
+  orderBy,
+  limit as limitQuery
 } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
+const USER_LOGINS_COLLECTION = 'userLogins';
 
 export const usersService = {
   /**
@@ -120,6 +124,8 @@ export const usersService = {
         team: userData.team,
         phone: userData.phone || '',
         position: userData.position || '',
+        personalEmail: userData.personalEmail || '',
+        address: userData.address || '',
         password: userData.password, // In production, hash this!
         createdAt: serverTimestamp(),
         isActive: userData.isActive !== undefined ? userData.isActive : true
@@ -236,6 +242,32 @@ export const usersService = {
         return { success: false, error: 'Team does not match' };
       }
 
+      // Record successful login metadata on the user record
+      try {
+        await this.updateUser(user.id, {
+          lastLoginAt: serverTimestamp(),
+          lastLoginTeam: team
+        });
+      } catch (metaError) {
+        console.error('Error updating user login metadata:', metaError);
+      }
+
+      // Log login event to a separate collection for activity views
+      try {
+        if (firebaseInitialized && db) {
+          const logRef = collection(db, USER_LOGINS_COLLECTION);
+          await addDoc(logRef, {
+            userId: user.id,
+            email: user.email,
+            team: user.team,
+            timestamp: serverTimestamp(),
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null
+          });
+        }
+      } catch (logError) {
+        console.error('Error logging user login event:', logError);
+      }
+
       // Ensure firstName and lastName exist (for backward compatibility)
       const userWithName = {
         ...user,
@@ -247,6 +279,33 @@ export const usersService = {
     } catch (error) {
       console.error('Error authenticating user:', error);
       return { success: false, error: 'Authentication failed' };
+    }
+  },
+
+  /**
+   * Get recent login activity across all users
+   */
+  async getRecentLogins(limit = 20) {
+    if (!firebaseInitialized || !db) {
+      console.warn('Firebase not initialized. Cannot get recent logins.');
+      return [];
+    }
+
+    try {
+      const logRef = collection(db, USER_LOGINS_COLLECTION);
+      const q = query(
+        logRef,
+        orderBy('timestamp', 'desc'),
+        limitQuery(limit)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+    } catch (error) {
+      console.error('Error getting recent logins:', error);
+      return [];
     }
   },
 
