@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Mail, MapPin, Send, Globe } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const Contact = () => {
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

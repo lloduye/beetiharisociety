@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Users, Heart, Target, ArrowRight, Building, GraduationCap } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const WhatWeDo = () => {
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
   const programs = [
     {
       icon: <Building className="h-8 w-8" />,

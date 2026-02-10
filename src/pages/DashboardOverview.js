@@ -210,7 +210,7 @@ const DashboardOverview = () => {
         return `As a member of the ${team}${position ? ` (${position})` : ''}, you have access to financial oversight and donation tracking. Monitor fundraising progress, review donor contributions, and analyze financial trends to guide organizational strategy. Your insights help ensure sustainable growth and effective resource allocation for our education and economic development programs.`;
 
       case 'Finance':
-        return `In your role with the ${team} department${position ? ` (${position})` : ''}, you can track all donation activities, monitor fundraising progress, and analyze financial data through the Zeffy platform. Use this dashboard to review donation trends, export financial reports, and ensure transparent financial management that supports our mission in South Sudan.`;
+        return `In your role with the ${team} department${position ? ` (${position})` : ''}, you can track all donation activities, monitor fundraising progress, and analyze financial data through Stripe. Use this dashboard to review donation trends, export financial reports, and ensure transparent financial management that supports our mission in South Sudan.`;
 
       case 'Communications':
         return `As part of the ${team} team${position ? ` (${position})` : ''}, you can create, edit, and manage stories that showcase our impact. Share inspiring narratives from our community, monitor engagement metrics, and ensure our message reaches supporters effectively. Your storytelling helps amplify the voices of those we serve and demonstrates the real-world impact of our programs.`;
@@ -307,7 +307,7 @@ const DashboardOverview = () => {
         return [
           {
             name: 'Donation Platform',
-            value: 'Zeffy',
+            value: 'Stripe',
             change: 'Active',
             icon: DollarSign,
             color: 'primary',

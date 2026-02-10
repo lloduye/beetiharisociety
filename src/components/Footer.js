@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Globe, MapPin, BookOpen } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const Footer = () => {
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
 
   const handleDonateClick = (e) => {
     e.preventDefault();

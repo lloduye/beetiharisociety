@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
 
   const navigation = [
     { name: 'Home', href: '/' },

@@ -28,7 +28,7 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPeriod, setFilterPeriod] = useState('all');
 
-  // Mock data - In production, this would fetch from Zeffy API
+  // Mock data - In production, this would fetch from Stripe API or webhooks
   useEffect(() => {
     // Simulate API call
     const fetchDonations = async () => {
@@ -37,7 +37,7 @@ const Dashboard = () => {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mock donation data - Replace with actual Zeffy API call
+      // Mock donation data - Replace with Stripe payments/list or webhook-synced data
       const mockDonations = [
         {
           id: 1,
@@ -404,18 +404,17 @@ const Dashboard = () => {
 
         {/* Integration Note */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Zeffy Integration</h3>
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">Stripe Donations</h3>
           <p className="text-sm text-blue-800 mb-4">
-            To connect this dashboard with your Zeffy account, you'll need to:
+            Donations are processed with Stripe. To see live data here you can:
           </p>
           <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
-            <li>Get your Zeffy API key from your Zeffy dashboard</li>
-            <li>Set up webhooks in Zeffy to send donation notifications</li>
-            <li>Replace the mock data in <code className="bg-blue-100 px-1 rounded">Dashboard.js</code> with actual API calls</li>
-            <li>Store the API key securely in environment variables</li>
+            <li>View payments in the <a href="https://dashboard.stripe.com" target="_blank" rel="noopener noreferrer" className="underline">Stripe Dashboard</a></li>
+            <li>Optionally use Stripe webhooks to sync payments to your backend or this dashboard</li>
+            <li>Ensure <code className="bg-blue-100 px-1 rounded">STRIPE_SECRET_KEY</code> is set in Netlify environment variables</li>
           </ol>
           <p className="text-sm text-blue-700 mt-4">
-            <strong>Note:</strong> Currently displaying sample data. Connect to Zeffy API for live donation tracking.
+            <strong>Note:</strong> This dashboard currently displays sample data. Connect to the Stripe API or webhooks for live donation tracking.
           </p>
         </div>
       </div>

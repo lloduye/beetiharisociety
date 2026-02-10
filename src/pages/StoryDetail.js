@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 import { storiesService } from '../services/storiesService';
 import { interactionsService } from '../services/interactionsService';
 import { 
@@ -22,7 +22,7 @@ import {
 
 const StoryDetail = () => {
   const { id } = useParams();
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
   const [liked, setLiked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [commentText, setCommentText] = useState('');

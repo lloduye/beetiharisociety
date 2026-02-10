@@ -30,6 +30,20 @@ Then add these 6 variables one by one:
 **Key:** `REACT_APP_FIREBASE_APP_ID`  
 **Value:** `1:18570375410:web:e86b12bfa9197c7090206b`
 
+### Stripe (embedded checkout in modal)
+
+For the payment form to appear **inside the popup** on your site (not an iframe of the payment link), set:
+
+**Key:** `REACT_APP_STRIPE_PUBLISHABLE_KEY`  
+**Value:** Your Stripe **publishable** key (`pk_test_...` or `pk_live_...`)  
+- [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/apikeys) → Publishable key.
+
+**Key:** `STRIPE_SECRET_KEY`  
+**Value:** Your Stripe **secret** key (`sk_test_...` or `sk_live_...`). Mark as **Secret**.  
+- Required for the Netlify function that creates the checkout session for the embedded form.
+
+If `REACT_APP_STRIPE_PUBLISHABLE_KEY` is not set, the modal will show an “Open payment page in new tab” button instead of the embedded form.
+
 ## After Adding Variables
 
 1. **IMPORTANT:** Go to **Deploys** tab

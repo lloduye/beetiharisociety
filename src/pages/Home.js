@@ -1,10 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Users, Heart, Target, ArrowRight } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Users, Heart, Target, ArrowRight, CheckCircle } from 'lucide-react';
+import { useDonation } from '../contexts/DonationContext';
 
 const Home = () => {
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showThankYou, setShowThankYou] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('donate') === 'success') {
+      setShowThankYou(true);
+      setSearchParams({}, { replace: true });
+      const t = setTimeout(() => setShowThankYou(false), 8000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleDonateClick = (e) => {
     e.preventDefault();
@@ -30,6 +41,12 @@ const Home = () => {
 
   return (
     <div>
+      {showThankYou && (
+        <div className="bg-green-600 text-white text-center py-3 px-4 flex items-center justify-center gap-2 flex-wrap">
+          <CheckCircle className="h-5 w-5 flex-shrink-0" />
+          <span>Thank you for your donation! Your support helps empower education in South Sudan.</span>
+        </div>
+      )}
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white">
         <div className="container-custom section-padding">

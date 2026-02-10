@@ -65,18 +65,14 @@ The website includes a fully functional admin dashboard for tracking donations a
 - **Statistics**: Real-time stats including total raised, total donations, monthly totals, and average donation
 - **Search & Filter**: Search donations by name/email and filter by time period
 - **Export**: Export donation data to CSV for external analysis
-- **Zeffy Integration**: Ready for Zeffy API integration (currently using sample data)
+- **Stripe Donations**: Donations are processed with Stripe Checkout (one-time payments)
 
-### Setting Up Zeffy Integration
+### Setting Up Stripe Donations
 
-To connect the dashboard with your Zeffy account:
-
-1. Get your Zeffy API key from your Zeffy dashboard
-2. Set up webhooks in Zeffy to send donation notifications
-3. Update `src/pages/Dashboard.js` to replace mock data with actual API calls
-4. Store API credentials securely in environment variables
-
-**Note**: The dashboard currently displays sample data. Connect to the Zeffy API for live donation tracking.
+1. Create a Stripe account and get your **Secret key** from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
+2. In Netlify: **Site settings → Environment variables** → Add `STRIPE_SECRET_KEY` with your secret key (mark as secret/sensitive).
+3. Redeploy the site. The donation modal will create a Checkout Session and redirect donors to Stripe’s hosted payment page.
+4. Optionally, use Stripe webhooks to record donations in your own database or dashboard; the dashboard currently shows sample data.
 
 ## 📁 Project Structure
 

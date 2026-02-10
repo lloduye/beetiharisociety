@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X, CheckCircle, ExternalLink, TrendingUp, Target } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const GetInvolved = () => {
-  const { openModal } = useZeffy();
+  const { openModal, openMembership } = useDonation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showMembershipThankYou, setShowMembershipThankYou] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -192,12 +195,14 @@ const GetInvolved = () => {
     return () => clearInterval(interval);
   }, [donationProjects]);
 
-  const membershipTypes = [
-    { id: 'individual', label: 'Individual Member', price: '$25/year' },
-    { id: 'family', label: 'Family Membership', price: '$50/year' },
-    { id: 'student', label: 'Student Member', price: '$10/year' },
-    { id: 'corporate', label: 'Corporate Partner', price: '$500/year' }
-  ];
+  useEffect(() => {
+    if (searchParams.get('membership') === 'success') {
+      setShowMembershipThankYou(true);
+      setSearchParams({}, { replace: true });
+      const t = setTimeout(() => setShowMembershipThankYou(false), 8000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, setSearchParams]);
 
   const volunteerSkills = [
     'Teaching', 'Administration', 'Fundraising', 'Event Planning', 
@@ -222,6 +227,14 @@ const GetInvolved = () => {
   };
 
   const handleActionClick = (actionType) => {
+    if (actionType === 'donation') {
+      openModal();
+      return;
+    }
+    if (actionType === 'membership') {
+      openMembership();
+      return;
+    }
     setActiveModal(actionType);
     setFormData({
       name: '',
@@ -239,36 +252,15 @@ const GetInvolved = () => {
   };
 
   const handleDonationClick = (option) => {
-    setActiveModal('donation');
-    setFormData(prev => ({
-      ...prev,
-      donationType: option.title,
-      donationAmount: option.amount === 'Any Amount' ? '' : option.amount,
-      donationProject: option.project
-    }));
+    openModal();
   };
 
   const handleSubmit = (type) => {
-    // Simulate form submission
+    if (type === 'membership') return; // Membership is handled by Stripe; no form submit
     setShowSuccess(true);
-    
-    // Add to recent donations if it's a donation
-    if (type === 'donation') {
-      const newDonation = {
-        name: formData.name.split(' ')[0] + ".",
-        amount: parseInt(formData.donationAmount.replace(/[^0-9]/g, '')),
-        project: formData.donationProject,
-        time: "Just now"
-      };
-      setRecentDonations(prev => [newDonation, ...prev.slice(0, 4)]);
-      setShowDonationPopup(true);
-      setTimeout(() => setShowDonationPopup(false), 4000);
-    }
-    
     setTimeout(() => {
       setShowSuccess(false);
       setActiveModal(null);
-      // Here you would typically send the data to your backend
       console.log('Form submitted:', { type, formData });
     }, 2000);
   };
@@ -403,13 +395,7 @@ const GetInvolved = () => {
           </div>
           <button 
             className="btn-primary text-sm w-full"
-            onClick={() => {
-              setActiveModal('donation');
-              setFormData(prev => ({
-                ...prev,
-                donationProject: project.name
-              }));
-            }}
+            onClick={openModal}
           >
             Support This Project
           </button>
@@ -505,242 +491,6 @@ const GetInvolved = () => {
       </div>
     );
   };
-
-  const MembershipForm = () => (
-    <div className="space-y-4">
-      <p className="text-gray-600 mb-4">Join our community of advocates and make a difference in the lives of children in South Sudan.</p>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Membership Type</label>
-        <div className="space-y-2">
-          {membershipTypes.map((type) => (
-            <label key={type.id} className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="radio"
-                name="membershipType"
-                value={type.id}
-                checked={formData.membershipType === type.id}
-                onChange={(e) => handleInputChange('membershipType', e.target.value)}
-                className="text-primary-600"
-              />
-              <span className="text-sm text-gray-700">{type.label}</span>
-              <span className="text-sm font-medium text-primary-600">{type.price}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-        <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => handleInputChange('phone', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
-        <textarea
-          value={formData.message}
-          onChange={(e) => handleInputChange('message', e.target.value)}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder="Tell us why you'd like to join our community..."
-        />
-      </div>
-
-      <button
-        onClick={() => handleSubmit('membership')}
-        disabled={!formData.name || !formData.email || !formData.membershipType}
-        className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Join Our Community
-      </button>
-    </div>
-  );
-
-  const DonationForm = () => (
-    <div className="space-y-4">
-      <p className="text-gray-600 mb-4">Your support can transform lives. Choose how you'd like to make an impact.</p>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Donation Type</label>
-        <input
-          type="text"
-          value={formData.donationType}
-          readOnly
-          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Project to Support *</label>
-        <select
-          value={formData.donationProject}
-          onChange={(e) => handleInputChange('donationProject', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
-        >
-          <option value="">Select a project</option>
-          {donationProjects.map((project) => (
-            <option key={project.id} value={project.name}>
-              {project.name} - {project.description}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Donation Frequency *</label>
-        <div className="space-y-2">
-          <label className="flex items-center space-x-3 cursor-pointer">
-            <input
-              type="radio"
-              name="donationFrequency"
-              value="one-time"
-              checked={formData.donationFrequency === 'one-time'}
-              onChange={(e) => handleInputChange('donationFrequency', e.target.value)}
-              className="text-primary-600"
-            />
-            <span className="text-sm text-gray-700">One-time donation</span>
-          </label>
-          <label className="flex items-center space-x-3 cursor-pointer">
-            <input
-              type="radio"
-              name="donationFrequency"
-              value="monthly"
-              checked={formData.donationFrequency === 'monthly'}
-              onChange={(e) => handleInputChange('donationFrequency', e.target.value)}
-              className="text-primary-600"
-            />
-            <span className="text-sm text-gray-700">Monthly recurring donation</span>
-          </label>
-          <label className="flex items-center space-x-3 cursor-pointer">
-            <input
-              type="radio"
-              name="donationFrequency"
-              value="annual"
-              checked={formData.donationFrequency === 'annual'}
-              onChange={(e) => handleInputChange('donationFrequency', e.target.value)}
-              className="text-primary-600"
-            />
-            <span className="text-sm text-gray-700">Annual recurring donation</span>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Amount *</label>
-        <div className="relative">
-          <span className="absolute left-3 top-2 text-gray-500">$</span>
-          <input
-            type="text"
-            value={formData.donationAmount}
-            onChange={(e) => handleInputChange('donationAmount', e.target.value)}
-            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="Enter amount (e.g., 50, 100)"
-            required
-          />
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          {formData.donationFrequency === 'monthly' && 'This amount will be charged monthly'}
-          {formData.donationFrequency === 'annual' && 'This amount will be charged annually'}
-          {formData.donationFrequency === 'one-time' && 'This is a one-time donation'}
-        </p>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-        <input
-          type="text"
-          value={formData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => handleInputChange('phone', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
-        <textarea
-          value={formData.message}
-          onChange={(e) => handleInputChange('message', e.target.value)}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder="Tell us about your donation or any specific instructions..."
-        />
-      </div>
-
-      <div className="bg-blue-50 p-4 rounded-md">
-        <p className="text-sm text-blue-800">
-          <strong>Next Steps:</strong> After submitting this form, we'll contact you within 24 hours to discuss payment options and provide you with a secure donation link.
-        </p>
-        {formData.donationFrequency === 'monthly' && (
-          <p className="text-sm text-blue-700 mt-2">
-            <strong>Monthly Donations:</strong> You can cancel or modify your monthly donation at any time.
-          </p>
-        )}
-        {formData.donationFrequency === 'annual' && (
-          <p className="text-sm text-blue-700 mt-2">
-            <strong>Annual Donations:</strong> You can cancel or modify your annual donation at any time.
-          </p>
-        )}
-      </div>
-
-      <button
-        onClick={() => handleSubmit('donation')}
-        disabled={!formData.name || !formData.email || !formData.donationAmount || !formData.donationProject || !formData.donationFrequency}
-        className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Submit Donation Request
-      </button>
-    </div>
-  );
 
   const VolunteerForm = () => (
     <div className="space-y-4">
@@ -1057,10 +807,6 @@ const GetInvolved = () => {
     }
 
     switch (activeModal) {
-      case 'membership':
-        return <MembershipForm />;
-      case 'donation':
-        return <DonationForm />;
       case 'volunteer':
         return <VolunteerForm />;
       case 'share':
@@ -1076,6 +822,12 @@ const GetInvolved = () => {
 
   return (
     <div>
+      {showMembershipThankYou && (
+        <div className="bg-green-600 text-white text-center py-3 px-4 flex items-center justify-center gap-2 flex-wrap">
+          <CheckCircle className="h-5 w-5 flex-shrink-0" />
+          <span>Thank you for becoming a member! Your receipt has been sent by email from Stripe.</span>
+        </div>
+      )}
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary-600 to-primary-700 text-white">
         <div className="container-custom section-padding">
@@ -1194,7 +946,7 @@ const GetInvolved = () => {
 
           <div className="text-center">
             <button 
-              onClick={() => setActiveModal('donation')}
+              onClick={openModal}
               className="btn-primary text-lg px-8 py-4"
             >
               <Target className="mr-2 h-5 w-5 inline" />

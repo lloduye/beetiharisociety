@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './utils/firebaseDiagnostics'; // Run diagnostics on app load
 // Migration removed - run manually if needed: migrateToFirebase() in console
-import { ZeffyProvider } from './contexts/ZeffyContext';
+import { DonationProvider } from './contexts/DonationContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { firebaseError } from './config/firebase';
 import FirebaseError from './components/FirebaseError';
@@ -33,7 +33,7 @@ function App() {
     <>
       {firebaseError && <FirebaseError />}
       <AuthProvider>
-        <ZeffyProvider>
+        <DonationProvider>
         <Router>
           <ScrollToTop />
           <Routes>
@@ -95,7 +95,7 @@ function App() {
             </Route>
           </Routes>
         </Router>
-      </ZeffyProvider>
+      </DonationProvider>
     </AuthProvider>
     </>
   );

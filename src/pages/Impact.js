@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Building, Heart, Target, TrendingUp, Award } from 'lucide-react';
-import { useZeffy } from '../contexts/ZeffyContext';
+import { useDonation } from '../contexts/DonationContext';
 
 const Impact = () => {
-  const { openModal } = useZeffy();
+  const { openModal } = useDonation();
   const achievements = [
     {
       icon: <Building className="h-8 w-8" />,

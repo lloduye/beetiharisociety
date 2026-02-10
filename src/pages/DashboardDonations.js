@@ -2,9 +2,9 @@ import React from 'react';
 import { DollarSign, ExternalLink, TrendingUp, Receipt, Shield, Info } from 'lucide-react';
 
 const DashboardDonations = () => {
-  const handleOpenZeffy = (e) => {
+  const handleOpenStripe = (e) => {
     e.preventDefault();
-    window.open('https://www.zeffy.com/en-US/login', '_blank', 'noopener,noreferrer');
+    window.open('https://dashboard.stripe.com', '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -13,7 +13,7 @@ const DashboardDonations = () => {
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h1 className="text-3xl font-bold text-gray-900">Donations</h1>
-          <p className="text-gray-600 mt-1">Manage donations through Zeffy platform</p>
+          <p className="text-gray-600 mt-1">Manage donations through Stripe</p>
         </div>
 
         {/* Main Content */}
@@ -26,9 +26,9 @@ const DashboardDonations = () => {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Donation Management</h2>
               <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Access the Zeffy dashboard to view all donations, track fundraising progress, 
-                manage donor information, and generate reports. Zeffy provides comprehensive 
-                tools for managing the organization's donation campaigns.
+                Access the Stripe dashboard to view all donations, track fundraising progress,
+                manage customer information, and generate reports. Stripe provides comprehensive
+                tools for managing the organization's donation payments.
               </p>
             </div>
 
@@ -39,7 +39,7 @@ const DashboardDonations = () => {
                   <TrendingUp className="h-6 w-6 text-primary-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Track Donations</h3>
-                <p className="text-sm text-gray-600">View real-time donation data and fundraising progress</p>
+                <p className="text-sm text-gray-600">View real-time payment data and fundraising progress</p>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
@@ -47,7 +47,7 @@ const DashboardDonations = () => {
                   <Receipt className="h-6 w-6 text-secondary-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Generate Reports</h3>
-                <p className="text-sm text-gray-600">Export donation data and create detailed financial reports</p>
+                <p className="text-sm text-gray-600">Export payment data and create detailed financial reports</p>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
@@ -55,26 +55,26 @@ const DashboardDonations = () => {
                   <Shield className="h-6 w-6 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Secure Platform</h3>
-                <p className="text-sm text-gray-600">PCI-compliant payment processing through Zeffy</p>
+                <p className="text-sm text-gray-600">PCI-compliant payment processing through Stripe</p>
               </div>
             </div>
 
             {/* Action Button */}
             <div className="text-center border-t border-gray-200 pt-8">
               <p className="text-gray-600 mb-6">
-                Click the button below to open the Zeffy login page in a new browser tab. 
+                Click the button below to open the Stripe Dashboard in a new browser tab.
                 The admin dashboard will remain open in this tab.
               </p>
               <button
-                onClick={handleOpenZeffy}
+                onClick={handleOpenStripe}
                 className="btn-primary text-lg px-8 py-4 flex items-center space-x-3 mx-auto"
               >
                 <ExternalLink className="h-6 w-6" />
-                <span>Open Zeffy Login Page</span>
+                <span>Open Stripe Dashboard</span>
               </button>
               <div className="mt-4 flex items-center justify-center text-sm text-gray-500">
                 <Info className="h-4 w-4 mr-2" />
-                <span>The Zeffy login page will open in a new tab</span>
+                <span>The Stripe Dashboard will open in a new tab</span>
               </div>
             </div>
           </div>
