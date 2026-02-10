@@ -37,7 +37,7 @@ To do that, you must use **Standard keys** (full API access). Do **not** use **R
 2. Open your **site** (e.g. beti-hari society).
 3. Go to **Site configuration** (or **Site settings**) → **Environment variables**.
 4. Click **Add a variable** or **Add environment variable** (or **Edit variables**).
-5. Add **three** variables:
+5. Add **two** variables:
 
    **Variable 1 – Publishable key (for the embedded form in the popup)**  
    - **Key:** `REACT_APP_STRIPE_PUBLISHABLE_KEY`  
@@ -50,13 +50,6 @@ To do that, you must use **Standard keys** (full API access). Do **not** use **R
    - **Value:** your secret key from Stripe (e.g. `sk_test_...` or `sk_live_...`)  
    - **Scopes:** same as above  
    - **Sensitive:** turn **on** so Netlify hides the value in the UI.
-
-   **Variable 3 – Admin passphrase (for the logged-in Donations dashboard tools)**  
-   - **Key:** `STRIPE_ADMIN_PASSPHRASE`  
-   - **Value:** a strong passphrase you choose (store it somewhere safe)  
-   - **Scopes:** same as above  
-   - **Sensitive:** turn **on**  
-   - **Used for:** enabling in-dashboard accounting tools (refunds, exports, payouts, disputes) without logging into Stripe
 
 6. Save / add the variables.
 
