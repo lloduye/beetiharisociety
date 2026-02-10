@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, ExternalLink, Inbox, Shield, Info } from 'lucide-react';
+import { Mail, ExternalLink, Inbox, Send, Shield, Info } from 'lucide-react';
 
 const DashboardEmails = () => {
   const handleOpenEmail = (e) => {

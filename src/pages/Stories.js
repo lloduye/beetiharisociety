@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Share2, Eye, Calendar, User, MapPin, ArrowRight } from 'lucide-react';
 import { storiesService } from '../services/storiesService';
@@ -7,6 +7,7 @@ import { interactionsService } from '../services/interactionsService';
 const Stories = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [stories, setStories] = useState([]);
+  const [storyInteractions, setStoryInteractions] = useState({});
 
   const categories = [
     { id: 'all', name: 'All Stories' },
@@ -15,6 +16,47 @@ const Stories = () => {
     { id: 'community', name: 'Community Impact' },
     { id: 'donors', name: 'Donor Stories' }
   ];
+
+  const loadInteractionsForStories = useCallback(async (storiesList) => {
+    if (!storiesList || storiesList.length === 0) {
+      setStoryInteractions({});
+      return;
+    }
+    try {
+      const interactionsByStory = {};
+      await Promise.all(
+        storiesList.map(async (story) => {
+          const storyId = story.id?.toString();
+          if (!storyId) return;
+          try {
+            const data = await interactionsService.getStoryInteractions(storyId);
+            interactionsByStory[storyId] = {
+              views: data.views || 0,
+              comments: (data.comments || []).length,
+              shares: data.shares || 0,
+            };
+          } catch (error) {
+            console.error('Failed to load interactions for story:', storyId, error);
+          }
+        })
+      );
+      setStoryInteractions(interactionsByStory);
+    } catch (error) {
+      console.error('Failed to load interactions for stories:', error);
+      setStoryInteractions({});
+    }
+  }, []);
+
+  const loadStories = useCallback(async () => {
+    try {
+      // Load published stories from Firestore
+      const allStories = await storiesService.getPublished();
+      setStories(allStories);
+      await loadInteractionsForStories(allStories);
+    } catch (error) {
+      console.error('Failed to load stories:', error);
+    }
+  }, [loadInteractionsForStories]);
 
   useEffect(() => {
     loadStories();
@@ -39,17 +81,7 @@ const Stories = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('storiesUpdated', handleStoriesUpdate);
     };
-  }, []);
-
-  const loadStories = async () => {
-    try {
-      // Load stories - prioritizes localStorage (has admin changes)
-      const allStories = await storiesService.getPublished();
-      setStories(allStories);
-    } catch (error) {
-      console.error('Failed to load stories:', error);
-    }
-  };
+  }, [loadStories]);
 
   const filteredStories = (selectedCategory === 'all' 
     ? stories 
@@ -72,10 +104,11 @@ const Stories = () => {
   };
 
   const formatNumber = (num) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'k';
+    const value = typeof num === 'number' ? num : 0;
+    if (value >= 1000) {
+      return (value / 1000).toFixed(1) + 'k';
     }
-    return num.toString();
+    return value.toString();
   };
 
   return (
@@ -173,15 +206,27 @@ const Stories = () => {
                      <div className="flex items-center space-x-3">
                        <div className="flex items-center">
                          <Eye className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getViews(story.id) || story.views)}</span>
+                         <span>
+                           {formatNumber(
+                             storyInteractions[story.id?.toString()]?.views ?? story.views ?? 0
+                           )}
+                         </span>
                        </div>
                        <div className="flex items-center">
                          <MessageCircle className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getComments(story.id).length || story.comments)}</span>
+                         <span>
+                           {formatNumber(
+                             storyInteractions[story.id?.toString()]?.comments ?? story.comments ?? 0
+                           )}
+                         </span>
                        </div>
                        <div className="flex items-center">
                          <Share2 className="h-3 w-3 mr-1" />
-                         <span>{formatNumber(interactionsService.getShares(story.id) || story.shares)}</span>
+                         <span>
+                           {formatNumber(
+                             storyInteractions[story.id?.toString()]?.shares ?? story.shares ?? 0
+                           )}
+                         </span>
                        </div>
                      </div>
                    </div>
