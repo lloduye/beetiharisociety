@@ -75,6 +75,9 @@ const About = () => {
 
   const [leadership, setLeadership] = useState(boardMembers);
 
+  // Load live leadership info from user profiles once on mount.
+  // boardMembers is static in this component, so it's safe to omit from deps.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadProfiles = async () => {
       try {
