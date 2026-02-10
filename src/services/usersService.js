@@ -197,16 +197,12 @@ export const usersService = {
   },
 
   /**
-   * Reset user password
+   * Reset user password (by email only)
    */
-  async resetPassword(email, team) {
+  async resetPassword(email) {
     const user = await this.getByEmail(email);
     if (!user) {
       throw new Error('User not found');
-    }
-
-    if (user.team !== team) {
-      throw new Error('Team does not match');
     }
 
     // Generate a temporary password
@@ -216,9 +212,10 @@ export const usersService = {
   },
 
   /**
-   * Authenticate user
+   * Authenticate user by email and password.
+   * Team is derived from the stored user record.
    */
-  async authenticate(email, team, password) {
+  async authenticate(email, password) {
     if (!firebaseInitialized || !db) {
       console.warn('Firebase not initialized. Cannot authenticate user.');
       return { success: false, error: 'Firebase is not configured. Please check environment variables in Netlify.' };
@@ -238,15 +235,11 @@ export const usersService = {
         return { success: false, error: 'Invalid email or password' };
       }
 
-      if (user.team !== team) {
-        return { success: false, error: 'Team does not match' };
-      }
-
       // Record successful login metadata on the user record
       try {
         await this.updateUser(user.id, {
           lastLoginAt: serverTimestamp(),
-          lastLoginTeam: team
+          lastLoginTeam: user.team || null
         });
       } catch (metaError) {
         console.error('Error updating user login metadata:', metaError);

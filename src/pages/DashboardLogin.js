@@ -1,23 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usersService } from '../services/usersService';
-import { Lock, Globe, ChevronDown, Mail, ArrowLeft } from 'lucide-react';
+import { Lock, Globe, Mail, ArrowLeft } from 'lucide-react';
 
 const DashboardLogin = () => {
   const [email, setEmail] = useState('');
-  const [team, setTeam] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showTeamDropdown, setShowTeamDropdown] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
-  const [forgotPasswordTeam, setForgotPasswordTeam] = useState('');
   const [forgotPasswordMessage, setForgotPasswordMessage] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-  const dropdownRef = useRef(null);
 
   const teams = [
     'Board of Directors',
@@ -26,34 +22,12 @@ const DashboardLogin = () => {
     'Communications'
   ];
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowTeamDropdown(false);
-      }
-    };
-
-    if (showTeamDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showTeamDropdown]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
     if (!email) {
       setError('Please enter your email.');
-      return;
-    }
-    
-    if (!team) {
-      setError('Please select your team.');
       return;
     }
     
@@ -67,7 +41,7 @@ const DashboardLogin = () => {
     setIsLoading(true);
 
     try {
-      const result = await login(email, team, password);
+      const result = await login(email, password);
       
       if (result.success) {
         navigate('/dashboard');
@@ -94,16 +68,15 @@ const DashboardLogin = () => {
     e.preventDefault();
     setForgotPasswordMessage('');
     
-    if (!forgotPasswordEmail || !forgotPasswordTeam) {
-      setForgotPasswordMessage('Please enter both email and team.');
+    if (!forgotPasswordEmail) {
+      setForgotPasswordMessage('Please enter your email.');
       return;
     }
 
     try {
-      const tempPassword = usersService.resetPassword(forgotPasswordEmail, forgotPasswordTeam);
+      const tempPassword = await usersService.resetPassword(forgotPasswordEmail);
       setForgotPasswordMessage(`Your temporary password is: ${tempPassword}. Please change it after logging in.`);
       setForgotPasswordEmail('');
-      setForgotPasswordTeam('');
     } catch (error) {
       setForgotPasswordMessage(error.message || 'Failed to reset password. Please contact administrator.');
     }
@@ -123,41 +96,6 @@ const DashboardLogin = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="team" className="block text-sm font-medium text-gray-700 mb-2">
-              Team
-            </label>
-            <div className="relative" ref={dropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowTeamDropdown(!showTeamDropdown)}
-                className="block w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-left bg-white"
-              >
-                {team || 'Select your team'}
-              </button>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <ChevronDown className="h-5 w-5 text-gray-400" />
-              </div>
-              {showTeamDropdown && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                  {teams.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        setTeam(t);
-                        setShowTeamDropdown(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-primary-50 hover:text-primary-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email
@@ -206,7 +144,7 @@ const DashboardLogin = () => {
 
           <button
             type="submit"
-            disabled={isLoading || !password || !team || !email}
+            disabled={isLoading || !password || !email}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isLoading ? (
@@ -247,23 +185,6 @@ const DashboardLogin = () => {
               </button>
             </div>
             <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div>
-                <label htmlFor="forgot-team" className="block text-sm font-medium text-gray-700 mb-2">
-                  Team
-                </label>
-                <select
-                  id="forgot-team"
-                  value={forgotPasswordTeam}
-                  onChange={(e) => setForgotPasswordTeam(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  required
-                >
-                  <option value="">Select team</option>
-                  {teams.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
               <div>
                 <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700 mb-2">
                   Email

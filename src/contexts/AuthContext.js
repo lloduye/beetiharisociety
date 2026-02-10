@@ -68,14 +68,15 @@ export const AuthProvider = ({ children }) => {
     initialize();
   }, []);
 
-  const login = async (email, team, password) => {
+  const login = async (email, password) => {
     try {
       // Authenticate using users service
-      const result = await usersService.authenticate(email, team, password);
+      const result = await usersService.authenticate(email, password);
       
       if (result.success) {
         const token = 'admin_' + Date.now();
         const fullName = `${result.user.firstName} ${result.user.lastName}`;
+        const team = result.user.team;
         localStorage.setItem('admin_token', token);
         localStorage.setItem('user_team', team);
         localStorage.setItem('user_email', email);
