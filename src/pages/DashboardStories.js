@@ -26,6 +26,9 @@ const DashboardStories = () => {
     { id: 'donors', name: 'Donor Stories' }
   ];
 
+  // We intentionally run this effect only once on mount to set up
+  // the Firestore listener. The cleanup function unsubscribes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let unsubscribe;
     unsubscribe = loadStories();
