@@ -4,15 +4,35 @@ const Stripe = require('stripe');
 // Set STRIPE_SECRET_KEY in Netlify Environment variables.
 // Body: { amount } for donation (cents), or { subscription: true } for $120/month membership.
 exports.handler = async (event) => {
+  const stripeSecretKey = (process.env.STRIPE_SECRET_KEY || '').trim();
+
+  // Diagnostic: GET or POST { "ping": true } – no Stripe call, just confirm env
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ok: true,
+        message: 'Stripe function is reachable',
+        secretKeySet: !!stripeSecretKey,
+        secretKeyStartsWith: stripeSecretKey ? stripeSecretKey.substring(0, 7) : null,
+      }),
+    };
+  }
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeSecretKey) {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Stripe is not configured. Add STRIPE_SECRET_KEY in Netlify environment variables.' }),
+    };
+  }
+  if (!stripeSecretKey.startsWith('sk_')) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'STRIPE_SECRET_KEY must be a secret key (starts with sk_test_ or sk_live_). You may have used the publishable key (pk_...) by mistake.' }),
     };
   }
 
@@ -21,6 +41,19 @@ exports.handler = async (event) => {
     body = JSON.parse(event.body || '{}');
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+  }
+
+  if (body.ping === true) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ok: true,
+        message: 'Stripe function is reachable',
+        secretKeySet: true,
+        secretKeyStartsWith: stripeSecretKey.substring(0, 7),
+      }),
+    };
   }
 
   const origin = event.headers.origin || event.headers.Referer || '';
@@ -83,10 +116,13 @@ exports.handler = async (event) => {
         ),
       };
     } catch (err) {
-      console.error('Stripe subscription error:', err.message);
+      console.error('Stripe subscription error:', err.type, err.code, err.message);
+      const msg = err.code === 'invalid_api_key' || (err.message && err.message.toLowerCase().includes('api key'))
+        ? `Stripe rejected the secret key. Check: (1) STRIPE_SECRET_KEY in Netlify is the secret key (sk_test_ or sk_live_), (2) no extra spaces/quotes, (3) key not rolled. Stripe: ${err.message}`
+        : (err.message || 'Failed to create checkout session');
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: err.message || 'Failed to create checkout session' }),
+        body: JSON.stringify({ error: msg }),
       };
     }
   }
@@ -130,10 +166,13 @@ exports.handler = async (event) => {
       ),
     };
   } catch (err) {
-    console.error('Stripe Checkout error:', err.message);
+    console.error('Stripe Checkout error:', err.type, err.code, err.message);
+    const msg = err.code === 'invalid_api_key' || (err.message && err.message.toLowerCase().includes('api key'))
+      ? `Stripe rejected the secret key. Check: (1) STRIPE_SECRET_KEY in Netlify is the secret key (sk_test_ or sk_live_), (2) no extra spaces/quotes, (3) key not rolled. Stripe: ${err.message}`
+      : (err.message || 'Failed to create checkout session');
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message || 'Failed to create checkout session' }),
+      body: JSON.stringify({ error: msg }),
     };
   }
 };

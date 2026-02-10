@@ -7,7 +7,7 @@ const DEFAULT_MEMBERSHIP_URL = 'https://donate.betiharisociety.org/b/6oU9AM4se73
 
 export const stripeDonationUrl = process.env.REACT_APP_STRIPE_DONATION_URL || DEFAULT_DONATION_URL;
 export const stripeMembershipUrl = process.env.REACT_APP_STRIPE_MEMBERSHIP_URL || DEFAULT_MEMBERSHIP_URL;
-export const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || '';
+export const stripePublishableKey = (process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || '').trim();
 
 export const hasDonationLink = Boolean(stripeDonationUrl);
 export const hasMembershipLink = Boolean(stripeMembershipUrl);
