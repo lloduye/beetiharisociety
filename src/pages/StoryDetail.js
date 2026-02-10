@@ -404,7 +404,7 @@ const StoryDetail = () => {
              )}
            </div>
 
-           {/* Comments Section */}
+      {/* Comments Section */}
            <div className="mb-12">
              <div className="flex items-center justify-between mb-6">
                <h3 className="text-2xl font-bold text-gray-900">Comments ({interactions.comments || story.comments})</h3>
@@ -511,7 +511,7 @@ const StoryDetail = () => {
 
        {/* Next Stories Section */}
        <section className="bg-gray-50 py-16">
-         <div className="container-custom">
+         <div className="container-custom px-4 sm:px-6 lg:px-8">
            <div className="text-center mb-12">
              <h2 className="text-3xl font-bold text-gray-900 mb-4">More Stories</h2>
              <p className="text-lg text-gray-600">Discover more inspiring stories from our community</p>
@@ -569,16 +569,16 @@ const StoryDetail = () => {
                          <span className="text-xs text-gray-600">By {nextStory.author}</span>
                        </div>
 
-                       {/* Engagement Stats */}
+                       {/* Engagement Stats (preview only, use stored values) */}
                        <div className="flex items-center justify-between text-xs text-gray-500">
                          <div className="flex items-center space-x-3">
                            <div className="flex items-center">
                              <Eye className="h-3 w-3 mr-1" />
-                             <span>{formatNumber(interactionsService.getViews(nextStory.id) || nextStory.views)}</span>
+                             <span>{formatNumber(nextStory.views || 0)}</span>
                            </div>
                            <div className="flex items-center">
                              <MessageCircle className="h-3 w-3 mr-1" />
-                             <span>{formatNumber(interactionsService.getComments(nextStory.id).length || nextStory.comments)}</span>
+                             <span>{formatNumber(nextStory.comments || 0)}</span>
                            </div>
                          </div>
                          <div className="text-primary-600 hover:text-primary-700 font-semibold text-xs flex items-center group">
