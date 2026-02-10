@@ -74,6 +74,10 @@ const About = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [leadership, setLeadership] = useState(boardMembers);
 
+  // Load live leadership info from user profiles once on mount.
+  // boardMembers is a static constant defined outside the component, so we intentionally
+  // do not include it in the dependency array.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadProfiles = async () => {
       try {
@@ -109,7 +113,7 @@ const About = () => {
     };
 
     loadProfiles();
-  }, [boardMembers]);
+  }, []);
 
   const values = [
     {

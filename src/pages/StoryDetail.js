@@ -17,8 +17,7 @@ import {
   Twitter,
   Linkedin,
   Mail,
-  Send,
-  Whatsapp
+  Send
 } from 'lucide-react';
 
 const StoryDetail = () => {
@@ -376,7 +375,7 @@ const StoryDetail = () => {
                       onClick={() => handleShare('whatsapp')}
                       className="flex items-center w-full px-4 py-2 text-left hover:bg-gray-50"
                     >
-                      <Whatsapp className="h-4 w-4 mr-3 text-green-500" />
+                      <Send className="h-4 w-4 mr-3 text-green-500" />
                       WhatsApp
                     </button>
                     <button
