@@ -4,13 +4,30 @@
 
 ---
 
+## How this site uses Stripe (your integration)
+
+This site uses **your own integration**: server-side code (Netlify functions) that talks to Stripe with your **secret key**. That gives full API access so the site can:
+
+- **Create checkout sessions** when someone donates a preset amount (e.g. Sponsor a Classroom, Support a Teacher).
+- **List completed payments** so the Get Involved page can show **live recent donations** and **top donors** to everyone (visitors and logged-in users).
+
+To do that, you must use **Standard keys** (full API access). Do **not** use **Restricted keys** — they limit permissions and can break listing donations and creating checkouts.
+
+| In Stripe Dashboard | Use this |
+|----------------------|----------|
+| **Standard keys** → Publishable key | Copy for `REACT_APP_STRIPE_PUBLISHABLE_KEY` |
+| **Standard keys** → Secret key (click Reveal) | Copy for `STRIPE_SECRET_KEY` |
+| **Restricted keys** | Don’t use for this site |
+
+---
+
 ## Step 1: Get your keys from Stripe
 
 1. Go to [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/apikeys).
-2. You’ll see:
-   - **Publishable key** – starts with `pk_test_` or `pk_live_`. (Safe to use in the browser.)
-   - **Secret key** – click “Reveal” to see it; starts with `sk_test_` or `sk_live_`. (Must stay private, server-only.)
-3. Keep that tab open (or copy the values somewhere private) so you can paste them into Netlify in the next step.
+2. Under **Standard keys** (not “Restricted keys”):
+   - **Publishable key** – copy the value (starts with `pk_test_` or `pk_live_`). Safe to use in the browser.
+   - **Secret key** – click **Reveal**, then copy (starts with `sk_test_` or `sk_live_`). Must stay private, server-only.
+3. Paste **only** the key string: no extra spaces, no quotes. If you use **live** keys for real money, use both live publishable and live secret together (don’t mix test and live).
 
 ---
 
@@ -20,7 +37,7 @@
 2. Open your **site** (e.g. beti-hari society).
 3. Go to **Site configuration** (or **Site settings**) → **Environment variables**.
 4. Click **Add a variable** or **Add environment variable** (or **Edit variables**).
-5. Add **two** variables:
+5. Add **three** variables:
 
    **Variable 1 – Publishable key (for the embedded form in the popup)**  
    - **Key:** `REACT_APP_STRIPE_PUBLISHABLE_KEY`  
@@ -33,6 +50,13 @@
    - **Value:** your secret key from Stripe (e.g. `sk_test_...` or `sk_live_...`)  
    - **Scopes:** same as above  
    - **Sensitive:** turn **on** so Netlify hides the value in the UI.
+
+   **Variable 3 – Admin passphrase (for the logged-in Donations dashboard tools)**  
+   - **Key:** `STRIPE_ADMIN_PASSPHRASE`  
+   - **Value:** a strong passphrase you choose (store it somewhere safe)  
+   - **Scopes:** same as above  
+   - **Sensitive:** turn **on**  
+   - **Used for:** enabling in-dashboard accounting tools (refunds, exports, payouts, disputes) without logging into Stripe
 
 6. Save / add the variables.
 
@@ -83,7 +107,8 @@ Stripe returns this when the wrong key type is used or the value is malformed.
 
 | Symptom | Fix |
 |--------|-----|
-| **Keys swapped** | **STRIPE_SECRET_KEY** must be the **secret** key (starts with `sk_test_` or `sk_live_`). **REACT_APP_STRIPE_PUBLISHABLE_KEY** must be the **publishable** key (starts with `pk_test_` or `pk_live_`). In [Stripe Dashboard → API keys](https://dashboard.stripe.com/apikeys), use "Publishable key" for the former and "Secret key" (Reveal) for the latter. |
+| **Restricted key** | The site needs **full API access**. Use the **Standard** secret key from the API keys page (the one under “Standard keys”), not a key created under “Restricted keys”. |
+| **Keys swapped** | **STRIPE_SECRET_KEY** must be the **secret** key (starts with `sk_test_` or `sk_live_`). **REACT_APP_STRIPE_PUBLISHABLE_KEY** must be the **publishable** key (starts with `pk_test_` or `pk_live_`). In the Dashboard, use “Publishable key” for the former and “Secret key” (Reveal) for the latter. |
 | **Spaces or quotes** | In Netlify, paste the key with **no spaces** before/after and **no quotes** around the value. Edit the variable and re-paste the key. |
 | **Wrong key or rolled** | If you rolled keys in Stripe, the old secret is invalid. Copy the **current** secret key from the Dashboard and update **STRIPE_SECRET_KEY** in Netlify. |
 | **Test vs Live** | Use **test** keys (`pk_test_`, `sk_test_`) for testing; use **live** keys (`pk_live_`, `sk_live_`) for real charges. Don’t mix (e.g. test publishable with live secret). |
