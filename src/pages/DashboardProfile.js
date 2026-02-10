@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usersService } from '../services/usersService';
-import { storageService } from '../services/storageService';
 import { Mail, Phone, MapPin, Image as ImageIcon, User, Loader2 } from 'lucide-react';
 import Cropper from 'react-easy-crop';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
@@ -628,26 +627,9 @@ const DashboardProfile = () => {
                         height
                       );
 
-                      const blob = await new Promise((resolve, reject) => {
-                        canvas.toBlob(
-                          (b) => {
-                            if (!b) {
-                              reject(new Error('Failed to crop image'));
-                            } else {
-                              resolve(b);
-                            }
-                          },
-                          'image/jpeg',
-                          0.9
-                        );
-                      });
-
-                      const file = new File([blob], avatarFile.name || 'avatar.jpg', {
-                        type: 'image/jpeg',
-                      });
-                      const url = await storageService.uploadProfileImage(userId, file);
-                      setFormData((prev) => ({ ...prev, profileImageUrl: url }));
-                      setAvatarPreview(url);
+                      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                      setFormData((prev) => ({ ...prev, profileImageUrl: dataUrl }));
+                      setAvatarPreview(dataUrl);
                       setAvatarFile(null);
                       setCroppedAreaPixels(null);
                       setSuccess('Profile picture updated.');
