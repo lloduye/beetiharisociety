@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { usersService } from '../services/usersService';
+import { storageService } from '../services/storageService';
 import { Mail, Phone, MapPin, Image as ImageIcon, User, Loader2 } from 'lucide-react';
+import Cropper from 'react-easy-crop';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const DashboardProfile = () => {
   const { userEmail } = useAuth();
@@ -26,6 +29,18 @@ const DashboardProfile = () => {
     showOnTeamPage: false,
   });
 
+  // Google Places Autocomplete
+  const addressInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  // Image upload & crop state
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const countries = [
     { code: 'SS', name: 'South Sudan', dialCode: '+211' },
     { code: 'US', name: 'United States', dialCode: '+1' },
@@ -42,20 +57,22 @@ const DashboardProfile = () => {
     countries.find((c) => c.code === code) || countries[0];
 
   const formatPhoneWithDialCode = (raw, dialCode) => {
-    if (!dialCode) {
-      // Ensure it starts with + if user begins typing digits
-      if (!raw) return '';
-      const digits = raw.replace(/[^\d]/g, '');
-      return digits ? `+${digits}` : '';
+    const onlyDigits = (raw || '').replace(/[^\d]/g, '');
+    const baseDigits = (dialCode || '').replace(/[^\d]/g, '');
+
+    let fullDigits = onlyDigits;
+    if (baseDigits && !onlyDigits.startsWith(baseDigits)) {
+      fullDigits = baseDigits + onlyDigits;
     }
 
-    const base = dialCode.replace(/[^\d+]/g, '');
-    const restDigits = raw
-      .replace(/[^\d]/g, '')
-      .replace(base.replace('+', ''), '');
+    if (!fullDigits) return '';
 
-    const combined = base + (restDigits ? restDigits : '');
-    return `+${combined.replace(/^\+/, '')}`;
+    const phoneNumber = parsePhoneNumberFromString(`+${fullDigits}`);
+    if (phoneNumber) {
+      return phoneNumber.formatInternational();
+    }
+
+    return `+${fullDigits}`;
   };
 
   useEffect(() => {
@@ -100,6 +117,61 @@ const DashboardProfile = () => {
 
     loadProfile();
   }, [userEmail]);
+
+  // Initialize Google Places Autocomplete for address field
+  useEffect(() => {
+    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+    if (!apiKey || !addressInputRef.current) {
+      return;
+    }
+
+    const initAutocomplete = () => {
+      if (!window.google || !window.google.maps || !window.google.maps.places) return;
+      if (!addressInputRef.current) return;
+
+      const autocomplete = new window.google.maps.places.Autocomplete(addressInputRef.current, {
+        types: ['geocode'],
+      });
+      autocomplete.setFields(['address_components', 'formatted_address']);
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place) return;
+
+        const components = place.address_components || [];
+        const countryComp = components.find((c) => c.types.includes('country'));
+        const stateComp = components.find((c) => c.types.includes('administrative_area_level_1'));
+
+        const countryCode = countryComp?.short_name || '';
+        const stateName = stateComp?.long_name || '';
+
+        setFormData((prev) => ({
+          ...prev,
+          address: place.formatted_address || prev.address,
+          country: countryCode || prev.country,
+          stateProvince: stateName || prev.stateProvince,
+        }));
+      });
+
+      autocompleteRef.current = autocomplete;
+    };
+
+    const existing = document.querySelector(
+      'script[src*="maps.googleapis.com/maps/api/js"]'
+    );
+    if (!existing) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.async = true;
+      script.onload = initAutocomplete;
+      document.head.appendChild(script);
+    } else {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initAutocomplete();
+      } else {
+        existing.addEventListener('load', initAutocomplete);
+      }
+    }
+  }, []);
 
   const handleChange = (field) => (e) => {
     if (field === 'showOnTeamPage') {
@@ -170,9 +242,10 @@ const DashboardProfile = () => {
     return initials || 'U';
   };
 
-  const avatar = formData.profileImageUrl ? (
+  const avatarSrc = avatarPreview || formData.profileImageUrl;
+  const avatar = avatarSrc ? (
     <img
-      src={formData.profileImageUrl}
+      src={avatarSrc}
       alt="Profile"
       className="h-16 w-16 rounded-full object-cover border border-gray-200"
     />
@@ -355,11 +428,12 @@ const DashboardProfile = () => {
                 <MapPin className="h-4 w-4 text-gray-400" />
               </div>
               <textarea
+                ref={addressInputRef}
                 value={formData.address}
                 onChange={handleChange('address')}
                 rows={2}
                 className="block w-full pl-9 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-                placeholder="Street and city (browser autofill supported)"
+                placeholder="Start typing your address…"
                 autoComplete="street-address"
               />
             </div>
@@ -379,17 +453,25 @@ const DashboardProfile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Profile picture URL
+                Profile picture
               </label>
               <input
-                type="url"
-                value={formData.profileImageUrl}
-                onChange={handleChange('profileImageUrl')}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="https://example.com/your-photo.jpg"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files && e.target.files[0];
+                  if (!file) return;
+                  setAvatarFile(file);
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    setAvatarPreview(reader.result?.toString() || null);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="block w-full text-sm text-gray-700"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Use a clear, square image. This will appear next to your name on the team page.
+                Upload a clear image. You can crop it before saving.
               </p>
             </div>
             <div>
@@ -441,14 +523,131 @@ const DashboardProfile = () => {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={saving || !userId}
+            disabled={saving || uploadingImage || !userId}
             className="btn-primary inline-flex items-center"
           >
-            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <span>{saving ? 'Saving changes...' : 'Save profile'}</span>
+            {(saving || uploadingImage) && (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            )}
+            <span>
+              {uploadingImage
+                ? 'Uploading picture...'
+                : saving
+                ? 'Saving changes...'
+                : 'Save profile'}
+            </span>
           </button>
         </div>
       </form>
+
+      {/* Cropper overlay for profile image */}
+      {avatarFile && avatarPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-4 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Crop profile picture</h3>
+            <div className="relative w-full h-64 bg-black rounded-lg overflow-hidden">
+              <Cropper
+                image={avatarPreview}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels)}
+              />
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-1/2"
+              />
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAvatarFile(null);
+                    setAvatarPreview(formData.profileImageUrl || null);
+                    setCroppedAreaPixels(null);
+                  }}
+                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={uploadingImage || !userId}
+                  onClick={async () => {
+                    if (!avatarPreview || !croppedAreaPixels || !userId) return;
+                    try {
+                      setUploadingImage(true);
+                      const imageElement = new Image();
+                      imageElement.src = avatarPreview;
+                      await new Promise((resolve, reject) => {
+                        imageElement.onload = resolve;
+                        imageElement.onerror = reject;
+                      });
+
+                      const canvas = document.createElement('canvas');
+                      const ctx = canvas.getContext('2d');
+                      const { width, height, x, y } = croppedAreaPixels;
+                      canvas.width = width;
+                      canvas.height = height;
+                      ctx.drawImage(
+                        imageElement,
+                        x,
+                        y,
+                        width,
+                        height,
+                        0,
+                        0,
+                        width,
+                        height
+                      );
+
+                      const blob = await new Promise((resolve, reject) => {
+                        canvas.toBlob(
+                          (b) => {
+                            if (!b) {
+                              reject(new Error('Failed to crop image'));
+                            } else {
+                              resolve(b);
+                            }
+                          },
+                          'image/jpeg',
+                          0.9
+                        );
+                      });
+
+                      const file = new File([blob], avatarFile.name || 'avatar.jpg', {
+                        type: 'image/jpeg',
+                      });
+                      const url = await storageService.uploadProfileImage(userId, file);
+                      setFormData((prev) => ({ ...prev, profileImageUrl: url }));
+                      setAvatarPreview(url);
+                      setAvatarFile(null);
+                      setCroppedAreaPixels(null);
+                      setSuccess('Profile picture updated.');
+                    } catch (err) {
+                      console.error('Failed to upload profile image:', err);
+                      setError('Failed to upload profile image. Please try again.');
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
+                  className="px-4 py-2 text-sm btn-primary"
+                >
+                  {uploadingImage ? 'Saving...' : 'Use this photo'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 // Firebase configuration
 // These values MUST be set in environment variables
@@ -18,6 +19,7 @@ const firebaseConfig = {
 let app;
 let db;
 let auth;
+let storage;
 let firebaseInitialized = false;
 let firebaseError = null;
 
@@ -46,6 +48,7 @@ if (missingVars.length > 0) {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    storage = getStorage(app);
     firebaseInitialized = true;
     console.log('✅ Firebase initialized successfully');
     console.log('Firebase Project:', firebaseConfig.projectId);
@@ -60,6 +63,6 @@ if (missingVars.length > 0) {
 }
 
 // Export error state so UI can show it
-export { db, auth, firebaseInitialized, firebaseError };
+export { db, auth, storage, firebaseInitialized, firebaseError };
 export default app;
 
