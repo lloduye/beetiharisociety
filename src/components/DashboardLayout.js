@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const DashboardLayout = () => {
-  const { logout, userTeam, userEmail } = useAuth();
+  const { logout, userTeam, userEmail, userName } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [userPosition, setUserPosition] = useState(null);
@@ -63,6 +63,27 @@ const DashboardLayout = () => {
 
   const navigation = getNavigationItems();
 
+  const getUserSubtitle = () => {
+    if (userName && userTeam && userPosition) {
+      return `${userName} • ${userTeam} - ${userPosition}`;
+    }
+    if (userName && userTeam) {
+      return `${userName} • ${userTeam}`;
+    }
+    if (userName) {
+      return userName;
+    }
+    if (userTeam && userPosition) {
+      return `${userTeam} - ${userPosition}`;
+    }
+    if (userTeam) {
+      return `${userTeam} Dashboard`;
+    }
+    return 'Dashboard';
+  };
+
+  const userSubtitle = getUserSubtitle();
+
   const isActive = (path) => {
     if (path === '/dashboard') {
       return location.pathname === '/dashboard';
@@ -82,11 +103,7 @@ const DashboardLayout = () => {
               <div>
                 <h1 className="text-sm md:text-xl font-bold text-gray-900 whitespace-nowrap">BETI-HARI SOCIETY</h1>
                 <p className="text-xs text-gray-600 hidden sm:block">
-                  {userTeam && userPosition 
-                    ? `${userTeam} - ${userPosition}`
-                    : userTeam 
-                    ? `${userTeam} Dashboard`
-                    : 'Dashboard'}
+                  {userSubtitle}
                 </p>
               </div>
             </Link>

@@ -40,7 +40,7 @@ const DashboardUsers = () => {
   const [error, setError] = useState('');
   const [loginActivity, setLoginActivity] = useState([]);
   const [activityError, setActivityError] = useState('');
-  const [activityLoading, setActivityLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   const teams = [
     'Board of Directors',
@@ -51,7 +51,6 @@ const DashboardUsers = () => {
 
   useEffect(() => {
     loadUsers();
-    loadLoginActivity();
   }, []);
 
   const loadUsers = async () => {
@@ -66,17 +65,42 @@ const DashboardUsers = () => {
     }
   };
 
-  const loadLoginActivity = async () => {
+  // Derive recent login activity from users' lastLoginAt field
+  useEffect(() => {
+    if (loading) return;
+
+    setActivityLoading(true);
     try {
-      const events = await usersService.getRecentLogins(10);
+      const getMillis = (value) => {
+        if (!value) return 0;
+        if (typeof value.toMillis === 'function') return value.toMillis();
+        if (typeof value.toDate === 'function') return value.toDate().getTime();
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? 0 : date.getTime();
+      };
+
+      const events = users
+        .filter((u) => u.lastLoginAt)
+        .sort((a, b) => getMillis(b.lastLoginAt) - getMillis(a.lastLoginAt))
+        .slice(0, 10)
+        .map((user) => ({
+          id: user.id,
+          userId: user.id,
+          email: user.email,
+          team: user.team,
+          timestamp: user.lastLoginAt
+        }));
+
       setLoginActivity(events);
+      setActivityError('');
     } catch (err) {
-      console.error('Failed to load login activity:', err);
+      console.error('Failed to build login activity from users:', err);
       setActivityError('Failed to load login activity');
+      setLoginActivity([]);
     } finally {
       setActivityLoading(false);
     }
-  };
+  }, [users, loading]);
 
   const formatDate = (value) => {
     if (!value) return '—';
@@ -307,7 +331,7 @@ const DashboardUsers = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -335,14 +359,14 @@ const DashboardUsers = () => {
           updates.password = formData.password;
         }
 
-        usersService.updateUser(editingUser.id, updates);
+        await usersService.updateUser(editingUser.id, updates);
       } else {
         // Create new user
         if (!formData.password) {
           setError('Password is required for new users');
           return;
         }
-        usersService.createUser(formData);
+        await usersService.createUser(formData);
       }
       
       setShowModal(false);

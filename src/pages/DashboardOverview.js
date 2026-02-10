@@ -221,24 +221,24 @@ const DashboardOverview = () => {
 
   const getRoleBasedMessage = (team, position) => {
     if (!team) {
-      return "Here's what's happening with BETI-HARI SOCIETY. Use this dashboard to stay informed about our impact and community engagement.";
+      return "Use this dashboard to keep track of donations, stories, and engagement across BETI-HARI SOCIETY.";
     }
 
     switch (team) {
       case 'Administration':
-        return `As part of the ${team} team${position ? ` (${position})` : ''}, you have full access to manage all aspects of the organization. You can oversee stories, track donations, manage user accounts, and monitor real-time engagement metrics. Your comprehensive view helps ensure smooth operations and strategic decision-making across all departments.`;
+        return `You have full access${position ? ` as ${position}` : ''}. From here you can oversee stories, donations, users, and emails to keep the whole organization running smoothly.`;
 
       case 'Board of Directors':
-        return `As a member of the ${team}${position ? ` (${position})` : ''}, you have access to financial oversight and donation tracking. Monitor fundraising progress, review donor contributions, and analyze financial trends to guide organizational strategy. Your insights help ensure sustainable growth and effective resource allocation for our education and economic development programs.`;
+        return `This view focuses on fundraising and impact${position ? ` for your role as ${position}` : ''}. Use the donation overview and reports to support strategic decisions.`;
 
       case 'Finance':
-        return `In your role with the ${team} department${position ? ` (${position})` : ''}, you can track all donation activities, monitor fundraising progress, and analyze financial data through Stripe. Use this dashboard to review donation trends, export financial reports, and ensure transparent financial management that supports our mission in South Sudan.`;
+        return `This dashboard is centered on Stripe donations${position ? ` for your role as ${position}` : ''}. Track total revenue, trends, and recent payments for financial reporting.`;
 
       case 'Communications':
-        return `As part of the ${team} team${position ? ` (${position})` : ''}, you can create, edit, and manage stories that showcase our impact. Share inspiring narratives from our community, monitor engagement metrics, and ensure our message reaches supporters effectively. Your storytelling helps amplify the voices of those we serve and demonstrates the real-world impact of our programs.`;
+        return `This dashboard highlights story performance${position ? ` for your role as ${position}` : ''}. Monitor views, likes, comments, and use quick links to manage stories.`;
 
       default:
-        return `Welcome to the BETI-HARI SOCIETY dashboard! As a member of the ${team}${position ? ` (${position})` : ''}, you can access relevant information and tools to support our mission of empowering children and communities through education in South Sudan.`;
+        return `This dashboard shows the key information for your role${position ? ` as ${position}` : ''} at BETI-HARI SOCIETY.`;
     }
   };
 
@@ -324,42 +324,48 @@ const DashboardOverview = () => {
         ];
 
       case 'Board of Directors':
-      case 'Finance':
-        // Finance and Board see donation-focused stats
+      case 'Finance': {
+        // Finance and Board: donation-focused stats only
+        const totalAmount = donationSummary?.totalAmount || 0;
+        const totalCount = donationSummary?.totalCount || 0;
+        const last30Amount = donationSummary?.last30DaysAmount || 0;
+        const last30Count = donationSummary?.last30DaysCount || 0;
+
         return [
           {
-            name: 'Donation Platform',
-            value: 'Stripe',
-            change: 'Active',
+            name: 'Total Raised',
+            value: donationSummary ? formatCurrency(totalAmount) : '—',
+            change: donationSummary ? `${totalCount} completed donations` : 'All time',
             icon: DollarSign,
             color: 'primary',
             link: '/dashboard/donations'
           },
           {
-            name: 'Story Engagement',
-            value: stats.totalViews.toLocaleString(),
-            change: 'Total Views',
-            icon: Eye,
-            color: 'green',
-            link: '/dashboard'
-          },
-          {
-            name: 'Community Impact',
-            value: stats.publishedStories.toString(),
-            change: 'Stories Shared',
-            icon: BookOpen,
-            color: 'secondary',
-            link: '/dashboard'
-          },
-          {
-            name: 'Engagement Rate',
-            value: stats.totalLikes > 0 ? `${Math.round((stats.totalLikes / Math.max(stats.totalViews, 1)) * 100)}%` : '0%',
-            change: 'Likes per View',
+            name: 'Last 30 Days',
+            value: donationSummary ? formatCurrency(last30Amount) : '—',
+            change: donationSummary ? `${last30Count} donations in last month` : 'Recent period',
             icon: TrendingUp,
+            color: 'green',
+            link: '/dashboard/donations'
+          },
+          {
+            name: 'Average Donation',
+            value: totalCount > 0 ? formatCurrency(totalAmount / totalCount) : '—',
+            change: 'Across all completed donations',
+            icon: Users,
+            color: 'secondary',
+            link: '/dashboard/donations'
+          },
+          {
+            name: 'Donation Platform',
+            value: 'Stripe',
+            change: 'Live payments',
+            icon: DollarSign,
             color: 'purple',
-            link: '/dashboard'
+            link: '/dashboard/donations'
           },
         ];
+      }
 
       default:
         // Default: show basic engagement stats
@@ -462,54 +468,56 @@ const DashboardOverview = () => {
         </p>
       </div>
 
-      {/* High-priority donation overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Total Raised (Stripe)
-            </p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              {donationSummary ? formatCurrency(donationSummary.totalAmount) : '—'}
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
-              {donationSummary
-                ? `${donationSummary.totalCount} completed donations`
-                : donationLoading
-                ? 'Loading live donation data…'
-                : donationError || 'No donation data yet'}
-            </p>
+      {/* High-priority donation overview (Admin, Finance, Board only) */}
+      {(userTeam === 'Administration' || userTeam === 'Finance' || userTeam === 'Board of Directors') && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Total Raised (Stripe)
+              </p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">
+                {donationSummary ? formatCurrency(donationSummary.totalAmount) : '—'}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                {donationSummary
+                  ? `${donationSummary.totalCount} completed donations`
+                  : donationLoading
+                  ? 'Loading live donation data…'
+                  : donationError || 'No donation data yet'}
+              </p>
+            </div>
+            <Link
+              to="/dashboard/donations"
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-primary-600 text-white text-xs font-medium shadow-sm hover:bg-primary-700 transition-colors"
+            >
+              <DollarSign className="h-4 w-4 mr-1" />
+              View Details
+            </Link>
           </div>
-          <Link
-            to="/dashboard/donations"
-            className="inline-flex items-center px-3 py-2 rounded-lg bg-primary-600 text-white text-xs font-medium shadow-sm hover:bg-primary-700 transition-colors"
-          >
-            <DollarSign className="h-4 w-4 mr-1" />
-            View Details
-          </Link>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Last 30 Days (Stripe)
-            </p>
-            <p className="mt-2 text-2xl font-bold text-gray-900">
-              {donationSummary ? formatCurrency(donationSummary.last30DaysAmount) : '—'}
-            </p>
-            <p className="mt-1 text-xs text-gray-500">
-              {donationSummary
-                ? `${donationSummary.last30DaysCount} donations in the last month`
-                : donationLoading
-                ? 'Refreshing from Stripe…'
-                : ''}
-            </p>
-          </div>
-          <div className="bg-green-100 rounded-full p-3">
-            <TrendingUp className="h-6 w-6 text-green-600" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Last 30 Days (Stripe)
+              </p>
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {donationSummary ? formatCurrency(donationSummary.last30DaysAmount) : '—'}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                {donationSummary
+                  ? `${donationSummary.last30DaysCount} donations in the last month`
+                  : donationLoading
+                  ? 'Refreshing from Stripe…'
+                  : ''}
+              </p>
+            </div>
+            <div className="bg-green-100 rounded-full p-3">
+              <TrendingUp className="h-6 w-6 text-green-600" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Stats Grid */}
       {statsData.length > 0 && (
@@ -546,87 +554,91 @@ const DashboardOverview = () => {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Story Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
-          <div className="space-y-4">
-            {recentActivity.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>No recent activity yet</p>
-                <p className="text-sm mt-2">
-                  Activity will appear here as visitors interact with stories.
-                </p>
-              </div>
-            ) : (
-              <>
-                {recentActivity.slice(0, storyActivityLimit).map((activity, index) => {
-                  const Icon = getActivityIcon(activity.type);
-                  return (
-                    <div
-                      key={`${activity.storyId}-${activity.timestamp}-${index}`}
-                      className="flex items-start space-x-3 pb-4 border-b border-gray-200 last:border-0"
-                    >
-                      <div className={`rounded-full p-2 ${getActivityColor(activity.type)}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-900">{getActivityMessage(activity)}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatTimeAgo(activity.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                {recentActivity.length > storyActivityLimit && (
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setStoryActivityLimit((prev) =>
-                          Math.min(prev + 5, recentActivity.length)
-                        )
-                      }
-                      className="text-xs font-medium text-primary-600 hover:text-primary-700"
-                    >
-                      Load more activity
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Donations Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
-          <div className="space-y-3">
-            {donationLoading ? (
-              <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
-            ) : donationError ? (
-              <p className="text-sm text-gray-500">{donationError}</p>
-            ) : donationRecent.length === 0 ? (
-              <p className="text-sm text-gray-500">No donations yet.</p>
-            ) : (
-              donationRecent.slice(0, 8).map((d, index) => (
-                <div
-                  key={`${d.time}-${index}`}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{d.name}</p>
-                    <p className="text-xs text-gray-500">{d.time}</p>
-                  </div>
-                  <div className="text-sm font-bold text-green-600">
-                    {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
-                  </div>
+        {/* Recent Story Activity - Administration & Communications */}
+        {(userTeam === 'Administration' || userTeam === 'Communications' || !userTeam) && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Story Activity</h2>
+            <div className="space-y-4">
+              {recentActivity.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>No recent activity yet</p>
+                  <p className="text-sm mt-2">
+                    Activity will appear here as visitors interact with stories.
+                  </p>
                 </div>
-              ))
-            )}
+              ) : (
+                <>
+                  {recentActivity.slice(0, storyActivityLimit).map((activity, index) => {
+                    const Icon = getActivityIcon(activity.type);
+                    return (
+                      <div
+                        key={`${activity.storyId}-${activity.timestamp}-${index}`}
+                        className="flex items-start space-x-3 pb-4 border-b border-gray-200 last:border-0"
+                      >
+                        <div className={`rounded-full p-2 ${getActivityColor(activity.type)}`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-900">{getActivityMessage(activity)}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatTimeAgo(activity.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {recentActivity.length > storyActivityLimit && (
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setStoryActivityLimit((prev) =>
+                            Math.min(prev + 5, recentActivity.length)
+                          )
+                        }
+                        className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                      >
+                        Load more activity
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Recent Donations Activity - Administration, Finance & Board */}
+        {(userTeam === 'Administration' || userTeam === 'Finance' || userTeam === 'Board of Directors' || !userTeam) && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Donation Activity</h2>
+            <div className="space-y-3">
+              {donationLoading ? (
+                <p className="text-sm text-gray-500">Loading recent donations from Stripe…</p>
+              ) : donationError ? (
+                <p className="text-sm text-gray-500">{donationError}</p>
+              ) : donationRecent.length === 0 ? (
+                <p className="text-sm text-gray-500">No donations yet.</p>
+              ) : (
+                donationRecent.slice(0, 8).map((d, index) => (
+                  <div
+                    key={`${d.time}-${index}`}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">{d.name}</p>
+                      <p className="text-xs text-gray-500">{d.time}</p>
+                    </div>
+                    <div className="text-sm font-bold text-green-600">
+                      {typeof d.amount === 'number' ? formatCurrency(d.amount) : d.amount}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Compact quick actions */}
         {quickActions.length > 0 && (
