@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { storiesService } from '../services/storiesService';
 import { interactionsService } from '../services/interactionsService';
@@ -26,20 +26,7 @@ const DashboardStories = () => {
     { id: 'donors', name: 'Donor Stories' }
   ];
 
-  // We intentionally run this effect only once on mount to set up
-  // the Firestore listener. The cleanup function unsubscribes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    let unsubscribe;
-    unsubscribe = loadStories();
-    return () => {
-      if (unsubscribe && typeof unsubscribe === 'function') {
-        unsubscribe();
-      }
-    };
-  }, []);
-
-  const loadInteractionsForStories = async (storiesList) => {
+  const loadInteractionsForStories = useCallback(async (storiesList) => {
     if (!storiesList || storiesList.length === 0) return;
     try {
       const interactionsByStory = {};
@@ -65,9 +52,9 @@ const DashboardStories = () => {
     } catch (error) {
       console.error('Failed to load interactions for stories:', error);
     }
-  };
+  }, []);
 
-  const loadStories = () => {
+  const loadStories = useCallback(() => {
     try {
       setLoading(true);
       let timeoutId;
@@ -108,7 +95,17 @@ const DashboardStories = () => {
       setLoading(false);
       return null;
     }
-  };
+  }, [loadInteractionsForStories]);
+
+  useEffect(() => {
+    let unsubscribe;
+    unsubscribe = loadStories();
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [loadStories]);
 
   const saveStories = async (updatedStories) => {
     try {
