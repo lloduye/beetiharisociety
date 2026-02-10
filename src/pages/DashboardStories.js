@@ -26,7 +26,6 @@ import {
 const DashboardStories = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -139,21 +138,6 @@ const DashboardStories = () => {
   useEffect(() => {
     loadRecentActivity();
   }, [loadRecentActivity]);
-
-  const saveStories = async (updatedStories) => {
-    try {
-      setSaving(true);
-      await storiesService.saveStories(updatedStories);
-      // Optional: Show success message
-      return true;
-    } catch (error) {
-      console.error('Failed to save stories:', error);
-      alert('Failed to save stories');
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this story? This will remove it from the website.')) {
@@ -313,9 +297,6 @@ const DashboardStories = () => {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Stories Management</h1>
               <p className="text-gray-600 mt-1">Manage and publish stories for the website</p>
-              {saving && (
-                <p className="text-sm text-primary-600 mt-1">Saving changes...</p>
-              )}
             </div>
             <Link
               to="/dashboard/stories/new"
