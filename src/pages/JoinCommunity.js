@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Loader2, Heart } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, Heart, Info, Gift, Shield } from 'lucide-react';
+import { AsYouType, getCountryCallingCode } from 'libphonenumber-js';
 import { communityMembersService } from '../services/communityMembersService';
 import { stripeMembershipUrl } from '../config/stripe';
 
@@ -17,6 +18,27 @@ const COUNTRIES = [
   'Tanzania', 'Thailand', 'Tunisia', 'Turkey', 'Uganda', 'Ukraine', 'United Arab Emirates',
   'United Kingdom', 'United States', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe', 'Other',
 ];
+
+const COUNTRY_TO_ISO = {
+  Afghanistan: 'AF', Albania: 'AL', Algeria: 'DZ', Andorra: 'AD', Angola: 'AO',
+  Argentina: 'AR', Armenia: 'AM', Australia: 'AU', Austria: 'AT', Bahrain: 'BH',
+  Bangladesh: 'BD', Belgium: 'BE', Brazil: 'BR', Bulgaria: 'BG', Cambodia: 'KH',
+  Cameroon: 'CM', Canada: 'CA', Chile: 'CL', China: 'CN', Colombia: 'CO',
+  Croatia: 'HR', Cyprus: 'CY', 'Czech Republic': 'CZ', Denmark: 'DK', Egypt: 'EG',
+  Estonia: 'EE', Ethiopia: 'ET', Finland: 'FI', France: 'FR', Germany: 'DE',
+  Ghana: 'GH', Greece: 'GR', 'Hong Kong': 'HK', Hungary: 'HU', India: 'IN',
+  Indonesia: 'ID', Iran: 'IR', Iraq: 'IQ', Ireland: 'IE', Israel: 'IL',
+  Italy: 'IT', Japan: 'JP', Jordan: 'JO', Kenya: 'KE', 'South Korea': 'KR',
+  Kuwait: 'KW', Lebanon: 'LB', Malaysia: 'MY', Mexico: 'MX', Morocco: 'MA',
+  Netherlands: 'NL', 'New Zealand': 'NZ', Nigeria: 'NG', Norway: 'NO',
+  Pakistan: 'PK', Palestine: 'PS', Philippines: 'PH', Poland: 'PL', Portugal: 'PT',
+  Qatar: 'QA', Romania: 'RO', Russia: 'RU', 'Saudi Arabia': 'SA', Singapore: 'SG',
+  'South Africa': 'ZA', 'South Sudan': 'SS', Spain: 'ES', 'Sri Lanka': 'LK',
+  Sudan: 'SD', Sweden: 'SE', Switzerland: 'CH', Syria: 'SY', Taiwan: 'TW',
+  Tanzania: 'TZ', Thailand: 'TH', Tunisia: 'TN', Turkey: 'TR', Uganda: 'UG',
+  Ukraine: 'UA', 'United Arab Emirates': 'AE', 'United Kingdom': 'GB',
+  'United States': 'US', Vietnam: 'VN', Yemen: 'YE', Zambia: 'ZM', Zimbabwe: 'ZW',
+};
 
 const JoinCommunity = () => {
   const [formData, setFormData] = useState({
@@ -37,8 +59,41 @@ const JoinCommunity = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === 'country') next.phone = '';
+      return next;
+    });
   };
+
+  const countryIso = useMemo(() => formData.country && formData.country !== 'Other' ? COUNTRY_TO_ISO[formData.country] : null, [formData.country]);
+  const callingCode = useMemo(() => countryIso ? getCountryCallingCode(countryIso) : '', [countryIso]);
+
+  const handlePhoneChange = (e) => {
+    const raw = e.target.value;
+    if (!countryIso) {
+      const asYouType = new AsYouType();
+      asYouType.input(raw);
+      const num = asYouType.getNumber();
+      setFormData((prev) => ({
+        ...prev,
+        phone: num ? num.number : (raw ? new AsYouType().input(raw) : ''),
+      }));
+      return;
+    }
+    const digits = raw.replace(/\D/g, '');
+    const stripped = digits.startsWith(callingCode) ? digits.slice(callingCode.length) : digits;
+    const e164 = stripped ? `+${callingCode}${stripped}` : '';
+    setFormData((prev) => ({ ...prev, phone: e164 }));
+  };
+
+  const phoneDisplayValue = useMemo(() => {
+    if (!formData.phone) return '';
+    if (!countryIso) return formData.phone;
+    const digits = formData.phone.replace(/\D/g, '');
+    const national = digits.startsWith(callingCode) ? digits.slice(callingCode.length) : digits;
+    return national ? new AsYouType(countryIso).input(national) : '';
+  }, [formData.phone, countryIso, callingCode]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +158,7 @@ const JoinCommunity = () => {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-primary-50 to-secondary-50 py-12 sm:py-16 px-4 flex justify-center">
         <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl p-8 text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-10 w-10 text-green-600" />
@@ -118,7 +173,7 @@ const JoinCommunity = () => {
             You can make donations or become a paying member at any time. We will keep you informed
             about our work and ways to get involved.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center">
             <Link
               to="/get-involved"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors"
@@ -135,6 +190,12 @@ const JoinCommunity = () => {
                 Become a Paying Member ($120/mo)
               </a>
             )}
+            <Link
+              to="/join"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+            >
+              Return to Join Page
+            </Link>
           </div>
         </div>
       </div>
@@ -142,23 +203,26 @@ const JoinCommunity = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50">
-      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 rounded-full mb-4">
-            <Heart className="h-7 w-7 text-primary-600" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+    <div className="bg-gradient-to-br from-primary-50 to-secondary-50">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {/* Header - compact */}
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Heart className="h-8 w-8 text-primary-600" />
             Join the Beti-Hari Society Community
           </h1>
-          <p className="mt-3 text-gray-600 max-w-xl mx-auto">
-            Sign up to become part of our community. Your information helps us stay connected and
-            enables future donations and membership.
+          <p className="mt-3 text-gray-600">
+            Sign up to become part of our community of advocates committed to supporting education
+            and economic development in South Sudan. Your membership helps us stay connected with
+            you, share updates on our work with the Didinga children in Lotukei sub-county, and
+            makes it easy for you to donate or become a paying member whenever you&apos;re ready.
           </p>
         </div>
 
-        {/* Form */}
+        {/* Form first, info side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
+          {/* Form - key, first */}
+          <div className="lg:col-span-3">
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
@@ -214,7 +278,7 @@ const JoinCommunity = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full address *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
               <div className="space-y-3">
                 <input
                   type="text"
@@ -272,13 +336,26 @@ const JoinCommunity = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="+1 234 567 8900"
-              />
+              <div className="flex">
+                {countryIso && (
+                  <span className="inline-flex items-center px-3 py-2.5 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-700">
+                    +{callingCode}
+                  </span>
+                )}
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  value={phoneDisplayValue}
+                  onChange={handlePhoneChange}
+                  className={`flex-1 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${countryIso ? 'rounded-l-none' : ''}`}
+                  placeholder={
+                    countryIso
+                      ? (countryIso === 'US' ? '(555) 123-4567' : 'Enter your number')
+                      : 'e.g. +44 7911 123456'
+                  }
+                />
+              </div>
             </div>
 
             <div className="pt-2">
@@ -321,13 +398,53 @@ const JoinCommunity = () => {
             </p>
           </div>
         </form>
-
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-500">
           Already part of our community?{' '}
           <Link to="/get-involved" className="text-primary-600 font-medium hover:underline">
             Get involved
           </Link>
         </p>
+          </div>
+
+          {/* Info - side by side */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-6">
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                <Info className="h-4 w-4 text-primary-600 flex-shrink-0" />
+                What membership means
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                You join a network of advocates supporting education and economic development in South Sudan — a declaration of support for the Didinga children in Lotukei sub-county. Whether you donate, volunteer, or stay informed, you stand with a community for change.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                <Shield className="h-4 w-4 text-primary-600 flex-shrink-0" />
+                Why we collect this
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed mb-2">We use your details to:</p>
+              <ul className="text-gray-600 text-sm space-y-1 list-disc list-inside">
+                <li>Keep you updated on our impact</li>
+                <li>Enable secure donations and payments</li>
+                <li>Send newsletters and event invites</li>
+                <li>Meet legal and tax requirements</li>
+              </ul>
+              <p className="text-gray-600 text-xs mt-2">Stored securely. Never sold.</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                <Gift className="h-4 w-4 text-primary-600 flex-shrink-0" />
+                Membership perks
+              </h2>
+              <ul className="text-gray-600 text-sm space-y-2">
+                <li><strong className="text-gray-900">Stay informed</strong> — Updates on programs and impact</li>
+                <li><strong className="text-gray-900">Easy giving</strong> — One-step donations with info on file</li>
+                <li><strong className="text-gray-900">Get involved</strong> — Volunteer and advocacy opportunities</li>
+                <li><strong className="text-gray-900">Make an impact</strong> — Support education for every child</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
