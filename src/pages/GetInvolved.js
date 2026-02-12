@@ -4,7 +4,7 @@ import { Heart, Users, Share2, Mail, DollarSign, ArrowRight, Gift, HandHeart, X,
 import { useDonation } from '../contexts/DonationContext';
 
 const GetInvolved = () => {
-  const { openModal, openMembership, openDonationWithAmount } = useDonation();
+  const { openModal, openDonationWithAmount } = useDonation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showMembershipThankYou, setShowMembershipThankYou] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
@@ -150,7 +150,7 @@ const GetInvolved = () => {
       return;
     }
     if (actionType === 'membership') {
-      openMembership();
+      window.location.href = '/join';
       return;
     }
     setActiveModal(actionType);

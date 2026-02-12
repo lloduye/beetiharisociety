@@ -40,6 +40,11 @@ service cloud.firestore {
       allow write: if true;
     }
     
+    // Community members - public create (signup form), read for dashboard
+    match /communityMembers/{memberId} {
+      allow read, write: if true;
+    }
+    
     // Default: deny all other access
     match /{document=**} {
       allow read, write: if false;

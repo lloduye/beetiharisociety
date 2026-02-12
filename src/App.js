@@ -28,6 +28,8 @@ import DashboardEmails from './pages/DashboardEmails';
 import DashboardUsers from './pages/DashboardUsers';
 import DashboardProfile from './pages/DashboardProfile';
 import DashboardLogin from './pages/DashboardLogin';
+import DashboardCommunity from './pages/DashboardCommunity';
+import JoinCommunity from './pages/JoinCommunity';
 
 function App() {
   return (
@@ -48,6 +50,11 @@ function App() {
               <Route index element={
                 <RoleProtectedRoute>
                   <DashboardOverview />
+                </RoleProtectedRoute>
+              } />
+              <Route path="community" element={
+                <RoleProtectedRoute>
+                  <DashboardCommunity />
                 </RoleProtectedRoute>
               } />
               <Route path="donations" element={
@@ -90,6 +97,7 @@ function App() {
             {/* Public routes with navbar and footer */}
             <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
+              <Route path="join" element={<JoinCommunity />} />
               <Route path="about" element={<About />} />
               <Route path="mission" element={<Mission />} />
               <Route path="what-we-do" element={<WhatWeDo />} />

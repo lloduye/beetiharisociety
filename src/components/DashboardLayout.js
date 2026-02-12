@@ -12,7 +12,8 @@ import {
   X,
   Home,
   Globe,
-  Users
+  Users,
+  UserPlus
 } from 'lucide-react';
 
 const DashboardLayout = () => {
@@ -38,9 +39,10 @@ const DashboardLayout = () => {
     loadUserPosition();
   }, [userEmail]);
 
-  // Define all navigation items with team permissions (order: Overview, Donations, Stories, Mailbox, Users)
+  // Define all navigation items with team permissions (order: Overview, Community, Donations, Stories, Mailbox, Users)
   const allNavigationItems = [
     { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] },
+    { name: 'Community', href: '/dashboard/community', icon: UserPlus, teams: ['Board of Directors', 'Finance', 'Administration'] },
     { name: 'Donations', href: '/dashboard/donations', icon: DollarSign, teams: ['Board of Directors', 'Finance', 'Administration'] },
     { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
     { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] },
