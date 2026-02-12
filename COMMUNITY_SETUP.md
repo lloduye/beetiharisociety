@@ -2,10 +2,11 @@
 
 ## Overview
 
-The Beti-Hari Society website now includes:
+The Beti-Hari Society website includes:
 
 1. **Public signup form** – `/join` – sharable link for self-service community membership
-2. **Community dashboard** – `/dashboard/community` – Stripe-integrated view of members, payments, and subscriptions
+2. **Community dashboard** – `/dashboard/community` – full management of members (after Donations, before Mailbox)
+3. **Update info form** – `/community/update-info` – members can update their own information
 
 ## Shareable Link
 
@@ -27,20 +28,20 @@ On submit:
 
 - **Stripe:** `STRIPE_SECRET_KEY` must be set in Netlify environment variables
 - **Firebase/Firestore:** Must be configured. Add `communityMembers` to Firestore rules (see FIRESTORE_RULES.md)
+- **Email (newsletter):** `MXROUTE_SERVER`, `MXROUTE_USERNAME`, `MXROUTE_PASSWORD`, `MXROUTE_FROM` for sending newsletters and info-update requests
 
 ## Community Dashboard (Admin)
 
-When logged in, navigate to **Community** (before Mailbox in the nav). Available to:
-- Board of Directors
-- Finance
-- Administration
+Navigate to **Community** (after Donations, before Mailbox). Available to Board of Directors, Finance, and Administration.
 
-Features:
-- List all Stripe customers (community members)
-- Search by email
-- View details: payments (charges), subscriptions
-- Link to Stripe Dashboard
-- Live data – click **Refresh** to fetch latest from Stripe
+### Features
+
+- **Add Member** – Manually add a community member (creates Stripe customer + Firestore record)
+- **Edit Member** – Click "View" on any member to open details; edit name, email, phone, address; save updates both Stripe and Firestore
+- **Send Newsletter** – Select members (or use all) and send an email to multiple recipients
+- **Request Payment** – Create a Stripe invoice for a member (amount + description), send to their email
+- **Request Info Update** – Send an email to selected members with a link to update their information; or copy the update link to share manually
+- **View payments & subscriptions** – In member details, see recent charges and active subscriptions
 
 ## Firestore
 
@@ -56,3 +57,6 @@ match /communityMembers/{memberId} {
 
 - `register-community-member` – Creates Stripe customer from signup form data
 - `stripe-customers` – Lists Stripe customers; with `?customer=cus_xxx` returns single customer with charges and subscriptions
+- `update-stripe-customer` – Updates a Stripe customer (name, email, phone, address)
+- `request-payment` – Creates and sends a Stripe invoice to a customer
+- `send-newsletter` – Sends email to multiple recipients (uses MXroute)

@@ -105,4 +105,34 @@ export const communityMembersService = {
     await setDoc(docRef, record);
     return { id: docRef.id, ...record };
   },
+
+  /**
+   * Update a community member by Firestore doc ID or by stripeCustomerId
+   */
+  async update(memberIdOrStripeId, updates) {
+    if (!firebaseInitialized || !db) {
+      throw new Error('Firebase is not initialized.');
+    }
+
+    let docRef;
+    if (memberIdOrStripeId.startsWith('cus_')) {
+      const member = await this.getByStripeCustomerId(memberIdOrStripeId);
+      if (!member) throw new Error('Community member not found in Firestore.');
+      docRef = doc(db, COMMUNITY_MEMBERS_COLLECTION, member.id);
+    } else {
+      docRef = doc(db, COMMUNITY_MEMBERS_COLLECTION, memberIdOrStripeId);
+    }
+
+    const safeFields = ['firstName', 'lastName', 'email', 'phone', 'country', 'addressLine1', 'addressLine2', 'city', 'state', 'postalCode'];
+    const updateData = { updatedAt: serverTimestamp() };
+    for (const key of safeFields) {
+      if (updates[key] != null) {
+        const v = String(updates[key]).trim();
+        updateData[key] = key === 'email' ? v.toLowerCase() : v;
+      }
+    }
+
+    if (Object.keys(updateData).length <= 1) return;
+    await setDoc(docRef, updateData, { merge: true });
+  },
 };
