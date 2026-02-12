@@ -51,7 +51,9 @@ exports.handler = async (event) => {
       const currency = (s.currency || 'usd').toUpperCase();
       return {
         id: s.id,
+        customerId: s.customer || null,
         name: name.split(' ')[0] + (name.includes(' ') ? '.' : ''),
+        fullName: s.customer_details?.name || name,
         email,
         amount,
         date,
@@ -189,8 +191,12 @@ exports.handler = async (event) => {
     donations.sort((a, b) => (b.created || 0) - (a.created || 0));
     const recentDonations = donations.slice(0, 20).map((d) => ({
       name: d.name,
+      fullName: d.fullName,
+      email: d.email,
       amount: d.amount,
       date: d.date,
+      created: d.created,
+      currency: d.currency,
       time: formatTimeAgo(d.created),
     }));
 
@@ -199,18 +205,22 @@ exports.handler = async (event) => {
       const key = d.email || d.name;
       if (!byEmail[key]) {
         byEmail[key] = {
+          email: d.email,
           name: d.name,
+          fullName: d.fullName,
           total: 0,
           count: 0,
           country: d.country || 'Unknown',
           state: d.state || null,
           lastDonation: d.created || null,
+          customerId: d.customerId || null,
         };
       }
       byEmail[key].total += d.amount;
       byEmail[key].count += 1;
       if (d.created && (!byEmail[key].lastDonation || d.created > byEmail[key].lastDonation)) {
         byEmail[key].lastDonation = d.created;
+        byEmail[key].customerId = d.customerId || byEmail[key].customerId;
       }
     });
     const topDonors = Object.values(byEmail)
@@ -222,16 +232,18 @@ exports.handler = async (event) => {
         count: d.count,
       }));
 
-    // Full donors list for admin (anonymized, no raw email)
     const donors = Object.values(byEmail)
       .sort((a, b) => (b.lastDonation || 0) - (a.lastDonation || 0))
       .map((d, index) => ({
         id: index + 1,
+        email: d.email,
         name: d.name,
+        fullName: d.fullName,
         total: Math.round(d.total * 100) / 100,
         count: d.count,
         country: d.country,
         state: d.state,
+        customerId: d.customerId,
         lastDonationDate: d.lastDonation ? new Date(d.lastDonation * 1000) : null,
         lastDonationTime: d.lastDonation ? formatTimeAgo(d.lastDonation) : '',
       }));
@@ -241,6 +253,7 @@ exports.handler = async (event) => {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
       body: JSON.stringify({
         recentDonations,
+        donations: donations.slice(0, 100),
         topDonors,
         summary,
         byCountry,

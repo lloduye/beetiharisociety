@@ -86,6 +86,7 @@ exports.handler = async (event) => {
     try {
       const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
+        customer_creation: 'always',
         ...sessionOptions({
           success_url: successUrl,
           cancel_url: cancelUrl,
@@ -143,6 +144,7 @@ exports.handler = async (event) => {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      customer_creation: 'always',
       ...sessionOptions({
         success_url: donationSuccessUrl,
         cancel_url: donationCancelUrl,

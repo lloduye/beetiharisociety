@@ -5,7 +5,6 @@ import {
   DollarSign,
   CreditCard,
   RefreshCw,
-  Phone,
   Loader2,
   X,
   UserPlus,
@@ -25,7 +24,7 @@ const formatCurrency = (value, currency = 'USD') => {
 
 const formatDate = (timestamp) => {
   if (!timestamp) return '—';
-  const d = new Date(timestamp * 1000);
+  const d = timestamp instanceof Date ? timestamp : new Date((timestamp || 0) * 1000);
   return d.toLocaleDateString();
 };
 
@@ -44,11 +43,11 @@ const INIT_MEMBER = {
 
 const Modal = ({ isOpen, onClose, title, children }) =>
   isOpen ? (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] p-4" onClick={onClose}>
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="h-6 w-6" /></button>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="h-6 w-6" /></button>
         </div>
         <div className="p-6">{children}</div>
       </div>
@@ -57,6 +56,8 @@ const Modal = ({ isOpen, onClose, title, children }) =>
 
 const DashboardCommunity = () => {
   const [customers, setCustomers] = useState([]);
+  const [recentSignups, setRecentSignups] = useState([]);
+  const [recentDonors, setRecentDonors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(false);
@@ -86,40 +87,91 @@ const DashboardCommunity = () => {
   const [requestInfoResult, setRequestInfoResult] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const fetchCustomers = useCallback(async (append = false) => {
+  const fetchAllData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
       params.set('limit', '50');
-      if (append && lastId) params.set('starting_after', lastId);
       if (searchEmail.trim()) params.set('email', searchEmail.trim());
-      const res = await fetch(`/.netlify/functions/stripe-customers?${params}`);
-      const data = await res.json();
-      if (data.error) {
-        setError(data.error);
-        if (!append) setCustomers([]);
-      } else {
-        setCustomers((prev) => (append ? [...prev, ...data.customers] : data.customers));
-        setHasMore(data.hasMore);
-        setLastId(data.lastId || null);
-      }
+
+      const [customersRes, donationsRes] = await Promise.all([
+        fetch(`/.netlify/functions/stripe-customers?${params}`),
+        fetch('/.netlify/functions/get-donations'),
+      ]);
+      const customersData = await customersRes.json();
+      const donationsData = await donationsRes.json();
+
+      const stripeCustomers = customersData.customers || [];
+      const customerMap = new Map();
+      stripeCustomers.forEach((c) => {
+        const email = (c.email || '').toLowerCase();
+        if (email) customerMap.set(email, { ...c, id: c.id });
+      });
+
+      (donationsData.donations || []).forEach((d) => {
+        const email = (d.email || '').toLowerCase();
+        if (email && !customerMap.has(email) && d.customerId) {
+          customerMap.set(email, {
+            id: d.customerId,
+            email: d.email,
+            name: d.fullName || d.name,
+            created: d.created,
+            source: 'donation',
+          });
+        }
+      });
+
+      const merged = Array.from(customerMap.values()).sort((a, b) => (b.created || 0) - (a.created || 0));
+
+      setCustomers(customersData.error ? [] : merged.length ? merged : stripeCustomers);
+      setHasMore(customersData.hasMore || false);
+      setLastId(customersData.lastId || null);
+
+      const allDonations = donationsData.donations || [];
+      const recentDonationsList = [...allDonations].sort((a, b) => (b.created || 0) - (a.created || 0)).slice(0, 15);
+      setRecentDonors(recentDonationsList);
+
+      const { communityMembersService } = await import('../services/communityMembersService');
+      const signups = await communityMembersService.getAll();
+      setRecentSignups(signups.slice(0, 15));
     } catch (err) {
-      setError(err.message || 'Failed to load community members');
-      if (!append) setCustomers([]);
+      setError(err.message || 'Failed to load data');
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
-  }, [lastId, searchEmail]);
+  }, [searchEmail]);
 
   useEffect(() => {
-    fetchCustomers(false);
+    fetchAllData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setLastId(null);
+    setHasMore(false);
+    fetchAllData();
+  };
+
   const handleLoadMore = () => {
     if (!hasMore || loading) return;
-    fetchCustomers(true);
+    setLoading(true);
+    fetch(`/.netlify/functions/stripe-customers?limit=50&starting_after=${lastId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) {
+          setCustomers((prev) => {
+            const existingEmails = new Set(prev.map((c) => (c.email || '').toLowerCase()));
+            const newOnes = (data.customers || []).filter((c) => !existingEmails.has((c.email || '').toLowerCase()));
+            return [...prev, ...newOnes].sort((a, b) => (b.created || 0) - (a.created || 0));
+          });
+          setHasMore(data.hasMore || false);
+          setLastId(data.lastId || null);
+        }
+      })
+      .finally(() => setLoading(false));
   };
 
   const fetchCustomerDetail = useCallback(async (customerId) => {
@@ -181,30 +233,15 @@ const DashboardCommunity = () => {
       const res = await fetch('/.netlify/functions/register-community-member', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: addForm.firstName,
-          lastName: addForm.lastName,
-          email: addForm.email,
-          phone: addForm.phone,
-          country: addForm.country,
-          addressLine1: addForm.addressLine1,
-          addressLine2: addForm.addressLine2,
-          city: addForm.city,
-          state: addForm.state,
-          postalCode: addForm.postalCode,
-        }),
+        body: JSON.stringify(addForm),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to add member');
       const { communityMembersService } = await import('../services/communityMembersService');
-      await communityMembersService.create({
-        ...addForm,
-        stripeCustomerId: data.stripeCustomerId,
-        consentGiven: true,
-      });
+      await communityMembersService.create({ ...addForm, stripeCustomerId: data.stripeCustomerId, consentGiven: true });
       setAddModal(false);
       setAddForm(INIT_MEMBER);
-      fetchCustomers(false);
+      fetchAllData();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -220,10 +257,7 @@ const DashboardCommunity = () => {
       const res = await fetch('/.netlify/functions/update-stripe-customer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerId: selectedCustomer.id,
-          ...editForm,
-        }),
+        body: JSON.stringify({ customerId: selectedCustomer.id, ...editForm }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update');
@@ -244,7 +278,7 @@ const DashboardCommunity = () => {
       ? customers.filter((c) => selectedIds.has(c.id)).map((c) => c.email).filter(Boolean)
       : customers.map((c) => c.email).filter(Boolean);
     if (recipients.length === 0) {
-      setNewsletterResult({ success: false, message: 'No recipients selected.' });
+      setNewsletterResult({ success: false, message: 'No recipients selected. Add members first.' });
       return;
     }
     setNewsletterSending(true);
@@ -253,11 +287,7 @@ const DashboardCommunity = () => {
       const res = await fetch('/.netlify/functions/send-newsletter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          recipients,
-          subject: newsletterSubject,
-          body: newsletterBody,
-        }),
+        body: JSON.stringify({ recipients, subject: newsletterSubject, body: newsletterBody }),
       });
       const data = await res.json();
       setNewsletterResult(data);
@@ -344,12 +374,7 @@ const DashboardCommunity = () => {
 
   const handleOpenStripe = () => window.open('https://dashboard.stripe.com/customers', '_blank');
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setLastId(null);
-    setHasMore(false);
-    fetchCustomers(false);
-  };
+  const hasStripeCustomer = (c) => c && (c.id?.startsWith('cus_') || c.customerId?.startsWith('cus_'));
 
   return (
     <div className="w-full space-y-6">
@@ -363,19 +388,19 @@ const DashboardCommunity = () => {
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </div>
         <div className="flex flex-wrap gap-3">
-          <button onClick={() => setAddModal(true)} className="inline-flex items-center px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700">
+          <button type="button" onClick={() => setAddModal(true)} className="inline-flex items-center px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700">
             <UserPlus className="h-4 w-4 mr-2" /> Add Member
           </button>
-          <button onClick={() => { setNewsletterModal(true); setNewsletterResult(null); }} className="inline-flex items-center px-4 py-2 rounded-lg bg-secondary-500 text-white text-sm font-medium hover:bg-secondary-600">
+          <button type="button" onClick={() => { setNewsletterModal(true); setNewsletterResult(null); }} className="inline-flex items-center px-4 py-2 rounded-lg bg-secondary-500 text-white text-sm font-medium hover:bg-secondary-600">
             <Send className="h-4 w-4 mr-2" /> Send Newsletter
           </button>
-          <button onClick={() => setRequestInfoModal(true)} className="inline-flex items-center px-4 py-2 rounded-lg border border-primary-600 text-primary-600 text-sm font-medium hover:bg-primary-50">
+          <button type="button" onClick={() => setRequestInfoModal(true)} className="inline-flex items-center px-4 py-2 rounded-lg border border-primary-600 text-primary-600 text-sm font-medium hover:bg-primary-50">
             <FileText className="h-4 w-4 mr-2" /> Request Info Update
           </button>
-          <button onClick={handleOpenStripe} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50">
+          <button type="button" onClick={handleOpenStripe} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50">
             <ExternalLink className="h-4 w-4 mr-2" /> Stripe
           </button>
-          <button onClick={() => fetchCustomers(false)} disabled={loading} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 disabled:opacity-50">
+          <button type="button" onClick={() => fetchAllData(false)} disabled={loading} className="inline-flex items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 disabled:opacity-50">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
@@ -392,72 +417,107 @@ const DashboardCommunity = () => {
         </form>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3">
-                  <input type="checkbox" checked={customers.length > 0 && selectedIds.size === customers.length} onChange={toggleSelectAll} className="rounded" />
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Member</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Country</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Joined</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading && customers.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-500"><Loader2 className="h-8 w-8 animate-spin mx-auto" /></td></tr>
-              ) : customers.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-500">No members. <a href="/join" className="text-primary-600 hover:underline">Share /join</a> to sign up.</td></tr>
-              ) : (
-                customers.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelect(c.id)} className="rounded" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{c.name || '—'}</div>
-                      {c.phone && <div className="text-xs text-gray-500"><Phone className="h-3 w-3 inline mr-1" />{c.phone}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{c.email || '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{c.address?.country || '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(c.created)}</td>
-                    <td className="px-4 py-3 text-right flex justify-end gap-2">
-                      <button onClick={() => fetchCustomerDetail(c.id)} className="text-primary-600 hover:text-primary-700 text-sm">View</button>
-                      <button onClick={() => setPaymentModal(c)} className="text-green-600 hover:text-green-700 text-sm">Request Payment</button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        {hasMore && (
-          <div className="px-4 py-3 bg-gray-50 border-t text-center">
-            <button onClick={handleLoadMore} disabled={loading} className="text-sm text-primary-600 hover:text-primary-700 font-medium">Load more</button>
+      {/* 3-column layout: Members | Recent Signups | Recent Donors */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Members list */}
+        <div className="xl:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <h2 className="px-4 py-3 bg-gray-50 border-b font-semibold text-gray-900">All Members</h2>
+          <div className="max-h-[500px] overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2"><input type="checkbox" checked={customers.length > 0 && selectedIds.size === customers.length} onChange={toggleSelectAll} className="rounded" /></th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500">Member</th>
+                  <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading && customers.length === 0 ? (
+                  <tr><td colSpan={3} className="px-4 py-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto" /></td></tr>
+                ) : customers.length === 0 ? (
+                  <tr><td colSpan={3} className="px-4 py-8 text-center text-sm text-gray-500">No members. <a href="/join" className="text-primary-600 hover:underline">Share /join</a></td></tr>
+                ) : (
+                  customers.map((c) => (
+                    <tr key={c.id} className="hover:bg-gray-50">
+                      <td className="px-3 py-2"><input type="checkbox" checked={selectedIds.has(c.id)} onChange={() => toggleSelect(c.id)} className="rounded" /></td>
+                      <td className="px-3 py-2">
+                        <div className="font-medium text-gray-900 text-sm">{c.name || c.email || '—'}</div>
+                        <div className="text-xs text-gray-500">{c.email || '—'}</div>
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        <button type="button" onClick={() => fetchCustomerDetail(c.id)} className="text-primary-600 hover:text-primary-700 text-xs mr-2">View</button>
+                        {hasStripeCustomer(c) && (
+                          <button type="button" onClick={() => setPaymentModal(c)} className="text-green-600 hover:text-green-700 text-xs">Request Payment</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+          {hasMore && (
+            <div className="px-4 py-2 bg-gray-50 border-t text-center">
+              <button type="button" onClick={handleLoadMore} disabled={loading} className="text-xs text-primary-600 font-medium">Load more</button>
+            </div>
+          )}
+        </div>
+
+        {/* Recent signups */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <h2 className="px-4 py-3 bg-gray-50 border-b font-semibold text-gray-900">Recent Signups</h2>
+          <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100">
+            {recentSignups.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-gray-500">No signups yet</div>
+            ) : (
+              recentSignups.map((s) => (
+                <div key={s.id} className="px-4 py-3 hover:bg-gray-50">
+                  <div className="font-medium text-gray-900 text-sm">{s.firstName} {s.lastName}</div>
+                  <div className="text-xs text-gray-500">{s.email}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {s.createdAt?.toDate ? formatDate(s.createdAt.toDate()) : (s.createdAt ? formatDate(s.createdAt) : '—')}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Recent donors */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <h2 className="px-4 py-3 bg-gray-50 border-b font-semibold text-gray-900">Recent Donors</h2>
+          <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100">
+            {recentDonors.length === 0 ? (
+              <div className="px-4 py-8 text-center text-sm text-gray-500">No donations yet</div>
+            ) : (
+              recentDonors.map((d, i) => (
+                <div key={d.id || i} className="px-4 py-3 hover:bg-gray-50">
+                  <div className="font-medium text-gray-900 text-sm">{d.fullName || d.name || 'Anonymous'}</div>
+                  <div className="text-xs text-gray-500">{d.email || '—'}</div>
+                  <div className="text-xs text-green-600 font-medium mt-0.5">{formatCurrency(d.amount, d.currency)}</div>
+                  <div className="text-xs text-gray-400">{formatDate(d.created)}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Add Member Modal */}
       <Modal isOpen={addModal} onClose={() => setAddModal(false)} title="Add Community Member">
         <form onSubmit={handleAddMember} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">First name *</label><input type="text" required value={addForm.firstName} onChange={(e) => setAddForm({ ...addForm, firstName: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Last name *</label><input type="text" required value={addForm.lastName} onChange={(e) => setAddForm({ ...addForm, lastName: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">First name *</label><input type="text" required value={addForm.firstName} onChange={(e) => setAddForm((p) => ({ ...p, firstName: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">Last name *</label><input type="text" required value={addForm.lastName} onChange={(e) => setAddForm((p) => ({ ...p, lastName: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
           </div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Email *</label><input type="email" required value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Phone</label><input type="tel" value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Country</label><input type="text" value={addForm.country} onChange={(e) => setAddForm({ ...addForm, country: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Address</label><input type="text" value={addForm.addressLine1} onChange={(e) => setAddForm({ ...addForm, addressLine1: e.target.value })} className="w-full px-3 py-2 border rounded-lg mb-2" placeholder="Line 1" /><input type="text" value={addForm.addressLine2} onChange={(e) => setAddForm({ ...addForm, addressLine2: e.target.value })} className="w-full px-3 py-2 border rounded-lg" placeholder="Line 2" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Email *</label><input type="email" required value={addForm.email} onChange={(e) => setAddForm((p) => ({ ...p, email: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Phone</label><input type="tel" value={addForm.phone} onChange={(e) => setAddForm((p) => ({ ...p, phone: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Country</label><input type="text" value={addForm.country} onChange={(e) => setAddForm((p) => ({ ...p, country: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Address</label><input type="text" value={addForm.addressLine1} onChange={(e) => setAddForm((p) => ({ ...p, addressLine1: e.target.value }))} className="w-full px-3 py-2 border rounded-lg mb-2" placeholder="Line 1" /><input type="text" value={addForm.addressLine2} onChange={(e) => setAddForm((p) => ({ ...p, addressLine2: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" placeholder="Line 2" /></div>
           <div className="grid grid-cols-3 gap-2">
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">City</label><input type="text" value={addForm.city} onChange={(e) => setAddForm({ ...addForm, city: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">State</label><input type="text" value={addForm.state} onChange={(e) => setAddForm({ ...addForm, state: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-            <div><label className="block text-sm font-medium text-gray-700 mb-1">Postal</label><input type="text" value={addForm.postalCode} onChange={(e) => setAddForm({ ...addForm, postalCode: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">City</label><input type="text" value={addForm.city} onChange={(e) => setAddForm((p) => ({ ...p, city: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">State</label><input type="text" value={addForm.state} onChange={(e) => setAddForm((p) => ({ ...p, state: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-1">Postal</label><input type="text" value={addForm.postalCode} onChange={(e) => setAddForm((p) => ({ ...p, postalCode: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
           </div>
           <div className="flex gap-3 pt-4">
             <button type="button" onClick={() => setAddModal(false)} className="flex-1 py-2 border rounded-lg">Cancel</button>
@@ -468,11 +528,11 @@ const DashboardCommunity = () => {
 
       {/* Detail + Edit Modal */}
       {selectedCustomerId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={closeDetailModal}>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] p-4" onClick={closeDetailModal}>
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold text-gray-900">Member Details</h2>
-              <button onClick={closeDetailModal} className="text-gray-400 hover:text-gray-600"><X className="h-6 w-6" /></button>
+              <button type="button" onClick={closeDetailModal} className="text-gray-400 hover:text-gray-600"><X className="h-6 w-6" /></button>
             </div>
             {detailLoading ? (
               <div className="p-12 text-center"><Loader2 className="h-10 w-10 animate-spin mx-auto text-primary-600" /></div>
@@ -480,17 +540,17 @@ const DashboardCommunity = () => {
               <div className="p-6 space-y-6">
                 <form onSubmit={handleEditMember} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">First name</label><input type="text" value={editForm.firstName} onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">Last name</label><input type="text" value={editForm.lastName} onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">First name</label><input type="text" value={editForm.firstName} onChange={(e) => setEditForm((p) => ({ ...p, firstName: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">Last name</label><input type="text" value={editForm.lastName} onChange={(e) => setEditForm((p) => ({ ...p, lastName: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
                   </div>
-                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Email</label><input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Phone</label><input type="tel" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Country</label><input type="text" value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Address</label><input type="text" value={editForm.addressLine1} onChange={(e) => setEditForm({ ...editForm, addressLine1: e.target.value })} className="w-full px-3 py-2 border rounded-lg mb-2" /><input type="text" value={editForm.addressLine2} onChange={(e) => setEditForm({ ...editForm, addressLine2: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Email</label><input type="email" value={editForm.email} onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Phone</label><input type="tel" value={editForm.phone} onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Country</label><input type="text" value={editForm.country} onChange={(e) => setEditForm((p) => ({ ...p, country: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                  <div><label className="block text-xs font-semibold text-gray-500 mb-1">Address</label><input type="text" value={editForm.addressLine1} onChange={(e) => setEditForm((p) => ({ ...p, addressLine1: e.target.value }))} className="w-full px-3 py-2 border rounded-lg mb-2" /><input type="text" value={editForm.addressLine2} onChange={(e) => setEditForm((p) => ({ ...p, addressLine2: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
                   <div className="grid grid-cols-3 gap-2">
-                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">City</label><input type="text" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">State</label><input type="text" value={editForm.state} onChange={(e) => setEditForm({ ...editForm, state: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">Postal</label><input type="text" value={editForm.postalCode} onChange={(e) => setEditForm({ ...editForm, postalCode: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">City</label><input type="text" value={editForm.city} onChange={(e) => setEditForm((p) => ({ ...p, city: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">State</label><input type="text" value={editForm.state} onChange={(e) => setEditForm((p) => ({ ...p, state: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
+                    <div><label className="block text-xs font-semibold text-gray-500 mb-1">Postal</label><input type="text" value={editForm.postalCode} onChange={(e) => setEditForm((p) => ({ ...p, postalCode: e.target.value }))} className="w-full px-3 py-2 border rounded-lg" /></div>
                   </div>
                   <div className="flex gap-3">
                     <button type="button" onClick={() => setPaymentModal(selectedCustomer)} className="flex-1 py-2 rounded-lg bg-green-600 text-white text-sm font-medium">Request Payment</button>
@@ -581,7 +641,7 @@ const DashboardCommunity = () => {
           {requestInfoResult && <p className={`text-sm ${requestInfoResult.success ? 'text-green-600' : 'text-red-600'}`}>{requestInfoResult.success ? `Sent to ${requestInfoResult.sent} recipient(s).` : requestInfoResult.message}</p>}
           <div className="flex gap-3">
             <button type="button" onClick={() => setRequestInfoModal(false)} className="flex-1 py-2 border rounded-lg">Close</button>
-            <button onClick={handleRequestInfoUpdate} disabled={requestInfoSending} className="flex-1 py-2 rounded-lg bg-primary-600 text-white font-medium disabled:opacity-50">{requestInfoSending ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Send Email'}</button>
+            <button type="button" onClick={handleRequestInfoUpdate} disabled={requestInfoSending} className="flex-1 py-2 rounded-lg bg-primary-600 text-white font-medium disabled:opacity-50">{requestInfoSending ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : 'Send Email'}</button>
           </div>
         </div>
       </Modal>
