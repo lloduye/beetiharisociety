@@ -57,6 +57,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/projects" className="text-gray-300 hover:text-white transition-colors">
+                  Projects
+                </Link>
+              </li>
+              <li>
                 <Link to="/impact" className="text-gray-300 hover:text-white transition-colors">
                   Our Impact
                 </Link>
@@ -117,7 +122,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Beti-Hari Society for Education & Economic Development. All rights reserved.
+              © {new Date().getFullYear()} Beti-Hari Society for Education & Economic Development. All rights reserved.
             </p>
             <div className="flex items-center space-x-2 mt-4 md:mt-0">
               <BookOpen className="h-4 w-4 text-primary-400" />

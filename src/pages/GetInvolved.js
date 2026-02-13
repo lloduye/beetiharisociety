@@ -894,10 +894,10 @@ const GetInvolved = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="section-padding bg-primary-600 text-white">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 bg-primary-600 text-white">
         <div className="container-custom text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Involved?</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Ready to Get Involved?</h2>
+          <p className="text-lg mb-5 max-w-3xl mx-auto">
             Whether you want to make a donation, volunteer your time, or simply learn more about our work, we'd love to hear from you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

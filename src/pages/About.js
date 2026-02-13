@@ -358,10 +358,10 @@ const About = () => {
       )}
 
       {/* Call to Action */}
-      <section className="section-padding bg-primary-600 text-white">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 bg-primary-600 text-white">
         <div className="container-custom text-center">
-          <h2 className="text-3xl font-bold mb-6">Join Our Mission</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Join Our Mission</h2>
+          <p className="text-lg mb-5 max-w-3xl mx-auto">
             Support our mission by joining our community of advocates. Stand with the Didinga children in Lotukei sub-county in their right to learn, grow, and thrive.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -18,6 +18,8 @@ import WhatWeDo from './pages/WhatWeDo';
 import Impact from './pages/Impact';
 import Stories from './pages/Stories';
 import StoryDetail from './pages/StoryDetail';
+import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
 import GetInvolved from './pages/GetInvolved';
 import Contact from './pages/Contact';
 import DashboardOverview from './pages/DashboardOverview';
@@ -29,6 +31,8 @@ import DashboardUsers from './pages/DashboardUsers';
 import DashboardProfile from './pages/DashboardProfile';
 import DashboardLogin from './pages/DashboardLogin';
 import DashboardCommunity from './pages/DashboardCommunity';
+import DashboardProjects from './pages/DashboardProjects';
+import ProjectEdit from './pages/ProjectEdit';
 import JoinCommunity from './pages/JoinCommunity';
 import CommunityUpdateInfo from './pages/CommunityUpdateInfo';
 
@@ -61,6 +65,21 @@ function App() {
               <Route path="donations" element={
                 <RoleProtectedRoute>
                   <DashboardDonations />
+                </RoleProtectedRoute>
+              } />
+              <Route path="projects" element={
+                <RoleProtectedRoute>
+                  <DashboardProjects />
+                </RoleProtectedRoute>
+              } />
+              <Route path="projects/new" element={
+                <RoleProtectedRoute>
+                  <ProjectEdit />
+                </RoleProtectedRoute>
+              } />
+              <Route path="projects/:id/edit" element={
+                <RoleProtectedRoute>
+                  <ProjectEdit />
                 </RoleProtectedRoute>
               } />
               <Route path="stories" element={
@@ -104,6 +123,8 @@ function App() {
               <Route path="mission" element={<Mission />} />
               <Route path="what-we-do" element={<WhatWeDo />} />
               <Route path="impact" element={<Impact />} />
+              <Route path="projects" element={<Projects />} />
+              <Route path="projects/:slug" element={<ProjectDetail />} />
               <Route path="stories" element={<Stories />} />
               <Route path="stories/:id" element={<StoryDetail />} />
               <Route path="get-involved" element={<GetInvolved />} />

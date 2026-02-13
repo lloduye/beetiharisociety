@@ -45,6 +45,12 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
+    // Projects - public read, write for admins
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if true; // TODO: Restrict to authenticated admins later
+    }
+    
     // Default: deny all other access
     match /{document=**} {
       allow read, write: if false;

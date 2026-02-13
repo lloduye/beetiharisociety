@@ -203,23 +203,33 @@ const JoinCommunity = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-primary-50 to-secondary-50">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Header - compact */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Heart className="h-8 w-8 text-primary-600" />
-            Join the Beti-Hari Society Community
-          </h1>
-          <p className="mt-3 text-gray-600">
-            Sign up to become part of our community of advocates committed to supporting education
-            and economic development in South Sudan. Your membership helps us stay connected with
-            you, share updates on our work with the Didinga children in Lotukei sub-county, and
-            makes it easy for you to donate or become a paying member whenever you&apos;re ready.
-          </p>
+    <div>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-primary-600 to-primary-700 text-white py-11">
+        <div className="container-custom px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-2xl md:text-3xl font-bold mb-3 flex items-center justify-center gap-2">
+              <Heart className="h-8 w-8" />
+              Join the Beti-Hari Society Community
+            </h1>
+            <p className="text-base text-primary-100">
+              Sign up to become part of our community of advocates committed to supporting education
+              and economic development in South Sudan.
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Form first, info side by side */}
+      {/* Form Section */}
+      <section className="section-padding bg-gradient-to-br from-primary-50 to-secondary-50">
+        <div className="container-custom">
+          <p className="text-center text-gray-600 mb-8 max-w-2xl mx-auto">
+            Your membership helps us stay connected with you, share updates on our work with the
+            Didinga children in Lotukei sub-county, and makes it easy for you to donate or become a
+            paying member whenever you&apos;re ready.
+          </p>
+
+          {/* Form first, info side by side */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Form - key, first */}
           <div className="lg:col-span-3">
@@ -446,6 +456,7 @@ const JoinCommunity = () => {
           </div>
         </div>
       </div>
+      </section>
     </div>
   );
 };

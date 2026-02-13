@@ -13,7 +13,8 @@ import {
   Home,
   Globe,
   Users,
-  UserPlus
+  UserPlus,
+  FolderOpen
 } from 'lucide-react';
 
 const DashboardLayout = () => {
@@ -44,6 +45,7 @@ const DashboardLayout = () => {
     { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] },
     { name: 'Donations', href: '/dashboard/donations', icon: DollarSign, teams: ['Board of Directors', 'Finance', 'Administration'] },
     { name: 'Community', href: '/dashboard/community', icon: UserPlus, teams: ['Board of Directors', 'Finance', 'Administration'] },
+    { name: 'Projects', href: '/dashboard/projects', icon: FolderOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
     { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
     { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] },
     { name: 'Users', href: '/dashboard/users', icon: Users, teams: ['Administration'] },

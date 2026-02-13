@@ -79,16 +79,16 @@ const Home = () => {
       {/* Quick Highlights */}
       <section className="section-padding bg-gray-50">
         <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {highlights.map((highlight, index) => (
-              <div key={index} className="text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <div key={index} className="text-center p-8 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow flex flex-col items-center justify-center min-h-[180px]">
                 <div className="text-primary-600 mb-4 flex justify-center">
                   {highlight.icon}
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">
                   {highlight.number}
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm md:text-base">
                   {highlight.label}
                 </p>
               </div>
@@ -146,12 +146,12 @@ const Home = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="section-padding bg-primary-600 text-white">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 bg-primary-600 text-white">
         <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">
             Join Our Mission
           </h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+          <p className="text-lg mb-5 max-w-3xl mx-auto">
             Your support can make a lasting difference in the lives of children and communities in South Sudan. Every donation, no matter the size, helps us build a brighter future through education.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
