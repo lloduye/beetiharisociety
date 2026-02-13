@@ -44,10 +44,11 @@ const ProjectImage = ({ src, alt, caption, className = '', gradientFrom = null }
 const ProjectDetail = () => {
   const { slug } = useParams();
   const { openModal } = useDonation();
-  const [project, setProject] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Start with static data so page renders immediately (no spinner flicker)
+  const [project, setProject] = useState(() => getProjectBySlug(slug));
 
   useEffect(() => {
+    setProject(getProjectBySlug(slug));
     let cancelled = false;
     const load = async () => {
       try {
@@ -55,21 +56,11 @@ const ProjectDetail = () => {
         if (!cancelled) setProject(p || getProjectBySlug(slug));
       } catch {
         if (!cancelled) setProject(getProjectBySlug(slug));
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     };
     load();
     return () => { cancelled = true; };
   }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" />
-      </div>
-    );
-  }
 
   if (!project) {
     return (

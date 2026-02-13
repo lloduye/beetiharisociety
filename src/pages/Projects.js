@@ -7,23 +7,17 @@ import { projects as staticProjects } from '../data/projects';
 
 const Projects = () => {
   const { openModal } = useDonation();
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Start with static data so page renders immediately (no spinner flicker)
+  const [projects, setProjects] = useState(staticProjects);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
         const list = await projectsService.getAll();
-        if (!cancelled && list?.length > 0) {
-          setProjects(list);
-        } else if (!cancelled) {
-          setProjects(staticProjects);
-        }
+        if (!cancelled && list?.length > 0) setProjects(list);
       } catch {
-        if (!cancelled) setProjects(staticProjects);
-      } finally {
-        if (!cancelled) setLoading(false);
+        /* keep static fallback */
       }
     };
     load();
@@ -35,14 +29,6 @@ const Projects = () => {
 
   const getProgressPercent = (raised, target) =>
     target > 0 ? Math.min(100, Math.round((raised / target) * 100)) : 0;
-
-  if (loading) {
-    return (
-      <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" />
-      </div>
-    );
-  }
 
   return (
     <div>
