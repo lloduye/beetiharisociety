@@ -32,7 +32,13 @@ export const projectsService = {
       id: d.id,
       ...d.data(),
     }));
-    return projects.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    const statusOrder = { current: 0, past: 1, completed: 2 };
+    return projects.sort((a, b) => {
+      const sa = statusOrder[a.status] ?? 0;
+      const sb = statusOrder[b.status] ?? 0;
+      if (sa !== sb) return sa - sb;
+      return (a.order ?? 999) - (b.order ?? 999);
+    });
   },
 
   async getById(id) {
@@ -64,6 +70,7 @@ export const projectsService = {
       id: projectRef.id,
       slug,
       order: projectData.order ?? 999,
+      status: projectData.status || 'current',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };

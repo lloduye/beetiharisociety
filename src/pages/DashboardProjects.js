@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { projectsService } from '../services/projectsService';
-import { Plus, Edit, Trash2, ExternalLink, DollarSign, RefreshCw, Database } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, DollarSign, RefreshCw, Database, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown } from 'lucide-react';
 import { projects as staticProjects } from '../data/projects';
 
 const DashboardProjects = () => {
@@ -43,6 +43,7 @@ const DashboardProjects = () => {
           raisedFunds: p.raisedFunds,
           slug: p.slug || p.id,
           order: i,
+          status: 'current',
           images: p.images || [],
         });
       }
@@ -62,6 +63,46 @@ const DashboardProjects = () => {
       setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       alert('Failed to delete project: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleReorder = async (id, action) => {
+    const list = projects.filter((p) => p.status === projects.find((x) => x.id === id)?.status);
+    const idx = list.findIndex((p) => p.id === id);
+    if (idx < 0) return;
+    const orders = list.map((p) => p.order ?? 999).sort((a, b) => a - b);
+    let newOrder;
+    if (action === 'first') newOrder = (orders[0] ?? 0) - 100;
+    else if (action === 'last') newOrder = (orders[orders.length - 1] ?? 999) + 100;
+    else if (action === 'up' && idx > 0) {
+      const swap = list[idx - 1];
+      await projectsService.update(swap.id, { order: list[idx].order ?? idx });
+      await projectsService.update(id, { order: swap.order ?? idx - 1 });
+      await loadProjects();
+      return;
+    } else if (action === 'down' && idx < list.length - 1) {
+      const swap = list[idx + 1];
+      await projectsService.update(swap.id, { order: list[idx].order ?? idx });
+      await projectsService.update(id, { order: swap.order ?? idx + 1 });
+      await loadProjects();
+      return;
+    } else return;
+    try {
+      await projectsService.update(id, { order: newOrder });
+      window.dispatchEvent(new Event('projectsUpdated'));
+      await loadProjects();
+    } catch (err) {
+      alert('Failed to reorder: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await projectsService.update(id, { status: newStatus });
+      window.dispatchEvent(new Event('projectsUpdated'));
+      await loadProjects();
+    } catch (err) {
+      alert('Failed to update status: ' + (err.message || 'Unknown error'));
     }
   };
 
@@ -128,72 +169,172 @@ const DashboardProjects = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Project</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Funding</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+        <div className="space-y-10">
+          {(() => {
+            const currentProjects = projects.filter((p) => (p.status || 'current') === 'current');
+            const pastProjects = projects.filter((p) => p.status === 'past' || p.status === 'completed');
+
+            const ProjectRow = ({ project, isCurrent }) => {
+              const progress =
+                project.targetFunds > 0
+                  ? Math.min(100, Math.round(((project.raisedFunds || 0) / project.targetFunds) * 100))
+                  : 0;
+              const list = isCurrent ? currentProjects : pastProjects;
+              const idx = list.findIndex((p) => p.id === project.id);
+
+              return (
+                <tr key={project.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-col">
+                        <button
+                          onClick={() => handleReorder(project.id, 'first')}
+                          className="p-0.5 text-gray-400 hover:text-primary-600 rounded"
+                          title="Move to first"
+                          disabled={idx <= 0}
+                        >
+                          <ChevronsUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(project.id, 'up')}
+                          className="p-0.5 text-gray-400 hover:text-primary-600 rounded"
+                          title="Move up"
+                          disabled={idx <= 0}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(project.id, 'down')}
+                          className="p-0.5 text-gray-400 hover:text-primary-600 rounded"
+                          title="Move down"
+                          disabled={idx >= list.length - 1 || idx < 0}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleReorder(project.id, 'last')}
+                          className="p-0.5 text-gray-400 hover:text-primary-600 rounded"
+                          title="Move to last"
+                          disabled={idx >= list.length - 1 || idx < 0}
+                        >
+                          <ChevronsDown className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{project.title}</p>
+                        <p className="text-sm text-gray-500 line-clamp-1">{project.shortDescription}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      value={project.status || 'current'}
+                      onChange={(e) => handleStatusChange(project.id, e.target.value)}
+                      className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                    >
+                      <option value="current">Current</option>
+                      <option value="past">Past</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm">
+                        {formatCurrency(project.raisedFunds)} / {formatCurrency(project.targetFunds)}
+                      </span>
+                      <span className="text-xs text-gray-400">({progress}%)</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <a
+                        href={`/projects/${project.slug || project.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 text-gray-500 hover:text-primary-600 rounded"
+                        title="View on website"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                      <Link
+                        to={`/dashboard/projects/${project.id}/edit`}
+                        className="p-2 text-gray-500 hover:text-primary-600 rounded"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(project.id, project.title)}
+                        className="p-2 text-gray-500 hover:text-red-600 rounded"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {projects.map((project) => {
-                  const progress =
-                    project.targetFunds > 0
-                      ? Math.min(100, Math.round(((project.raisedFunds || 0) / project.targetFunds) * 100))
-                      : 0;
-                  return (
-                    <tr key={project.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="font-medium text-gray-900">{project.title}</p>
-                          <p className="text-sm text-gray-500 line-clamp-1">{project.shortDescription}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm">
-                            {formatCurrency(project.raisedFunds)} / {formatCurrency(project.targetFunds)}
-                          </span>
-                          <span className="text-xs text-gray-400">({progress}%)</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <a
-                            href={`/projects/${project.slug || project.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 text-gray-500 hover:text-primary-600 rounded"
-                            title="View on website"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                          <Link
-                            to={`/dashboard/projects/${project.id}/edit`}
-                            className="p-2 text-gray-500 hover:text-primary-600 rounded"
-                            title="Edit"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(project.id, project.title)}
-                            className="p-2 text-gray-500 hover:text-red-600 rounded"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              );
+            };
+
+            return (
+              <>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <h2 className="px-4 py-3 bg-primary-50 border-b border-primary-100 text-lg font-semibold text-gray-900">
+                    Current Projects
+                  </h2>
+                  {currentProjects.length === 0 ? (
+                    <p className="px-4 py-8 text-gray-500 text-center">No current projects. Add one or move projects from Past.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Project / Order</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Funding</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {currentProjects.map((p) => (
+                            <ProjectRow key={p.id} project={p} isCurrent />
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <h2 className="px-4 py-3 bg-gray-50 border-b border-gray-200 text-lg font-semibold text-gray-900">
+                    Past Projects
+                  </h2>
+                  {pastProjects.length === 0 ? (
+                    <p className="px-4 py-8 text-gray-500 text-center">No past or completed projects. Change status to move projects here.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Project / Order</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Funding</th>
+                            <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {pastProjects.map((p) => (
+                            <ProjectRow key={p.id} project={p} isCurrent={false} />
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
     </div>

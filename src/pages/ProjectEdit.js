@@ -116,6 +116,7 @@ const ProjectEdit = () => {
     raisedFunds: '',
     slug: '',
     order: 0,
+    status: 'current',
     images: [
       { src: '', alt: '', caption: '' },
       { src: '', alt: '', caption: '' },
@@ -136,6 +137,7 @@ const ProjectEdit = () => {
           raisedFunds: project.raisedFunds ?? '',
           slug: project.slug || '',
           order: project.order ?? 0,
+          status: project.status || 'current',
           images: [
           { src: project.images?.[0]?.src || '', alt: project.images?.[0]?.alt || '', caption: project.images?.[0]?.caption || '' },
           { src: project.images?.[1]?.src || '', alt: project.images?.[1]?.alt || '', caption: project.images?.[1]?.caption || '' },
@@ -335,6 +337,21 @@ const ProjectEdit = () => {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full max-w-[200px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white"
+          >
+            <option value="current">Current</option>
+            <option value="past">Past</option>
+            <option value="completed">Completed</option>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">Current = active on website; Past/Completed = shown in Past Projects section.</p>
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Display order</label>
           <input
             type="number"
@@ -344,7 +361,7 @@ const ProjectEdit = () => {
             min="0"
             className="w-full max-w-[120px] px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
-          <p className="text-xs text-gray-500 mt-1">Lower numbers appear first.</p>
+          <p className="text-xs text-gray-500 mt-1">Lower numbers appear first within the same status.</p>
         </div>
 
         <div>
