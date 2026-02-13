@@ -234,7 +234,7 @@ const ProjectEdit = () => {
   }
 
   return (
-    <div className="w-full lg:w-[85%] max-w-[1600px] mx-auto">
+    <div className="w-[95%] max-w-[1920px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <Link to="/dashboard/projects" className="text-gray-600 hover:text-primary-600 flex items-center gap-2">
           <ArrowLeft className="h-5 w-5" />
@@ -249,8 +249,8 @@ const ProjectEdit = () => {
         {isNew ? 'Create a new project for the public Projects page.' : 'Update project details.'}
       </p>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 xl:gap-10">
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-10">
+        <form onSubmit={handleSubmit} className="xl:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
           <input
@@ -464,8 +464,8 @@ const ProjectEdit = () => {
         </div>
       </form>
 
-        {/* Live preview */}
-        <div className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto">
+        {/* Live preview - 2/3 of page */}
+        <div className="xl:col-span-2 xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
               <Eye className="h-4 w-4 text-primary-600" />
