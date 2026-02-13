@@ -66,7 +66,7 @@ export const chatbotKnowledge = [
   },
   {
     keywords: ['board', 'leadership', 'director', 'who runs', 'governance'],
-    answer: "We are governed by a Board of Directors representing South Sudan and the diaspora. Board members include: Alex Atiol (Chairman), Charles Lokonyen (Treasurer), Angelo Gola (Director, South Sudan), Lino Lokonobei (Director, USA), Amedeo Awai Martin, Cicilia Achuka, Jackie Kulang, Godfrey Lokuju, Joseph Nachungura, and Paul Atanya (Director / Project Officer).",
+    answer: "We are governed by a Board of Directors representing South Sudan and the diaspora. Board members include: Alex Atiol (Chairman), Charles Lokonyen (Treasurer), Josephine Louis (Assistant Treasurer), Paul Atanya (Director / Project Officer), Angelo Gola (Director, South Sudan), Lino Lokonobei (Director, USA), Amedeo Awai Martin, Cicilia Achuka, Jackie Kulang, Godfrey Lokuju, and Joseph Nachungura.",
     suggestedReplies: ['Mission', 'Contact', 'Get involved'],
   },
   {

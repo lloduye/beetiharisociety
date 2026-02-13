@@ -29,6 +29,14 @@ const boardMembers = [
       image: null,
     },
     {
+      name: 'Josephine Louis',
+      role: 'Assistant Treasurer',
+      email: 'j.louis@betiharisociety.org',
+      roleDescription: 'Supports financial oversight, budgeting, and transparency alongside the Treasurer.',
+      bio: 'Josephine Louis serves as Assistant Treasurer, supporting the Society\'s financial management and ensuring resources are used effectively to advance education and development in South Sudan.',
+      image: null,
+    },
+    {
       name: 'Lino Lokonobei',
       role: 'Director (USA)',
       email: 'l.lokonobei@betiharisociety.org',
@@ -301,7 +309,7 @@ const About = () => {
                     <button
                       type="button"
                       onClick={() => setSelectedMember(chairman)}
-                      className="bg-white p-8 rounded-xl shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group w-full max-w-2xl mx-auto"
+                      className="bg-white p-8 rounded-xl shadow-md text-center hover:shadow-2xl hover:ring-2 hover:ring-primary-500 hover:scale-[1.05] hover:-translate-y-2 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group w-full max-w-2xl mx-auto"
                     >
                       <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
                         {chairman.image ? (
@@ -325,7 +333,7 @@ const About = () => {
                           key={index}
                           type="button"
                           onClick={() => setSelectedMember(member)}
-                          className="w-full max-w-[220px] bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group"
+                          className="w-full max-w-[220px] bg-white p-6 rounded-lg shadow-md text-center hover:shadow-2xl hover:ring-2 hover:ring-primary-500 hover:scale-[1.08] hover:-translate-y-2 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group"
                         >
                         <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
                           {member.image ? (
