@@ -1,8 +1,104 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { projectsService } from '../services/projectsService';
-import { storageService } from '../services/storageService';
-import { ArrowLeft, Save, Image as ImageIcon, X } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, X, Eye } from 'lucide-react';
+
+const gradientFromLeft = 'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.3) 75%, rgba(255,255,255,0) 100%)';
+const gradientFromRight = 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0.95) 25%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.3) 75%, rgba(255,255,255,0) 100%)';
+
+const PreviewImage = ({ src, alt, caption, gradientFrom }) => {
+  const content = src ? (
+    <img src={src} alt={alt || ''} className="w-full h-full min-h-[120px] object-cover rounded-lg border border-gray-200" />
+  ) : (
+    <div className="w-full min-h-[120px] aspect-[4/3] bg-gray-200 rounded-lg flex items-center justify-center border border-gray-200">
+      <ImageIcon className="h-8 w-8 text-gray-400" />
+    </div>
+  );
+  const gradientStyle = gradientFrom === 'left' ? gradientFromLeft : gradientFrom === 'right' ? gradientFromRight : null;
+  return (
+    <figure>
+      <div className="relative overflow-hidden rounded-lg">
+        {content}
+        {gradientStyle && (
+          <div className="absolute inset-0 pointer-events-none rounded-lg" style={{ background: gradientStyle }} />
+        )}
+      </div>
+      {caption && <figcaption className="mt-2 text-xs text-gray-500 italic">{caption}</figcaption>}
+    </figure>
+  );
+};
+
+const ProjectLivePreview = ({ formData }) => {
+  const formatCurrency = (amt) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(amt || 0);
+  const target = Number(formData.targetFunds) || 0;
+  const raised = Number(formData.raisedFunds) || 0;
+  const progress = target > 0 ? Math.min(100, Math.round((raised / target) * 100)) : 0;
+  const remaining = Math.max(0, target - raised);
+  const paragraphs = (formData.story || '').split(/\n\n+/).filter(Boolean);
+  const images = formData.images || [];
+
+  return (
+    <div className="space-y-4 text-sm">
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-xl p-4">
+        <h2 className="text-lg font-bold truncate">{formData.title || 'Project title'}</h2>
+        <p className="text-xs text-primary-100 mt-1 line-clamp-2">{formData.shortDescription || 'Short description'}</p>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="text-xs">
+            <p className="text-primary-200">Raised / Target</p>
+            <p className="font-semibold">{formatCurrency(raised)} / {formatCurrency(target)}</p>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="text-xs text-primary-200">{progress}%</p>
+          </div>
+        </div>
+        {remaining > 0 && <p className="text-xs text-primary-200 mt-1">{formatCurrency(remaining)} still needed</p>}
+      </div>
+
+      {/* Story + images */}
+      <div className="space-y-4">
+        {paragraphs.length > 0 ? (
+          paragraphs.map((para, i) => {
+            const img = images[i];
+            const imageOnLeft = i % 2 === 1;
+            return (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                {img && imageOnLeft ? (
+                  <>
+                    <PreviewImage src={img.src} alt={img.alt} caption={img.caption} gradientFrom="right" />
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">{para}</p>
+                  </>
+                ) : img ? (
+                  <>
+                    <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">{para}</p>
+                    <PreviewImage src={img.src} alt={img.alt} caption={img.caption} gradientFrom="left" />
+                  </>
+                ) : (
+                  <p className="text-gray-700 text-sm leading-relaxed md:col-span-2">{para}</p>
+                )}
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-gray-400 italic">Start typing the story to see it here...</p>
+        )}
+      </div>
+
+      {/* CTA block */}
+      <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-lg p-4 border border-primary-100">
+        <h3 className="font-bold text-gray-900 mb-1">Make a difference today</h3>
+        <p className="text-gray-700 text-xs">
+          Your donation goes directly to {formData.title || 'this project'}. Every contribution helps.
+        </p>
+        <p className="text-primary-600 text-xs font-medium mt-2">Donate to This Project</p>
+      </div>
+    </div>
+  );
+};
 
 const ProjectEdit = () => {
   const { id } = useParams();
@@ -12,7 +108,6 @@ const ProjectEdit = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(null);
-  const fileInputRefs = useRef({});
   const [formData, setFormData] = useState({
     title: '',
     shortDescription: '',
@@ -75,22 +170,24 @@ const ProjectEdit = () => {
     });
   };
 
-  const handleImageUpload = async (index, file) => {
+  const handleImageUpload = (index, file) => {
     if (!file || !file.type.startsWith('image/')) return;
     if (file.size > 5 * 1024 * 1024) {
       alert('File size must be less than 5MB');
       return;
     }
     setUploadingIndex(index);
-    try {
-      const url = await storageService.uploadProjectImage(editId, file, index);
-      handleImageChange(index, 'src', url);
-    } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Upload failed: ' + (err.message || 'Unknown error'));
-    } finally {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result;
+      handleImageChange(index, 'src', dataUrl || '');
       setUploadingIndex(null);
-    }
+    };
+    reader.onerror = () => {
+      alert('Failed to read image file');
+      setUploadingIndex(null);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleImageRemove = (index) => {
@@ -137,8 +234,8 @@ const ProjectEdit = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
         <Link to="/dashboard/projects" className="text-gray-600 hover:text-primary-600 flex items-center gap-2">
           <ArrowLeft className="h-5 w-5" />
           Back to Projects
@@ -152,7 +249,8 @@ const ProjectEdit = () => {
         {isNew ? 'Create a new project for the public Projects page.' : 'Update project details.'}
       </p>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 xl:gap-10">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
           <input
@@ -251,7 +349,7 @@ const ProjectEdit = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Images (2)</label>
-          <p className="text-xs text-gray-500 mb-3">Upload images for the project. Stored in Firebase and editable anytime. PNG, JPG, GIF (max 5MB each).</p>
+          <p className="text-xs text-gray-500 mb-3">Upload images for the project. Stored in Firestore (same as profile & story images). PNG, JPG, GIF (max 5MB each).</p>
           {[0, 1].map((i) => {
             const hasImage = !!(formData.images?.[i]?.src);
             const isUploading = uploadingIndex === i;
@@ -269,26 +367,20 @@ const ProjectEdit = () => {
                       />
                     </div>
                     <div className="absolute top-2 right-2 flex gap-1">
-                      <input
-                        ref={(el) => { fileInputRefs.current[i] = el; }}
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleImageUpload(i, f);
-                          e.target.value = '';
-                        }}
-                      />
-                      <button
-                        type="button"
-                        disabled={isUploading}
-                        onClick={() => fileInputRefs.current[i]?.click()}
-                        className="p-1.5 rounded-full bg-white/90 text-gray-700 hover:bg-white shadow border border-gray-200"
-                        title="Replace image"
-                      >
+                      <label className="cursor-pointer p-1.5 rounded-full bg-white/90 text-gray-700 hover:bg-white shadow border border-gray-200" title="Replace image">
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          disabled={isUploading}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleImageUpload(i, f);
+                            e.target.value = '';
+                          }}
+                        />
                         <ImageIcon className="h-4 w-4" />
-                      </button>
+                      </label>
                       <button
                         type="button"
                         onClick={() => handleImageRemove(i)}
@@ -371,6 +463,18 @@ const ProjectEdit = () => {
           </Link>
         </div>
       </form>
+
+        {/* Live preview */}
+        <div className="xl:sticky xl:top-6 xl:self-start xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-4">
+              <Eye className="h-4 w-4 text-primary-600" />
+              Live Preview
+            </h3>
+            <ProjectLivePreview formData={formData} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
