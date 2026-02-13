@@ -350,58 +350,95 @@ const About = () => {
       {/* Leadership profile modal */}
       {selectedMember && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => setSelectedMember(null)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="profile-title"
         >
           <div
-            className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 sm:p-8">
-              <div className="flex justify-between items-start gap-4 mb-6">
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-20 h-20 rounded-full bg-primary-100 flex-shrink-0 flex items-center justify-center">
-                    {selectedMember.image ? (
-                      <img src={selectedMember.image} alt={selectedMember.name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <User className="h-10 w-10 text-primary-600" />
+            {/* Header bar */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50 shrink-0">
+              <span className="text-sm font-medium text-gray-500">Board of Directors</span>
+              <button
+                type="button"
+                onClick={() => setSelectedMember(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+                aria-label="Close profile"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Content - scrollable */}
+            <div className="overflow-y-auto flex-1">
+              <div className="p-6 sm:p-8 lg:p-10">
+                <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8">
+                  {/* Photo */}
+                  <div>
+                    <div className="w-40 h-40 lg:w-48 lg:h-48 rounded-2xl bg-primary-100 flex items-center justify-center overflow-hidden shrink-0 mx-auto lg:mx-0">
+                      {selectedMember.image ? (
+                        <img src={selectedMember.image} alt={selectedMember.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="h-20 w-20 lg:h-24 lg:w-24 text-primary-600" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Name, role, contact */}
+                  <div>
+                    <h2 id="profile-title" className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
+                      {selectedMember.name}
+                    </h2>
+                    <p className="text-primary-600 font-semibold text-lg mb-4">{selectedMember.role}</p>
+                    {selectedMember.email && (
+                      <a
+                        href={`mailto:${selectedMember.email}`}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary-50 hover:bg-primary-100 text-primary-700 font-medium rounded-lg transition-colors"
+                      >
+                        <Mail className="h-5 w-5" />
+                        Email {selectedMember.name.split(' ')[0]}
+                      </a>
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <h2 id="profile-title" className="text-2xl font-bold text-gray-900">{selectedMember.name}</h2>
-                    <p className="text-primary-600 font-semibold">{selectedMember.role}</p>
+                </div>
+
+                {/* Role & responsibilities */}
+                {selectedMember.roleDescription && (
+                  <div className="mt-8 pt-8 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Role & Responsibilities</h3>
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {selectedMember.roleDescription}
+                    </p>
                   </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedMember(null)}
-                  className="text-gray-400 hover:text-gray-600 p-1 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 flex-shrink-0"
-                  aria-label="Close profile"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+                )}
+
+                {/* Bio */}
+                {selectedMember.bio && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">About</h3>
+                    <p className="text-gray-700 leading-relaxed text-base">
+                      {selectedMember.bio}
+                    </p>
+                  </div>
+                )}
+
+                {/* Contact details (repeat at bottom for easy access) */}
+                {selectedMember.email && (
+                  <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4">
+                    <span className="text-sm text-gray-500">Direct contact:</span>
+                    <a
+                      href={`mailto:${selectedMember.email}`}
+                      className="text-primary-600 hover:text-primary-700 font-medium break-all"
+                    >
+                      {selectedMember.email}
+                    </a>
+                  </div>
+                )}
               </div>
-              {selectedMember.bio && (
-                <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">About</h3>
-                  <p className="text-gray-700 leading-relaxed">{selectedMember.bio}</p>
-                </div>
-              )}
-              {selectedMember.email && (
-                <div className="border-t border-gray-200 pt-6 mt-6">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Contact</h3>
-                  <a
-                    href={`mailto:${selectedMember.email}`}
-                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    <Mail className="h-4 w-4 flex-shrink-0" />
-                    {selectedMember.email}
-                  </a>
-                </div>
-              )}
             </div>
           </div>
         </div>
