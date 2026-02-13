@@ -44,7 +44,7 @@ const DashboardLayout = () => {
   const allNavigationItems = [
     { name: 'Overview', href: '/dashboard', icon: Home, teams: ['all'] },
     { name: 'Donations', href: '/dashboard/donations', icon: DollarSign, teams: ['Board of Directors', 'Finance', 'Administration'] },
-    { name: 'Community', href: '/dashboard/community', icon: UserPlus, teams: ['Board of Directors', 'Finance', 'Administration'] },
+    { name: 'Community', href: '/dashboard/community', icon: UserPlus, teams: ['Board of Directors', 'Finance', 'Administration', 'Communications'] },
     { name: 'Projects', href: '/dashboard/projects', icon: FolderOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
     { name: 'Stories', href: '/dashboard/stories', icon: BookOpen, teams: ['Administration', 'Communications', 'Board of Directors'] },
     { name: 'Mailbox', href: '/dashboard/emails', icon: Mail, teams: ['all'] },
@@ -54,7 +54,7 @@ const DashboardLayout = () => {
   // Filter navigation based on user's team
   const tl = userTeam && String(userTeam).toLowerCase();
   const normalizedTeam =
-    !userTeam ? userTeam : tl === 'board of directors' || tl === 'board of director' || (tl && tl.includes('board')) ? 'Board of Directors' : userTeam;
+    !userTeam ? userTeam : tl === 'board of directors' || tl === 'board of director' || tl === 'board member' || tl === 'board members' || (tl && tl.includes('board')) ? 'Board of Directors' : userTeam;
 
   const getNavigationItems = () => {
     if (!normalizedTeam) return allNavigationItems.filter(item => item.teams.includes('all'));
