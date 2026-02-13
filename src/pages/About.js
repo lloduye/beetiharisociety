@@ -13,19 +13,19 @@ const boardMembers = [
       image: null,
     },
     {
+      name: 'Paul Atanya',
+      role: 'Director / Project Officer',
+      email: 'p.atanya@betiharisociety.org',
+      roleDescription: 'Combines board governance with day-to-day project coordination and field implementation.',
+      bio: 'Paul Atanya serves both as Director and Project Officer, linking board strategy with program delivery. His dual role helps ensure that decisions made at the board level are effectively translated into action in Lotukei and beyond.',
+      image: null,
+    },
+    {
       name: 'Charles Lokonyen',
       role: 'Treasurer',
       email: 'c.lokonyen@betiharisociety.org',
       roleDescription: 'Oversees financial oversight, budgeting, and transparency for the organization.',
       bio: 'Charles Lokonyen ensures the Society\'s resources are managed with integrity and accountability. His financial stewardship supports sustainable programs and helps donors trust that their contributions directly serve education and development in South Sudan.',
-      image: null,
-    },
-    {
-      name: 'Angelo Gola',
-      role: 'Director (South Sudan)',
-      email: 'a.gola@betiharisociety.org',
-      roleDescription: 'Represents the organization on the ground and connects board decisions with community realities.',
-      bio: 'Angelo Gola brings essential on-the-ground perspective from South Sudan, linking the Board with the Didinga communities we serve. His local knowledge and field experience help shape programs that truly meet the needs of students and families in Lotukei.',
       image: null,
     },
     {
@@ -45,11 +45,35 @@ const boardMembers = [
       image: null,
     },
     {
-      name: 'Albert Lonyia',
+      name: 'Cicilia Achuka',
       role: 'Director',
-      email: 'a.lonyia@betiharisociety.org',
+      email: 'c.achuka@betiharisociety.org',
       roleDescription: 'Supports governance, strategy, and organizational development.',
-      bio: 'Albert Lonyia serves as Director, bringing expertise and commitment to the Beti-Hari Society\'s mission. His contributions help ensure effective governance and alignment with the goal of universal child education in South Sudan.',
+      bio: 'Cicilia Achuka serves as Director, bringing expertise and commitment to the Beti-Hari Society\'s mission. Her contributions help ensure effective governance and alignment with the goal of universal child education in South Sudan.',
+      image: null,
+    },
+    {
+      name: 'Angelo Gola',
+      role: 'Director (South Sudan)',
+      email: 'a.gola@betiharisociety.org',
+      roleDescription: 'Represents the organization on the ground and connects board decisions with community realities.',
+      bio: 'Angelo Gola brings essential on-the-ground perspective from South Sudan, linking the Board with the Didinga communities we serve. His local knowledge and field experience help shape programs that truly meet the needs of students and families in Lotukei.',
+      image: null,
+    },
+    {
+      name: 'Jackie Kulang',
+      role: 'Director',
+      email: 'j.kulang@betiharisociety.org',
+      roleDescription: 'Supports governance, strategy, and organizational development.',
+      bio: 'Jackie Kulang serves as Director, contributing to the Board\'s strategic and governance work. Her dedication to education and community development in South Sudan supports the long-term impact of the Society\'s programs.',
+      image: null,
+    },
+    {
+      name: 'Godfrey Lokuju',
+      role: 'Director',
+      email: 'g.lokuju@betiharisociety.org',
+      roleDescription: 'Supports governance, strategy, and organizational development.',
+      bio: 'Godfrey Lokuju serves as Director, bringing perspective and commitment to the Beti-Hari Society\'s mission. His involvement supports the organization\'s focus on serving the Didinga community with integrity and sustainable impact.',
       image: null,
     },
     {
@@ -58,14 +82,6 @@ const boardMembers = [
       email: 'j.nachungura@betiharisociety.org',
       roleDescription: 'Supports governance, strategy, and organizational development.',
       bio: 'Joseph Nachungura is a dedicated Director who supports the Board in advancing education and economic development. His perspective and commitment help the organization stay focused on serving the Didinga community with integrity and impact.',
-      image: null,
-    },
-    {
-      name: 'Paul Atanya',
-      role: 'Director / Project Officer',
-      email: 'p.atanya@betiharisociety.org',
-      roleDescription: 'Combines board governance with day-to-day project coordination and field implementation.',
-      bio: 'Paul Atanya serves both as Director and Project Officer, linking board strategy with program delivery. His dual role helps ensure that decisions made at the board level are effectively translated into action in Lotukei and beyond.',
       image: null,
     },
   ];
@@ -265,7 +281,7 @@ const About = () => {
 
       {/* Leadership */}
       <section className="section-padding bg-gray-50">
-        <div className="container-custom">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Leadership</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -273,27 +289,61 @@ const About = () => {
             </p>
             <p className="text-sm text-gray-500 mt-2">Click a profile to view full information.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {leadership.map((member, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => setSelectedMember(member)}
-                className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group"
-              >
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
-                  {member.image ? (
-                    <img src={member.image} alt={member.name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <User className="h-8 w-8 text-primary-600" />
-                  )}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{member.name}</h3>
-                <p className="text-primary-600 font-medium text-sm">{member.role}</p>
-                <span className="text-xs text-gray-500 mt-2 inline-block">Learn more</span>
-              </button>
-            ))}
-          </div>
+
+          {/* Chairman - featured at top */}
+          {(() => {
+            const chairman = leadership.find((m) => (m.role || '').toLowerCase().includes('chairman'));
+            const otherMembers = leadership.filter((m) => !(m.role || '').toLowerCase().includes('chairman'));
+            return (
+              <>
+                {chairman && (
+                  <div className="flex justify-center mb-10">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMember(chairman)}
+                      className="bg-white p-8 rounded-xl shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group w-full max-w-2xl mx-auto"
+                    >
+                      <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                        {chairman.image ? (
+                          <img src={chairman.image} alt={chairman.name} className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <User className="h-12 w-12 text-primary-600" />
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">{chairman.name}</h3>
+                      <p className="text-primary-600 font-semibold">{chairman.role}</p>
+                      <span className="text-xs text-gray-500 mt-2 inline-block">Learn more</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Board members beneath Chairman */}
+                {otherMembers.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-5 justify-items-center">
+                      {otherMembers.map((member, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setSelectedMember(member)}
+                          className="w-full max-w-[220px] bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg hover:ring-2 hover:ring-primary-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 cursor-pointer group"
+                        >
+                        <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary-100 flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                          {member.image ? (
+                            <img src={member.image} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                          ) : (
+                            <User className="h-8 w-8 text-primary-600" />
+                          )}
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{member.name}</h3>
+                        <p className="text-primary-600 font-medium text-sm">{member.role}</p>
+                        <span className="text-xs text-gray-500 mt-2 inline-block">Learn more</span>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
