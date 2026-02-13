@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { projectsService } from '../services/projectsService';
-import { ArrowLeft, Save } from 'lucide-react';
+import { storageService } from '../services/storageService';
+import { ArrowLeft, Save, Image as ImageIcon, X } from 'lucide-react';
 
 const ProjectEdit = () => {
   const { id } = useParams();
@@ -10,6 +11,8 @@ const ProjectEdit = () => {
   const editId = isNew ? null : id;
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [uploadingIndex, setUploadingIndex] = useState(null);
+  const fileInputRefs = useRef({});
   const [formData, setFormData] = useState({
     title: '',
     shortDescription: '',
@@ -68,6 +71,33 @@ const ProjectEdit = () => {
       const imgs = [...(prev.images || [])];
       while (imgs.length <= index) imgs.push({ src: '', alt: '', caption: '' });
       imgs[index] = { ...imgs[index], [field]: value };
+      return { ...prev, images: imgs };
+    });
+  };
+
+  const handleImageUpload = async (index, file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+    setUploadingIndex(index);
+    try {
+      const url = await storageService.uploadProjectImage(editId, file, index);
+      handleImageChange(index, 'src', url);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Upload failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
+  const handleImageRemove = (index) => {
+    setFormData((prev) => {
+      const imgs = [...(prev.images || [])];
+      while (imgs.length <= index) imgs.push({ src: '', alt: '', caption: '' });
+      imgs[index] = { src: '', alt: '', caption: '' };
       return { ...prev, images: imgs };
     });
   };
@@ -221,33 +251,107 @@ const ProjectEdit = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Images (2)</label>
-          <p className="text-xs text-gray-500 mb-3">Enter image URL, alt text, and caption for each image.</p>
-          {[0, 1].map((i) => (
-            <div key={i} className="mb-4 p-4 bg-gray-50 rounded-lg space-y-2">
-              <p className="text-sm font-medium text-gray-600">Image {i + 1}</p>
-              <input
-                type="url"
-                placeholder="Image URL"
-                value={formData.images?.[i]?.src || ''}
-                onChange={(e) => handleImageChange(i, 'src', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Alt text"
-                value={formData.images?.[i]?.alt || ''}
-                onChange={(e) => handleImageChange(i, 'alt', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              />
-              <input
-                type="text"
-                placeholder="Caption"
-                value={formData.images?.[i]?.caption || ''}
-                onChange={(e) => handleImageChange(i, 'caption', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              />
-            </div>
-          ))}
+          <p className="text-xs text-gray-500 mb-3">Upload images for the project. Stored in Firebase and editable anytime. PNG, JPG, GIF (max 5MB each).</p>
+          {[0, 1].map((i) => {
+            const hasImage = !!(formData.images?.[i]?.src);
+            const isUploading = uploadingIndex === i;
+            return (
+              <div key={i} className="mb-4 p-4 bg-gray-50 rounded-lg space-y-3">
+                <p className="text-sm font-medium text-gray-600">Image {i + 1}</p>
+                {hasImage ? (
+                  <div className="relative">
+                    <div className="w-full h-40 bg-gray-200 rounded-lg overflow-hidden">
+                      <img
+                        src={formData.images[i].src}
+                        alt={formData.images[i].alt || 'Project'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    </div>
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <input
+                        ref={(el) => { fileInputRefs.current[i] = el; }}
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleImageUpload(i, f);
+                          e.target.value = '';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={isUploading}
+                        onClick={() => fileInputRefs.current[i]?.click()}
+                        className="p-1.5 rounded-full bg-white/90 text-gray-700 hover:bg-white shadow border border-gray-200"
+                        title="Replace image"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleImageRemove(i)}
+                        className="p-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 shadow"
+                        title="Remove image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <label
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                    onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const f = e.dataTransfer.files?.[0];
+                      if (f && f.type.startsWith('image/')) handleImageUpload(i, f);
+                    }}
+                  >
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      disabled={isUploading}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleImageUpload(i, f);
+                        e.target.value = '';
+                      }}
+                    />
+                    <div className="flex flex-col items-center justify-center py-4">
+                      {isUploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent mb-2" />
+                      ) : (
+                        <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
+                      )}
+                      <p className="text-sm text-gray-500">
+                        <span className="font-semibold">{isUploading ? 'Uploading...' : 'Click to upload'}</span>
+                        {!isUploading && ' or drag and drop'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5">PNG, JPG, GIF (max 5MB)</p>
+                    </div>
+                  </label>
+                )}
+                <input
+                  type="text"
+                  placeholder="Alt text (for accessibility)"
+                  value={formData.images?.[i]?.alt || ''}
+                  onChange={(e) => handleImageChange(i, 'alt', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder="Caption"
+                  value={formData.images?.[i]?.caption || ''}
+                  onChange={(e) => handleImageChange(i, 'caption', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+              </div>
+            );
+          })}
         </div>
 
         <div className="flex gap-3 pt-4">

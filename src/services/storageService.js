@@ -18,5 +18,23 @@ export const storageService = {
     const url = await getDownloadURL(snapshot.ref);
     return url;
   },
+
+  async uploadProjectImage(projectId, file, index = 0) {
+    if (!firebaseInitialized || !storage) {
+      throw new Error('File storage is not configured. Please check Firebase environment variables.');
+    }
+    if (!file) {
+      throw new Error('Missing file for upload.');
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const folder = projectId || 'temp';
+    const path = `projectImages/${folder}/${index}_${Date.now()}_${safeName}`;
+    const fileRef = ref(storage, path);
+
+    const snapshot = await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(snapshot.ref);
+    return url;
+  },
 };
 

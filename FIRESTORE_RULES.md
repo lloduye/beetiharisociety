@@ -105,4 +105,18 @@ service cloud.firestore {
 
 **Warning:** This allows anyone to read/write everything. Use only for development/testing.
 
+## Firebase Storage Rules (for images)
+
+Profile pictures and project images are stored in Firebase Storage. Configure rules at **Build** → **Storage** → **Rules**:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /profileImages/{allPaths=**} { allow read, write: if true; }
+    match /projectImages/{allPaths=**} { allow read, write: if true; }
+  }
+}
+```
+
 
