@@ -234,7 +234,7 @@ const ProjectEdit = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full lg:w-[85%] max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between mb-6">
         <Link to="/dashboard/projects" className="text-gray-600 hover:text-primary-600 flex items-center gap-2">
           <ArrowLeft className="h-5 w-5" />
