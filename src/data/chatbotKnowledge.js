@@ -56,12 +56,12 @@ export const chatbotKnowledge = [
   },
   {
     keywords: ['impact', 'achievement', 'result', 'stat', 'number', 'student', 'classroom', 'teacher'],
-    answer: "Since 2010 we've made substantial progress: 5 classrooms built (including through community bottle/can collection), 1,200+ students enrolled, 9 full-time teachers on the South Sudanese government payroll (often serving despite delayed salaries of 15–24 months), and 11 volunteer teachers (ages 22–70) at Piobokoi Primary School in Lotukei sub-county. We're expanding toward 5,000–7,000 students in 5–10 years.",
+    answer: "Since 2010 we've made substantial progress: our funds were used to make some of the bricks for 5 classrooms (including through community bottle/can collection), 1,200+ students enrolled, 9 full-time teachers on the South Sudanese government payroll (often serving despite delayed salaries of 15–24 months), and 11 volunteer teachers (ages 22–70) at Piobokoi Primary School in Lotukei sub-county. We're expanding toward 5,000–7,000 students in 5–10 years.",
     suggestedReplies: ['Programs', 'Donate', 'Stories'],
   },
   {
     keywords: ['program', 'what we do', 'education', 'school', 'classroom', 'curriculum'],
-    answer: "Our core work includes: (1) Expanding educational access—building classrooms and high schools so young people, especially girls, can continue past Grade 6 without traveling long distances. (2) Nurturing learning environments—community-supported, spiritually grounded, emotionally safe. (3) Holistic development—healthcare support, microcredit, financial literacy, adult education, environmental awareness. We also focus on universal primary education, adult literacy, and apprenticeship opportunities.",
+    answer: "Our core work includes: (1) Expanding educational access—providing funds used to make bricks for classrooms and supporting high school construction so young people, especially girls, can continue past Grade 6 without traveling long distances. (2) Nurturing learning environments—community-supported, spiritually grounded, emotionally safe. (3) Holistic development—healthcare support, microcredit, financial literacy, adult education, environmental awareness. We also focus on universal primary education, adult literacy, and apprenticeship opportunities.",
     suggestedReplies: ['Impact', 'Where you work', 'Donate'],
   },
   {
@@ -76,7 +76,7 @@ export const chatbotKnowledge = [
   },
   {
     keywords: ['story', 'stories', 'example', 'testimonial', 'read'],
-    answer: "We share stories from the field on our website—student and teacher stories from the Didinga community. You can read them under the Stories section. They highlight the impact of education, volunteer teachers, classroom construction, and community initiatives.",
+    answer: "We share stories from the field on our website—student and teacher stories from the Didinga community. You can read them under the Stories section. They highlight the impact of education, volunteer teachers, our funds for bricks used in classroom construction, and community initiatives.",
     suggestedReplies: ['Impact', 'Donate', 'Get involved'],
   },
   {
@@ -86,7 +86,7 @@ export const chatbotKnowledge = [
   },
   {
     keywords: ['girl', 'female', 'woman', 'women'],
-    answer: "We prioritize girls' education. Many children in rural South Sudan end at Grade 6; we build local high schools so young people—especially girls—can continue without traveling long distances. Our girls' education efforts have increased female enrollment significantly.",
+    answer: "We prioritize girls' education. Many children in rural South Sudan end at Grade 6; we support local high school construction (including funds for bricks) so young people—especially girls—can continue without traveling long distances. Our girls' education efforts have increased female enrollment significantly.",
     suggestedReplies: ['Programs', 'Impact', 'Donate'],
   },
   {
@@ -97,6 +97,6 @@ export const chatbotKnowledge = [
 ];
 
 export const defaultReply = {
-  answer: "I'm not sure about that. I can help with: our mission and vision, where we work (Didinga in Lotukei, South Sudan), how to donate or become a member, volunteering, our impact (classrooms, students, teachers), contact details, and our board. Try one of the suggestions below or email contact@betiharisociety.org.",
+  answer: "I'm not sure about that. I can help with: our mission and vision, where we work (Didinga in Lotukei, South Sudan), how to donate or become a member, volunteering, our impact (funds for bricks used in classrooms, students, teachers), contact details, and our board. Try one of the suggestions below or email contact@betiharisociety.org.",
   suggestedReplies: ['What is Beti-Hari Society?', 'How can I donate?', 'Where do you work?', 'Contact you'],
 };

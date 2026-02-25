@@ -9,8 +9,8 @@ const Impact = () => {
     {
       icon: <Building className="h-8 w-8" />,
       number: "5",
-      label: "Classrooms built",
-      description: "Using funds raised from bottle and can collection"
+      label: "Classrooms (funds for bricks)",
+      description: "Funds raised (e.g. bottle/can collection) were used to make bricks for these classrooms"
     },
     {
       icon: <Users className="h-8 w-8" />,
@@ -35,8 +35,8 @@ const Impact = () => {
   const impactAreas = [
     {
       title: "Educational Infrastructure",
-      description: "Building physical classrooms and learning spaces where none existed before.",
-      impact: "5 classrooms constructed through grassroots fundraising efforts"
+      description: "Providing funds used to make bricks for classrooms and learning spaces where none existed before.",
+      impact: "Funds helped make bricks for 5 classrooms through grassroots fundraising efforts"
     },
     {
       title: "Student Enrollment",
@@ -206,7 +206,7 @@ const Impact = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Expanded Access</h3>
               <p className="text-gray-600">
-                Building more classrooms to serve 5,000–7,000 students in the next 5–10 years.
+                Providing funds for bricks for more classrooms to serve 5,000–7,000 students in the next 5–10 years.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
@@ -236,7 +236,7 @@ const Impact = () => {
         <div className="container-custom text-center">
           <h2 className="text-2xl font-bold mb-4">Support Our Impact</h2>
           <p className="text-lg mb-5 max-w-3xl mx-auto">
-            Your support helps us continue building classrooms, training teachers, and expanding educational opportunities for children in South Sudan.
+            Your support helps us continue providing funds for bricks for classrooms, training teachers, and expanding educational opportunities for children in South Sudan.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={openModal} className="btn-secondary text-lg px-8 py-4">

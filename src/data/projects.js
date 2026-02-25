@@ -79,7 +79,7 @@ We’ve worked closely with school heads and community leaders to choose the sit
 
 Construction is planned for 2025, timed to the dry season to minimize disruption. Site assessments are underway. Once complete, hundreds more children will have a place in a classroom—and teachers will be able to teach effectively instead of managing overcrowding.
 
-Every classroom we build says to the community: education matters. Your support turns that message into reality. It gives a child a seat, a teacher space to teach, and a community proof that investing in education yields lasting returns.`,
+Every classroom we help by providing funds for bricks says to the community: education matters. Your support turns that message into reality. It gives a child a seat, a teacher space to teach, and a community proof that investing in education yields lasting returns.`,
     targetFunds: 35000,
     raisedFunds: 8500,
     images: [

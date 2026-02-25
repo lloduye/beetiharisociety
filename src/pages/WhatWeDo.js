@@ -9,9 +9,9 @@ const WhatWeDo = () => {
     {
       icon: <Building className="h-8 w-8" />,
       title: "Expanding Educational Access",
-      description: "Building classrooms and high schools near communities so young people can continue their education without traveling long distances.",
+      description: "Providing funds used to make bricks for classrooms and supporting high school construction near communities so young people can continue their education without traveling long distances.",
       details: [
-        "Focus on building local high schools",
+        "Funds for bricks and support for local high school construction",
         "Reducing travel barriers for students",
         "Especially supporting girls' education",
         "Targeting 5,000–7,000 students in 5–10 years"
@@ -69,7 +69,7 @@ const WhatWeDo = () => {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">What We Do</h1>
             <p className="text-xl text-primary-100">
-              Building the future, classroom by classroom, to create lasting change in South Sudan.
+              Providing funds for bricks and education, building lasting change in South Sudan.
             </p>
           </div>
         </div>

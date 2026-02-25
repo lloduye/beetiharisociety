@@ -56,11 +56,7 @@ const Footer = () => {
                   What We Do
                 </Link>
               </li>
-              <li>
-                <Link to="/projects" className="text-gray-300 hover:text-white transition-colors">
-                  Projects
-                </Link>
-              </li>
+              {/* Projects - hidden for now */}
               <li>
                 <Link to="/impact" className="text-gray-300 hover:text-white transition-colors">
                   Our Impact
